@@ -1,4 +1,4 @@
-package com.tussle.game.desktop;
+package com.tussle.input;
 
 import com.badlogic.gdx.InputProcessor;
 import com.tussle.input.*;

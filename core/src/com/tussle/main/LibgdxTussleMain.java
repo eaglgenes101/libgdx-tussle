@@ -11,10 +11,7 @@ import com.tussle.input.BufferChecker;
 import com.tussle.input.Controller;
 import com.tussle.input.InputState;
 import com.tussle.input.InputToken;
-import com.tussle.game.desktop.KeyboardController;
-
-import java.util.LinkedList;
-import java.util.function.Function;
+import com.tussle.input.KeyboardController;
 
 public class LibgdxTussleMain extends ApplicationAdapter {
 	SpriteBatch batch;

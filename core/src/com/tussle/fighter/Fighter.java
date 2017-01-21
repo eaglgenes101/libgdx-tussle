@@ -31,10 +31,10 @@ public class Fighter extends Group
 	ECB collisionBox;
 	Set<Hitbox> hitboxes;
 	Set<Hurtbox> hurtboxes;
-	Array<Armor> armors;
+	//Array<Armor> armors;
 	Set<Hitbox> hitboxLocks;
 
-	Ledge currentLedge;
+	//Ledge currentLedge;
 
 	int jumps;
 	int airdodges;
@@ -59,6 +59,11 @@ public class Fighter extends Group
 	}
 
 	public void act(float delta)
+	{
+		super.act(delta);
+	}
+
+	public void setActionState(ActionState newState)
 	{
 
 	}

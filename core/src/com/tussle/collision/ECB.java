@@ -1,4 +1,4 @@
-package com.tussle.Collision;
+package com.tussle.collision;
 
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;

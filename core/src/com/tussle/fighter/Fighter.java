@@ -1,9 +1,9 @@
 package com.tussle.fighter;
 
 import com.badlogic.gdx.scenes.scene2d.Group;
-import com.tussle.Collision.ECB;
-import com.tussle.Collision.Hitbox;
-import com.tussle.Collision.Hurtbox;
+import com.tussle.collision.ECB;
+import com.tussle.collision.Hitbox;
+import com.tussle.collision.Hurtbox;
 import com.tussle.input.Controller;
 
 import java.util.HashMap;
@@ -50,21 +50,31 @@ public class Fighter extends Group
 
 	public void onSpawn()
 	{
-
+		//Currently stubbed
 	}
 
 	public void onDeath()
 	{
-
+		//Currently stubbed
 	}
 
 	public void act(float delta)
 	{
 		super.act(delta);
+		//Move self
+
+
 	}
 
 	public void setActionState(ActionState newState)
 	{
+		if (currentState != null) {
+			currentState.onEnd(newState);
+			removeAction(currentState);
+		}
+		currentState = newState;
+		addAction(newState);
+		newState.onStart();
 
 	}
 }

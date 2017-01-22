@@ -20,7 +20,7 @@ public abstract class ActionState extends Action
         return false;
     }
 
-    public abstract ActionState eachFrame();
+    public abstract ActionState eachFrame(); //Each frame
 
-    public abstract void onEnd(ActionState nextState);
+    public abstract void onEnd(ActionState nextState); //Before disposal
 }

@@ -1,5 +1,6 @@
 package com.tussle.fighter;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.tussle.collision.ECB;
 import com.tussle.collision.Hitbox;
@@ -17,10 +18,10 @@ public class Fighter extends Group
 	Controller controller;
 	String baseDir;
 
-	double xVelocity;
-	double yVelocity;
-	double preferredXVelocity;
-	double preferredYVelocity;
+	float xVelocity;
+	float yVelocity;
+	float preferredXVelocity;
+	float preferredYVelocity;
 	int facing;
 
 	ActionState currentState;
@@ -62,7 +63,8 @@ public class Fighter extends Group
 	{
 		super.act(delta);
 		//Move self
-
+		setX(getX()+xVelocity);
+		setY(getY()+yVelocity);
 
 	}
 
@@ -76,5 +78,37 @@ public class Fighter extends Group
 		addAction(newState);
 		newState.onStart();
 
+	}
+
+	public void addStatusEffect(StatusEffect newEffect)
+	{
+		newEffect.onStart();
+		this.addAction(newEffect);
+	}
+
+	public int getFacing()
+	{
+		return facing;
+	}
+
+	public void setVelocity(Vector2 newVelocity)
+	{
+		xVelocity = newVelocity.x;
+		yVelocity = newVelocity.y;
+	}
+
+	public void setFacing(int newFacing)
+	{
+		facing = newFacing;
+	}
+
+	public void setPreferredXVelocity(float newVelocity)
+	{
+		preferredXVelocity = newVelocity;
+	}
+
+	public Controller getController()
+	{
+		return controller;
 	}
 }

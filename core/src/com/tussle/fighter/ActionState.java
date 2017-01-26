@@ -5,14 +5,12 @@ import com.badlogic.gdx.scenes.scene2d.Action;
 /**
  * Created by eaglgenes101 on 1/20/17.
  */
-public abstract class ActionState extends Action
+public abstract class ActionState extends Action implements Terminable
 {
-    public abstract void onStart(); //After construction and initialization
-
     public boolean act(float delta)
     {
         ActionState newAction = eachFrame();
-        if (newAction != null)
+        if (newAction != null && newAction != this)
         {
             ((Fighter)getActor()).setActionState(newAction);
             return true;
@@ -21,6 +19,4 @@ public abstract class ActionState extends Action
     }
 
     public abstract ActionState eachFrame(); //Each frame
-
-    public abstract void onEnd(ActionState nextState); //Before disposal
 }

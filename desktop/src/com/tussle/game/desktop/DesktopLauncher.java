@@ -16,6 +16,8 @@ public class DesktopLauncher {
 		config.title = "Libgdx-Tussle";
 		config.width = 640;
 		config.height = 480;
+		config.foregroundFPS = 60;
+		config.backgroundFPS = 60;
 		Map<Integer, InputToken> inputMap = new HashMap<>();
 		inputMap.put(RIGHT, new InputToken(1, InputState.HOR_MOVEMENT));
 		inputMap.put(LEFT, new InputToken(-1, InputState.HOR_MOVEMENT));
@@ -23,6 +25,6 @@ public class DesktopLauncher {
 		inputMap.put(DOWN, new InputToken(-1, InputState.VERT_MOVEMENT));
 
 		KeyboardController g = new KeyboardController(inputMap, 12);
-		LwjglApplication l = new LwjglApplication(new LibgdxTussleMain(new KeyboardController[]{g}), config);
+		new LwjglApplication(new LibgdxTussleMain(new KeyboardController[]{g}), config);
 	}
 }

@@ -1,6 +1,5 @@
 package com.tussle.actionstate;
 
-import com.tussle.fighter.ActionState;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.input.BufferChecker;

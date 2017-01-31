@@ -5,11 +5,13 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.tussle.actionstate.ActionState;
 import com.tussle.actionstate.IdleState;
 import com.tussle.collision.ECB;
 import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
 import com.tussle.input.Controller;
+import com.tussle.main.Utility;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -22,6 +24,7 @@ public class Fighter extends Group
 	Controller controller;
 	String baseDir;
 	Texture texture;
+	Sprite sprite;
 
 	float xVelocity;
 	float yVelocity;
@@ -51,6 +54,7 @@ public class Fighter extends Group
 	public Fighter(Controller ctrl, String path)
 	{
 		texture = new Texture(path);
+		sprite = new Sprite(texture);
 		controller = ctrl;
 		baseDir = path;
 		this.setX(0);
@@ -59,7 +63,8 @@ public class Fighter extends Group
 
 	public void draw(Batch batch, float parentAlpha)
 	{
-		batch.draw(texture, this.getX(), this.getY());
+		sprite.setPosition(getX(), getY());
+		sprite.draw(batch, parentAlpha);
 	}
 
 	public void onSpawn()
@@ -79,7 +84,8 @@ public class Fighter extends Group
 		//Move self
 		setX(getX()+xVelocity);
 		setY(getY()+yVelocity);
-
+		xVelocity = Utility.addFrom(xVelocity, -0.5f, preferredXVelocity);
+		System.out.println(getX());
 	}
 
 	public void setActionState(ActionState newState)

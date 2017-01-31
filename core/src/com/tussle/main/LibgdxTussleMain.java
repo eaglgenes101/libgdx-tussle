@@ -36,7 +36,11 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	@Override
 	public void create () {
 		stage = new Stage(new ScreenViewport(new OrthographicCamera(640, 480)));
-		stage.addActor(new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png"));
+		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png");
+		stage.addActor(fighter);
+		fighter.onSpawn();
+
+
 		Gdx.input.setInputProcessor(inputs);
 	}
 

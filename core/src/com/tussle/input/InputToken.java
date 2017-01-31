@@ -26,11 +26,6 @@ public class InputToken
 
 	public boolean equals(Object o)
 	{
-		if (o instanceof InputToken)
-		{
-			return ((InputToken) o).intensity() == intensity &&
-					((InputToken) o).state().equals(state);
-		}
-		else return false;
+		return o instanceof InputToken && ((InputToken) o).intensity() == intensity && ((InputToken) o).state().equals(state);
 	}
 }

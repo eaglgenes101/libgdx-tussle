@@ -8,7 +8,7 @@ import java.util.function.Function;
  */
 public interface Controller
 {
-	public void flushInputs();
-	public void pumpBuffer();
-	public int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
+	void flushInputs();
+	void pumpBuffer();
+	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
 }

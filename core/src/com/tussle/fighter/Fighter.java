@@ -1,7 +1,11 @@
 package com.tussle.fighter;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.tussle.actionstate.IdleState;
 import com.tussle.collision.ECB;
 import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
@@ -17,6 +21,7 @@ public class Fighter extends Group
 {
 	Controller controller;
 	String baseDir;
+	Texture texture;
 
 	float xVelocity;
 	float yVelocity;
@@ -45,13 +50,22 @@ public class Fighter extends Group
 
 	public Fighter(Controller ctrl, String path)
 	{
+		texture = new Texture(path);
 		controller = ctrl;
 		baseDir = path;
+		this.setX(0);
+		this.setY(0);
+	}
+
+	public void draw(Batch batch, float parentAlpha)
+	{
+		batch.draw(texture, this.getX(), this.getY());
 	}
 
 	public void onSpawn()
 	{
-		//Currently stubbed
+		setActionState(new IdleState());
+		//Currently (mostly ) stubbed
 	}
 
 	public void onDeath()

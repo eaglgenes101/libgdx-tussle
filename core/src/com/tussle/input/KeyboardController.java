@@ -67,7 +67,7 @@ public class KeyboardController implements InputProcessor, Controller
 
 	public LinkedList<InputToken> getInputs()
 	{
-		LinkedList<InputToken> returnList = new LinkedList<InputToken>();
+		LinkedList<InputToken> returnList = new LinkedList<>();
 
 		for (Map.Entry<InputState, InputToken> pair : initials.entrySet())
 		{

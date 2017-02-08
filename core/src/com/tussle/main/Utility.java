@@ -210,6 +210,7 @@ public class Utility
 			float[] times = intervalCollide(min1, max1, movement.dot(axisX, axisY), min2, max2);
 			minTime = Math.max(minTime, times[0]);
 			maxTime = Math.min(maxTime, times[1]);
+
 		}
 		// -- End check for separation on movement axis --//
 

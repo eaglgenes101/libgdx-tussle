@@ -42,12 +42,12 @@ public class Utility
 
 	public static Vector2 projection(Vector2 v1, Vector2 v2)
 	{
-		return v2.scl(v1.dot(v2)/v2.len2());
+		return v2.cpy().scl(v1.dot(v2)/v2.len2());
 	}
 
 	public static Vector2 rejection(Vector2 v1, Vector2 v2)
 	{
-		return v1.sub(projection(v1, v2));
+		return v1.cpy().sub(projection(v1, v2));
 	}
 
 	//Returns the time when an intersection is introduced

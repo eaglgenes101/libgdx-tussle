@@ -2,6 +2,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.tussle.stage.StageElement;
 
@@ -70,6 +71,12 @@ public class ECB extends Polygon
 		for (int i = 0; i < surfaces.length; i++)
 			vectors[i] = surfaces[i].getNormal(this);
 		return vectors;
+	}
+
+	public void setCenter(float centerx, float centery)
+	{
+		Rectangle rect = this.getBoundingRectangle();
+		setPosition(centerx-rect.getWidth()/2, centery-rect.getHeight()/2);
 	}
 
 }

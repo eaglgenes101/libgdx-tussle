@@ -3,6 +3,8 @@ package com.tussle.fighter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -58,6 +60,8 @@ public class Fighter extends Group
 
 	int hitlag_frames;
 
+	ShapeRenderer debugDrawer;
+
 	public Fighter(Controller ctrl, String path, Vector2 center)
 	{
 		texture = new Texture(path);
@@ -67,6 +71,8 @@ public class Fighter extends Group
 		setSize(sprite.getWidth(), sprite.getHeight());
 		setOrigin(Align.center);
 		setPosition(center.x, center.y, Align.center);
+		debugDrawer = new ShapeRenderer();
+		debugDrawer.setAutoShapeType(true);
 	}
 
 	public void draw(Batch batch, float parentAlpha)
@@ -76,6 +82,13 @@ public class Fighter extends Group
 		sprite.setRotation(angle);
 		sprite.setPosition(getX(), getY());
 		sprite.draw(batch, parentAlpha);
+		batch.end();
+		debugDrawer.begin();
+		debugDrawer.setColor(0, 0, 1, 1);
+		debugDrawer.polygon(collisionBox.getTransformedVertices());
+		drawDebug(debugDrawer);
+		debugDrawer.end();
+		batch.begin();
 	}
 
 	public void onSpawn()
@@ -101,13 +114,34 @@ public class Fighter extends Group
 				stageElements.add((StageElement)act);
 		}
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
-		float limit = 1.0f;
-		Vector2 velocity = getVelocity();
-		limit = collisionBox.checkMovement(velocity, elementArray);
-		setX(getX()+xVelocity*limit);
-		setY(getY()+yVelocity*limit);
+		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
+		for (Intersector.MinimumTranslationVector normal : normals)
+		{
+			if (normal != null)
+			{
+				setX(getX() + normal.normal.x * normal.depth);
+				setY(getY() + normal.normal.y * normal.depth);
+				reflect(normal.normal, 0.5f);
+			}
+		}
 		xVelocity = Utility.addFrom(xVelocity, -0.5f, preferredXVelocity);
 		yVelocity = Utility.addFrom(yVelocity, -0.5f, preferredYVelocity);
+		float limit = collisionBox.checkMovement(getVelocity(), elementArray);
+		setX(getX()+xVelocity*limit);
+		setY(getY()+yVelocity*limit);
+		collisionBox.setCenter(getX(Align.center), getY(Align.center));
+	}
+
+	public void reflect(Vector2 normal, float elasticity)
+	{
+		Vector2 velocity = new Vector2(xVelocity, yVelocity);
+		Vector2 rej = Utility.rejection(velocity, normal);
+		if (normal.dot(velocity) <= 0)
+		{
+			Vector2 proj = Utility.projection(velocity, normal);
+			xVelocity = rej.x -proj.x * elasticity;
+			yVelocity = rej.y -proj.y * elasticity;
+		}
 	}
 
 	public void setActionState(ActionState newState)
@@ -136,9 +170,10 @@ public class Fighter extends Group
 	public void setCollisionBox()
 	{
 		Rectangle rect = this.sprite.getBoundingRectangle();
-		float[] vertices = {rect.getX(), rect.getY(), rect.getX()+rect.getWidth(), rect.getY(),
-				rect.getX()+rect.getWidth(), rect.getY()+rect.getHeight(),
-				rect.getX(), rect.getY()+rect.getHeight()};
+		float[] vertices = {rect.getX(), rect.getY(),
+				rect.getX()+rect.getWidth()-2, rect.getY(),
+				rect.getX()+rect.getWidth()-2, rect.getY()+rect.getHeight()-2,
+				rect.getX(), rect.getY()+rect.getHeight()-2};
 		collisionBox = new ECB(vertices);
 	}
 

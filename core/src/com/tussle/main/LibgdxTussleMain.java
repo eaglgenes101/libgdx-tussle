@@ -42,8 +42,8 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	public void create () {
 		stage = new Stage(new ScreenViewport(new OrthographicCamera(640, 480)));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
-				Vector2.Zero);
-		float[] testVertices = {200, -50, 200, 50, 300, 50, 300, -50};
+				new Vector2(300, 8000));
+		float[] testVertices = {0, 10, 0, 20, 500, 50, 500, 40};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");
 		stage.addActor(fighter);

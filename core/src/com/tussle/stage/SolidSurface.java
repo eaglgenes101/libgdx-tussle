@@ -1,5 +1,6 @@
 package com.tussle.stage;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
@@ -11,6 +12,18 @@ import com.tussle.main.Utility;
 public class SolidSurface extends StageElement
 {
 	Polygon hitSurface;
+
+	public void draw(Batch batch, float parentAlpha)
+	{
+		super.draw(batch, parentAlpha);
+		batch.end();
+		debugDrawer.begin();
+		debugDrawer.setColor(0, 0, 1, 1);
+		debugDrawer.polygon(hitSurface.getTransformedVertices());
+		drawDebug(debugDrawer);
+		debugDrawer.end();
+		batch.begin();
+	}
 
 	public SolidSurface(Polygon surface, String path)
 	{

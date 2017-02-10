@@ -25,9 +25,11 @@ public class ECB extends Polygon
 			float val = surface.checkMovement(Velocity, this);
 			if (val == 0.0f)
 				return 0.0f;
-			else if (val < 1.0f)
+			else if (val > 0.0f)
 				minDist = Math.min(val, minDist);
 		}
+		if (minDist != 1.0f)
+			System.out.println("Gotcha!");
 		return minDist;
 	}
 

@@ -3,6 +3,7 @@ package com.tussle.stage;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
@@ -23,6 +24,8 @@ public abstract class StageElement extends Actor
 	int facing;
 	float angle;
 
+	ShapeRenderer debugDrawer;
+
 	public StageElement(String path, Vector2 center)
 	{
 		texture = new Texture(path);
@@ -31,6 +34,8 @@ public abstract class StageElement extends Actor
 		setSize(sprite.getWidth(), sprite.getHeight());
 		setOrigin(Align.center);
 		setPosition(center.x, center.y, Align.center);
+		debugDrawer = new ShapeRenderer();
+		debugDrawer.setAutoShapeType(true);
 	}
 
 	public void draw(Batch batch, float parentAlpha)

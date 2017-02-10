@@ -3,6 +3,8 @@ package com.tussle.main;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.Arrays;
+
 /**
  * Created by eaglgenes101 on 1/31/17.
  */
@@ -89,8 +91,8 @@ public class Utility
 	 */
 	public static float pathPolygonIntersects(Vector2 movement, float[] start, float[] surface)
 	{
-		int startLen = start.length/2;
-		int surfaceLen = surface.length/2;
+		int startLen = start.length;
+		int surfaceLen = surface.length;
 		float minTime = 0.0f;
 		float maxTime = 1.0f;
 
@@ -189,13 +191,8 @@ public class Utility
 			for (int j = 0; j < startLen; j += 2)
 			{
 				float p = axisX * start[j] + axisY * start[j + 1];
-				if (p < min1)
-				{
-					min1 = p;
-				} else if (p > max1)
-				{
-					max1 = p;
-				}
+				if (p < min1) min1 = p;
+				else if (p > max1) max1 = p;
 			}
 
 			// Project polygon2 onto this axis

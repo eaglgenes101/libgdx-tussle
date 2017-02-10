@@ -73,7 +73,7 @@ public class Fighter extends Group
 		setPosition(center.x, center.y, Align.center);
 		debugDrawer = new ShapeRenderer();
 		debugDrawer.setAutoShapeType(true);
-		preferredYVelocity = -30;
+		preferredYVelocity = -2000;
 	}
 
 	public void draw(Batch batch, float parentAlpha)
@@ -115,6 +115,12 @@ public class Fighter extends Group
 				stageElements.add((StageElement)act);
 		}
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
+		xVelocity = Utility.addFrom(xVelocity, -0.5f, preferredXVelocity);
+		yVelocity = Utility.addFrom(yVelocity, -0.5f, preferredYVelocity);
+		float limit = collisionBox.checkMovement(getVelocity(), elementArray);
+		setX(getX()+xVelocity*limit);
+		setY(getY()+yVelocity*limit);
+		collisionBox.setCenter(getX(Align.center), getY(Align.center));
 		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
 		for (Intersector.MinimumTranslationVector normal : normals)
 		{
@@ -125,11 +131,6 @@ public class Fighter extends Group
 				reflect(normal.normal, 0.5f);
 			}
 		}
-		xVelocity = Utility.addFrom(xVelocity, -0.5f, preferredXVelocity);
-		yVelocity = Utility.addFrom(yVelocity, -0.5f, preferredYVelocity);
-		float limit = collisionBox.checkMovement(getVelocity(), elementArray);
-		setX(getX()+xVelocity*limit);
-		setY(getY()+yVelocity*limit);
 		collisionBox.setCenter(getX(Align.center), getY(Align.center));
 	}
 

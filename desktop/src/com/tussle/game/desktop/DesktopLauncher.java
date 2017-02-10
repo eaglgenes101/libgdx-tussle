@@ -22,12 +22,10 @@ public class DesktopLauncher {
 		Map<Integer, InputToken> releaseMap = new HashMap<>();
 		inputMap.put(RIGHT, new InputToken(1, InputState.HOR_MOVEMENT));
 		inputMap.put(LEFT, new InputToken(-1, InputState.HOR_MOVEMENT));
-		inputMap.put(UP, new InputToken(1, InputState.VERT_MOVEMENT));
-		inputMap.put(DOWN, new InputToken(-1, InputState.VERT_MOVEMENT));
+		inputMap.put(UP, new InputToken(1, InputState.JUMP));
 		releaseMap.put(RIGHT, new InputToken(0, InputState.HOR_MOVEMENT));
 		releaseMap.put(LEFT, new InputToken(0, InputState.HOR_MOVEMENT));
-		releaseMap.put(UP, new InputToken(0, InputState.VERT_MOVEMENT));
-		releaseMap.put(DOWN, new InputToken(0, InputState.VERT_MOVEMENT));
+		releaseMap.put(UP, new InputToken(0, InputState.JUMP));
 		KeyboardController g = new KeyboardController(inputMap, releaseMap, 12);
 		new LwjglApplication(new LibgdxTussleMain(new KeyboardController[]{g}), config);
 	}

@@ -73,6 +73,7 @@ public class Fighter extends Group
 		setPosition(center.x, center.y, Align.center);
 		debugDrawer = new ShapeRenderer();
 		debugDrawer.setAutoShapeType(true);
+		preferredYVelocity = -30;
 	}
 
 	public void draw(Batch batch, float parentAlpha)
@@ -170,10 +171,10 @@ public class Fighter extends Group
 	public void setCollisionBox()
 	{
 		Rectangle rect = this.sprite.getBoundingRectangle();
-		float[] vertices = {rect.getX(), rect.getY(),
-				rect.getX()+rect.getWidth()-2, rect.getY(),
-				rect.getX()+rect.getWidth()-2, rect.getY()+rect.getHeight()-2,
-				rect.getX(), rect.getY()+rect.getHeight()-2};
+		float[] vertices = {rect.getX()+rect.getWidth()/2, rect.getY(),
+				rect.getX()+rect.getWidth(), rect.getY()+rect.getHeight()/2,
+				rect.getX()+rect.getWidth()/2, rect.getY()+rect.getHeight(),
+				rect.getX(), rect.getY()+rect.getHeight()/2};
 		collisionBox = new ECB(vertices);
 	}
 

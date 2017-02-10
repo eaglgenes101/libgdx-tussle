@@ -19,12 +19,16 @@ public class DesktopLauncher {
 		config.foregroundFPS = 60;
 		config.backgroundFPS = 60;
 		Map<Integer, InputToken> inputMap = new HashMap<>();
+		Map<Integer, InputToken> releaseMap = new HashMap<>();
 		inputMap.put(RIGHT, new InputToken(1, InputState.HOR_MOVEMENT));
 		inputMap.put(LEFT, new InputToken(-1, InputState.HOR_MOVEMENT));
 		inputMap.put(UP, new InputToken(1, InputState.VERT_MOVEMENT));
 		inputMap.put(DOWN, new InputToken(-1, InputState.VERT_MOVEMENT));
-
-		KeyboardController g = new KeyboardController(inputMap, 12);
+		releaseMap.put(RIGHT, new InputToken(0, InputState.HOR_MOVEMENT));
+		releaseMap.put(LEFT, new InputToken(0, InputState.HOR_MOVEMENT));
+		releaseMap.put(UP, new InputToken(0, InputState.VERT_MOVEMENT));
+		releaseMap.put(DOWN, new InputToken(0, InputState.VERT_MOVEMENT));
+		KeyboardController g = new KeyboardController(inputMap, releaseMap, 12);
 		new LwjglApplication(new LibgdxTussleMain(new KeyboardController[]{g}), config);
 	}
 }

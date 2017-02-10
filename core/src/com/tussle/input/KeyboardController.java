@@ -13,14 +13,18 @@ import java.util.function.Function;
 public class KeyboardController implements InputProcessor, Controller
 {
 	java.util.Map<Integer, InputToken> inputMap;
+	java.util.Map<Integer, InputToken> releaseMap;
 	java.util.LinkedList<InputToken> buffer;
 	java.util.LinkedHashMap<InputState, InputToken> initials;
+	java.util.HashMap<InputState, Integer> currents;
 	int maxFrames;
 	int currentFrames;
 
-	public KeyboardController(java.util.Map<Integer, InputToken> dict, int len)
+	public KeyboardController(java.util.Map<Integer, InputToken> inputDict,
+							  java.util.Map<Integer, InputToken> releaseDict, int len)
 	{
-		inputMap = dict;
+		inputMap = inputDict;
+		releaseMap = releaseDict;
 		maxFrames = len;
 		this.flushInputs();
 	}
@@ -35,6 +39,7 @@ public class KeyboardController implements InputProcessor, Controller
 		currentFrames = 0;
 		buffer = new java.util.LinkedList<>();
 		initials = new java.util.LinkedHashMap<>();
+		currents = new java.util.HashMap<>();
 		setInitToken(new InputToken(0, InputState.HOR_MOVEMENT));
 		setInitToken(new InputToken(0, InputState.VERT_MOVEMENT));
 		setInitToken(new InputToken(0, InputState.HOR_ACTION));
@@ -68,7 +73,6 @@ public class KeyboardController implements InputProcessor, Controller
 	public LinkedList<InputToken> getInputs()
 	{
 		LinkedList<InputToken> returnList = new LinkedList<>();
-
 		for (Map.Entry<InputState, InputToken> pair : initials.entrySet())
 		{
 			returnList.addFirst(pair.getValue());
@@ -101,11 +105,22 @@ public class KeyboardController implements InputProcessor, Controller
 		return maxMatch;
 	}
 
+	public int getState(InputState state)
+	{
+		if (currents.containsKey(state))
+		{
+			return currents.get(state);
+		}
+		else
+			return 0;
+	}
+
 	public boolean keyDown(int keycode)
 	{
 		if (inputMap.containsKey(keycode))
 		{
 			buffer.addLast(inputMap.get(keycode));
+			currents.put(inputMap.get(keycode).state(), inputMap.get(keycode).intensity());
 			return true; //OM NOM NOM
 		}
 		else return false; //Pass!
@@ -118,16 +133,13 @@ public class KeyboardController implements InputProcessor, Controller
 
 	public boolean keyUp(int keycode)
 	{
-		//TODO: Support key up stuff
-		/*
-		if (inputMap.containsKey(keycode))
+		if (releaseMap.containsKey(keycode))
 		{
-			buffer.addLast(inputMap.get(keycode));
+			buffer.addLast(releaseMap.get(keycode));
+			currents.put(releaseMap.get(keycode).state(), releaseMap.get(keycode).intensity());
 			return true; //OM NOM NOM
 		}
 		else return false; //Pass!
-		*/
-		return false;
 	}
 
 	public boolean mouseMoved(int screenX, int screenY)

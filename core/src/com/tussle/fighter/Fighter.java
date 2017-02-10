@@ -193,6 +193,16 @@ public class Fighter extends Group
 		yVelocity = newVelocity.y;
 	}
 
+	public void setXVelocity(float x)
+	{
+		xVelocity = x;
+	}
+
+	public void setYVelocity(float y)
+	{
+		yVelocity = y;
+	}
+
 	public void setFacing(int newFacing)
 	{
 		facing = newFacing;

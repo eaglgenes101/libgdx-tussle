@@ -11,4 +11,5 @@ public interface Controller
 	void flushInputs();
 	void pumpBuffer();
 	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
+	int getState(InputState state);
 }

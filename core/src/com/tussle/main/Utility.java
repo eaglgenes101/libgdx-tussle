@@ -176,40 +176,7 @@ public class Utility
 			// -- End check for separation on this axis --//
 		}
 
-		if (!movement.equals(Vector2.Zero))
-		{
-			//Get movement axes
-			final float length = movement.len();
-			float axisX = movement.x / length;
-			float axisY = movement.y / length;
-
-			// -- Begin check for separation on this axis --//
-
-			// Project polygon1 onto this axis
-			float min1 = axisX * start[0] + axisY * start[1];
-			float max1 = min1;
-			for (int j = 0; j < startLen; j += 2)
-			{
-				float p = axisX * start[j] + axisY * start[j + 1];
-				if (p < min1) min1 = p;
-				else if (p > max1) max1 = p;
-			}
-
-			// Project polygon2 onto this axis
-			float min2 = axisX * surface[0] + axisY * surface[1];
-			float max2 = min2;
-			for (int j = 0; j < surfaceLen; j += 2)
-			{
-				float p = axisX * surface[j] + axisY * surface[j + 1];
-				if (p < min2) min2 = p;
-				else if (p > max2) max2 = p;
-			}
-			float[] times = intervalCollide(min1, max1, movement.dot(axisX, axisY), min2, max2);
-			minTime = Math.max(minTime, times[0]);
-			maxTime = Math.min(maxTime, times[1]);
-		}
-		// -- End check for separation on movement axis --//
-
+		System.out.println(Float.toString(minTime) + " " + Float.toString(maxTime));
 		if (minTime > maxTime)
 			return Float.NaN;
 		else

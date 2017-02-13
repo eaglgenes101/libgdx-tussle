@@ -56,9 +56,9 @@ public class Utility
 	public static float[] intervalCollide(float min1, float max1, float slope, float min2, float max2)
 	{
 		float[] returnVals = new float[2];
-		if (slope == 0)
+		if (slope == 0.0f)
 		{
-			if (min1 > max2 || max1 < min2)
+			if (min1 >= max2 || max1 <= min2)
 			{
 				returnVals[0] = Float.POSITIVE_INFINITY;
 				returnVals[1] = Float.NEGATIVE_INFINITY;
@@ -73,14 +73,14 @@ public class Utility
 		}
 		else if (slope > 0)
 		{
-			returnVals[0] = (max2-min1)/slope;
-			returnVals[1] = (min2-max1)/slope;
+			returnVals[0] = (min2-max1)/slope;
+			returnVals[1] = (max2-min1)/slope;
 			return returnVals;
 		}
 		else
 		{
-			returnVals[0] = (min2-max1)/slope;
-			returnVals[1] = (max2-min1)/slope;
+			returnVals[0] = (max2-min1)/slope;
+			returnVals[1] = (min2-max1)/slope;
 			return returnVals;
 		}
 	}
@@ -176,8 +176,7 @@ public class Utility
 			// -- End check for separation on this axis --//
 		}
 
-		System.out.println(Float.toString(minTime) + " " + Float.toString(maxTime));
-		if (minTime > maxTime)
+		if (minTime >= maxTime)
 			return Float.NaN;
 		else
 			return minTime;

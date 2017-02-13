@@ -34,8 +34,7 @@ public class Fighter extends Group
 	Texture texture;
 	Sprite sprite;
 
-	float xVelocity;
-	float yVelocity;
+	Vector2 velocity;
 	float preferredXVelocity;
 	float preferredYVelocity;
 	int facing;
@@ -61,9 +60,11 @@ public class Fighter extends Group
 	int hitlag_frames;
 
 	ShapeRenderer debugDrawer;
+	float elasticity = 0.0f;
 
 	public Fighter(Controller ctrl, String path, Vector2 center)
 	{
+		velocity = new Vector2();
 		texture = new Texture(path);
 		sprite = new Sprite(texture);
 		controller = ctrl;
@@ -110,40 +111,17 @@ public class Fighter extends Group
 		//Move self
 		List<StageElement> stageElements = new LinkedList<>();
 		for (Actor act : getStage().getActors())
-		{
 			if (act instanceof StageElement)
 				stageElements.add((StageElement)act);
-		}
+		collisionBox.setCenter(getX(Align.center), getY(Align.center));
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
-		xVelocity = Utility.addFrom(xVelocity, -0.5f, preferredXVelocity);
-		yVelocity = Utility.addFrom(yVelocity, -0.5f, preferredYVelocity);
-		float limit = collisionBox.checkMovement(getVelocity(), elementArray);
-		setX(getX()+xVelocity*limit);
-		setY(getY()+yVelocity*limit);
-		collisionBox.setCenter(getX(Align.center), getY(Align.center));
-		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
-		for (Intersector.MinimumTranslationVector normal : normals)
-		{
-			if (normal != null)
-			{
-				setX(getX() + normal.normal.x * normal.depth);
-				setY(getY() + normal.normal.y * normal.depth);
-				reflect(normal.normal, 0.5f);
-			}
-		}
-		collisionBox.setCenter(getX(Align.center), getY(Align.center));
-	}
+		velocity.set(Utility.addFrom(velocity.x, -0.5f, preferredXVelocity),
+				Utility.addFrom(velocity.y, -0.5f, preferredYVelocity));
+		collisionBox.checkMovement(velocity, elementArray, elasticity);
+		collisionBox.eject(velocity, elementArray, elasticity);
+		Vector2 cent = collisionBox.getBoundingRectangle().getCenter(new Vector2());
+		setPosition(cent.x, cent.y, Align.center);
 
-	public void reflect(Vector2 normal, float elasticity)
-	{
-		Vector2 velocity = new Vector2(xVelocity, yVelocity);
-		Vector2 rej = Utility.rejection(velocity, normal);
-		if (normal.dot(velocity) <= 0)
-		{
-			Vector2 proj = Utility.projection(velocity, normal);
-			xVelocity = rej.x -proj.x * elasticity;
-			yVelocity = rej.y -proj.y * elasticity;
-		}
 	}
 
 	public void setActionState(ActionState newState)
@@ -186,23 +164,22 @@ public class Fighter extends Group
 
 	public Vector2 getVelocity()
 	{
-		return new Vector2(xVelocity, yVelocity);
+		return velocity;
 	}
 
 	public void setVelocity(Vector2 newVelocity)
 	{
-		xVelocity = newVelocity.x;
-		yVelocity = newVelocity.y;
+		velocity = newVelocity;
 	}
 
 	public void setXVelocity(float x)
 	{
-		xVelocity = x;
+		velocity.x = x;
 	}
 
 	public void setYVelocity(float y)
 	{
-		yVelocity = y;
+		velocity.y = y;
 	}
 
 	public void setFacing(int newFacing)

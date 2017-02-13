@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.tussle.main.Utility;
 import com.tussle.stage.StageElement;
 
 /**
@@ -16,21 +17,60 @@ public class ECB extends Polygon
 		super(vertices);
 	}
 
-	// Returns the factor by which the specified movement can be done
-	public float checkMovement(Vector2 Velocity, StageElement[] surfaces)
+	// Displaces self, and returns actual displacement done
+	public Vector2 checkMovement(Vector2 velocity, StageElement[] surfaces, float elasticity)
 	{
-		float minDist = 1.0f;
-		for (StageElement surface : surfaces)
+		Vector2 velocityDone = new Vector2();
+		Vector2 velocityLeft = velocity.cpy();
+		int maxIterations = 10;
+		for (int i = 0; i < maxIterations; i++)
 		{
-			float val = surface.checkMovement(Velocity, this);
-			if (val == 0.0f)
-				return 0.0f;
-			else if (val > 0.0f)
-				minDist = Math.min(val, minDist);
+			float minDist = 1.0f;
+			StageElement interceptSurface = null;
+			Vector2 finalNormal = new Vector2();
+			for (StageElement surface : surfaces)
+			{
+				float val = surface.checkMovement(velocityLeft, this);
+				if (!Float.isNaN(val) && val < minDist)
+				{
+					Polygon poly = new Polygon(this.getTransformedVertices());
+					poly.translate(val*velocityLeft.x, val*velocityLeft.y);
+					Intersector.MinimumTranslationVector mtv = surface.getNormal(poly);
+					if (mtv != null && mtv.normal.dot(velocityLeft) < 0)
+					{
+						minDist = val;
+						interceptSurface = surface;
+						finalNormal = mtv.normal;
+					}
+				}
+			}
+			if (interceptSurface == null)
+			{
+				this.translate(velocityLeft.x, velocityLeft.y);
+				return velocityDone.add(velocityLeft);
+			}
+			else
+			{
+				Vector2 truncatedMovement = velocityLeft.cpy().scl(minDist);
+				velocityDone.add(truncatedMovement);
+				this.translate(truncatedMovement.x, truncatedMovement.y);
+				velocityLeft.scl(1-minDist);
+				reflect(velocity, finalNormal, elasticity);
+				velocityLeft = reflect(velocityLeft, finalNormal, elasticity);
+			}
 		}
-		if (minDist != 1.0f)
-			System.out.println("Gotcha!");
-		return minDist;
+		return velocityDone;
+	}
+
+	public Vector2 reflect(Vector2 velocity, Vector2 normal, float elasticity)
+	{
+		Vector2 rej = Utility.rejection(velocity, normal);
+		if (normal.dot(velocity) < 0)
+		{
+			Vector2 proj = Utility.projection(velocity, normal);
+			velocity.set(rej.sub(proj.scl(elasticity)));
+		}
+		return velocity;
 	}
 
 	//Checks the polygon shape, and changes the polygon shape
@@ -64,6 +104,20 @@ public class ECB extends Polygon
 			}
 		}
 		return null; //We give up, initiate crushing routine
+	}
+
+	public void eject(Vector2 velocity, StageElement[] surfaces, float elasticity)
+	{
+		Intersector.MinimumTranslationVector[] normals = getNormals(surfaces);
+		for (Intersector.MinimumTranslationVector normal : normals)
+		{
+			if (normal != null)
+			{
+				Vector2 toDisplace = normal.normal.cpy().scl(normal.depth);
+				translate(toDisplace.x, toDisplace.y);
+				reflect(velocity, normal.normal, elasticity);
+			}
+		}
 	}
 
 	public Intersector.MinimumTranslationVector[] getNormals(StageElement[] surfaces)

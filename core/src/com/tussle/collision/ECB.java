@@ -18,11 +18,12 @@ public class ECB extends Polygon
 	}
 
 	// Displaces self, and returns actual displacement done
-	public Vector2 checkMovement(Vector2 velocity, StageElement[] surfaces, float elasticity)
+	public Vector2 checkMovement(Vector2 velocity, StageElement[] surfaces)
 	{
 		Vector2 velocityDone = new Vector2();
 		Vector2 velocityLeft = velocity.cpy();
-		int maxIterations = 10;
+		StageElement lastContact = null;
+		int maxIterations = 4;
 		for (int i = 0; i < maxIterations; i++)
 		{
 			float minDist = 1.0f;
@@ -30,21 +31,24 @@ public class ECB extends Polygon
 			Vector2 finalNormal = new Vector2();
 			for (StageElement surface : surfaces)
 			{
-				float val = surface.checkMovement(velocityLeft, this);
-				if (!Float.isNaN(val) && val < minDist)
+				if (surface != lastContact)
 				{
-					Polygon poly = new Polygon(this.getTransformedVertices());
-					poly.translate(val*velocityLeft.x, val*velocityLeft.y);
-					Intersector.MinimumTranslationVector mtv = surface.getNormal(poly);
-					if (mtv != null && mtv.normal.dot(velocityLeft) < 0)
+					float val = surface.checkMovement(velocityLeft, this);
+					if (!Float.isNaN(val) && val < minDist)
 					{
-						minDist = val;
-						interceptSurface = surface;
-						finalNormal = mtv.normal;
+						Polygon poly = new Polygon(this.getTransformedVertices());
+						poly.translate(val * velocityLeft.x, val * velocityLeft.y);
+						Intersector.MinimumTranslationVector mtv = surface.getNormal(poly);
+						if (mtv != null && mtv.normal.dot(velocityLeft) < 0)
+						{
+							minDist = val;
+							interceptSurface = surface;
+							finalNormal = mtv.normal;
+						}
 					}
 				}
 			}
-			if (interceptSurface == null)
+			if (minDist == 1.0f || interceptSurface == null)
 			{
 				this.translate(velocityLeft.x, velocityLeft.y);
 				return velocityDone.add(velocityLeft);
@@ -55,8 +59,8 @@ public class ECB extends Polygon
 				velocityDone.add(truncatedMovement);
 				this.translate(truncatedMovement.x, truncatedMovement.y);
 				velocityLeft.scl(1-minDist);
-				reflect(velocity, finalNormal, elasticity);
-				velocityLeft = reflect(velocityLeft, finalNormal, elasticity);
+				reflect(velocityLeft, finalNormal, 0);
+				lastContact = interceptSurface;
 			}
 		}
 		return velocityDone;
@@ -64,9 +68,9 @@ public class ECB extends Polygon
 
 	public Vector2 reflect(Vector2 velocity, Vector2 normal, float elasticity)
 	{
-		Vector2 rej = Utility.rejection(velocity, normal);
 		if (normal.dot(velocity) < 0)
 		{
+			Vector2 rej = Utility.rejection(velocity, normal);
 			Vector2 proj = Utility.projection(velocity, normal);
 			velocity.set(rej.sub(proj.scl(elasticity)));
 		}

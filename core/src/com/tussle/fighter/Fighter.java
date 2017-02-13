@@ -117,7 +117,7 @@ public class Fighter extends Group
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
 		velocity.set(Utility.addFrom(velocity.x, -0.5f, preferredXVelocity),
 				Utility.addFrom(velocity.y, -0.5f, preferredYVelocity));
-		collisionBox.checkMovement(velocity, elementArray, elasticity);
+		collisionBox.checkMovement(velocity, elementArray);
 		collisionBox.eject(velocity, elementArray, elasticity);
 		Vector2 cent = collisionBox.getBoundingRectangle().getCenter(new Vector2());
 		setPosition(cent.x, cent.y, Align.center);

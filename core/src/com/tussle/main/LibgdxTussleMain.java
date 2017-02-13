@@ -19,6 +19,7 @@ import com.tussle.input.Controller;
 import com.tussle.input.InputState;
 import com.tussle.input.InputToken;
 import com.tussle.input.KeyboardController;
+import com.tussle.stage.Platform;
 import com.tussle.stage.SolidSurface;
 import com.tussle.stage.StageElement;
 
@@ -43,11 +44,14 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		stage = new Stage(new ScreenViewport(new OrthographicCamera(640, 480)));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(300, 300));
-		float[] testVertices = {0, 10, 250, 20, 500, 10, 250, 0};
+		float[] testVertices = {0, 10, 250, 0, 500, 10, 250, 20};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");
+		StageElement platform = new Platform(new Vector2(100, 200), new Vector2(400, 200),
+				4.0f, "core/assets/sprites/default_franchise_icon.png");
 		stage.addActor(fighter);
 		stage.addActor(surface);
+		stage.addActor(platform);
 		stage.setDebugAll(true);
 		fighter.onSpawn();
 		Gdx.input.setInputProcessor(inputs);

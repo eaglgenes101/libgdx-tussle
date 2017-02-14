@@ -75,8 +75,19 @@ public class Platform extends StageElement
 	{
 		if (velocity.dot(normal) < 0)
 		{
-			return Utility.pathPolygonIntersects(velocity, ecb.getTransformedVertices(),
+			float val = Utility.pathPolygonIntersects(velocity, ecb.getTransformedVertices(),
 					hitSurface.getTransformedVertices());
+			Polygon poly = new Polygon(ecb.getTransformedVertices());
+			poly.translate(val*velocity.x, val*velocity.y);
+			Intersector.MinimumTranslationVector nudge = new Intersector.MinimumTranslationVector();
+			if (Intersector.overlapConvexPolygons(poly.getTransformedVertices(),
+					hitSurface.getTransformedVertices(), nudge))
+			{
+				if (nudge.normal.dot(normal) > 0 && nudge.normal.dot(normal)*nudge.depth <= tolerance)
+					return val;
+				else return 1.0f;
+			}
+			else return 1.0f;
 		}
 		else
 			return 1.0f;
@@ -87,6 +98,7 @@ public class Platform extends StageElement
 		super.draw(batch, parentAlpha);
 		batch.end();
 		debugDrawer.begin();
+		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
 		debugDrawer.setColor(0, 0, 1, 1);
 		debugDrawer.polygon(hitSurface.getTransformedVertices());
 		drawDebug(debugDrawer);

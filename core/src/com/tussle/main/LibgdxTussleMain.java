@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tussle.fighter.Fighter;
@@ -41,7 +42,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-		stage = new Stage(new ScreenViewport(new OrthographicCamera(640, 480)));
+		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(300, 300));
 		float[] testVertices = {0, 10, 250, 0, 500, 10, 250, 20};
@@ -58,7 +59,8 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	}
 
 	@Override
-	public void render () {
+	public void render ()
+	{
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act();
@@ -71,5 +73,10 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	
 	@Override
 	public void dispose () {
+	}
+
+	public void resize(int width, int height)
+	{
+		stage.getViewport().update(width, height, true);
 	}
 }

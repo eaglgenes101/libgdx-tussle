@@ -64,6 +64,7 @@ public class SolidSurface extends StageElement
 		super.draw(batch, parentAlpha);
 		batch.end();
 		debugDrawer.begin();
+		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
 		debugDrawer.setColor(0, 0, 1, 1);
 		debugDrawer.polygon(hitSurface.getTransformedVertices());
 		drawDebug(debugDrawer);

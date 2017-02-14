@@ -86,6 +86,7 @@ public class Fighter extends Group
 		sprite.draw(batch, parentAlpha);
 		batch.end();
 		debugDrawer.begin();
+		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
 		debugDrawer.setColor(0, 0, 1, 1);
 		debugDrawer.polygon(collisionBox.getTransformedVertices());
 		drawDebug(debugDrawer);

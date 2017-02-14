@@ -30,7 +30,7 @@ public class WalkState extends ActionState
 	public ActionState eachFrame()
 	{
 		frame += 1;
-		if (frame > 10)
+		if (frame > 0)
 		{
 			if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT)*side <= 0)
 				return new IdleState();

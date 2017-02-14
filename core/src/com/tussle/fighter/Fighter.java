@@ -87,7 +87,7 @@ public class Fighter extends Group
 		setPosition(center.x, center.y, Align.center);
 		debugDrawer = new ShapeRenderer();
 		debugDrawer.setAutoShapeType(true);
-		preferredYVelocity = -2000;
+		preferredYVelocity = -30;
 	}
 
 	public void draw(Batch batch, float parentAlpha)

@@ -57,6 +57,5 @@ public class IdleState extends ActionState
 
 	public void onEnd(Terminable nextAction)
 	{
-		//Do nothing
 	}
 }

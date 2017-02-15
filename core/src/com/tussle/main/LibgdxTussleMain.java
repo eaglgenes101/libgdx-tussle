@@ -42,6 +42,11 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	int screenWidth = 640;
 	int screenHeight = 480;
 	float zoomScale = 1.0f;
+	float leftBound = -1000f;
+	float rightBound = 1000f;
+	float bottomBound = -1000f;
+	float topBound = 1000f;
+	int frameCount = 0;
 
 	public LibgdxTussleMain(KeyboardController[] ctrl)
 	{
@@ -57,15 +62,18 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	public void create () {
 		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
-				new Vector2(300, 300));
-		float[] testVertices = {0, 10, 250, 0, 500, 10, 250, 20};
+				new Vector2(0, 300));
+		float[] testVertices = {-300, 10, 0, 0, 300, 10, 0, 20};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");
-		StageElement platform = new Platform(new Vector2(100, 200), new Vector2(400, 200),
+		StageElement platform1 = new Platform(new Vector2(-300, 200), new Vector2(-200, 200),
+				4.0f, "core/assets/sprites/default_franchise_icon.png");
+		StageElement platform2 = new Platform(new Vector2(200, 200), new Vector2(300, 200),
 				4.0f, "core/assets/sprites/default_franchise_icon.png");
 		stage.addActor(fighter);
 		stage.addActor(surface);
-		stage.addActor(platform);
+		stage.addActor(platform1);
+		stage.addActor(platform2);
 		stage.setDebugAll(true);
 		fighter.onSpawn();
 		Gdx.input.setInputProcessor(inputs);
@@ -80,14 +88,33 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		float yMax = Float.NEGATIVE_INFINITY;
 		for (Actor actor : stage.getActors())
 		{
-			if (actor.getX(Align.left) < xMin)
-				xMin = actor.getX(Align.left);
-			if (actor.getX(Align.right) > xMax)
-				xMax = actor.getX(Align.right);
-			if (actor.getY(Align.bottom) < yMin)
-				yMin = actor.getY(Align.bottom);
-			if (actor.getY(Align.top) > yMax)
-				yMax = actor.getY(Align.top);
+			boolean doDie = false;
+			if (actor.getX(Align.left) < xMin && xMin >= leftBound)
+			{
+				xMin = Math.max(leftBound, actor.getX(Align.left));
+				if (actor instanceof Fighter && actor.getX(Align.right) < leftBound)
+					doDie = true;
+			}
+			if (actor.getX(Align.right) > xMax && xMax <= rightBound)
+			{
+				xMax = Math.min(rightBound, actor.getX(Align.right));
+				if (actor instanceof Fighter && actor.getX(Align.left) > rightBound)
+					doDie = true;
+			}
+			if (actor.getY(Align.bottom) < yMin && yMin >= bottomBound)
+			{
+				yMin = Math.max(bottomBound, actor.getY(Align.bottom));
+				if (actor instanceof Fighter && actor.getY(Align.bottom) < bottomBound)
+					doDie = true;
+			}
+			if (actor.getY(Align.top) > yMax && yMax <= topBound)
+			{
+				yMax = Math.min(topBound, actor.getY(Align.top));
+				if (actor instanceof Fighter && actor.getY(Align.top) > topBound)
+					doDie = true;
+			}
+			if (doDie/* || (actor instanceof Fighter && frameCount % 360 == 0)*/)
+				((Fighter)actor).onDeath();
 		}
 		float centerx = (xMin+xMax)/2;
 		float centery = (yMin+yMax)/2;
@@ -105,6 +132,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		{
 			controller.pumpBuffer();
 		}
+		frameCount++;
 	}
 	
 	@Override

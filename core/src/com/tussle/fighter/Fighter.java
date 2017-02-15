@@ -47,6 +47,7 @@ public class Fighter extends Group
 	Texture texture;
 	Sprite sprite;
 
+	Vector2 startCenter;
 	Vector2 velocity;
 	float preferredXVelocity;
 	float preferredYVelocity;
@@ -82,12 +83,9 @@ public class Fighter extends Group
 		sprite = new Sprite(texture);
 		controller = ctrl;
 		baseDir = path;
-		setSize(sprite.getWidth(), sprite.getHeight());
-		setOrigin(Align.center);
-		setPosition(center.x, center.y, Align.center);
+		startCenter = center;
 		debugDrawer = new ShapeRenderer();
 		debugDrawer.setAutoShapeType(true);
-		preferredYVelocity = -30;
 	}
 
 	public void draw(Batch batch, float parentAlpha)
@@ -109,14 +107,19 @@ public class Fighter extends Group
 
 	public void onSpawn()
 	{
-		setActionState(new IdleState());
+		setSize(sprite.getWidth(), sprite.getHeight());
+		setOrigin(Align.center);
+		setPosition(startCenter.x, startCenter.y, Align.center);
+		interruptActionState(new IdleState());
 		setCollisionBox();
-		//Currently (mostly ) stubbed
+		setVelocity(new Vector2());
+		setPreferredXVelocity(0.0f);
+		preferredYVelocity = -30;
 	}
 
 	public void onDeath()
 	{
-		//Currently stubbed
+		onSpawn();
 	}
 
 	public void act(float delta)
@@ -133,9 +136,7 @@ public class Fighter extends Group
 				Utility.addFrom(velocity.y, -0.5f, preferredYVelocity));
 		collisionBox.checkMovement(velocity, elementArray);
 		collisionBox.eject(velocity, elementArray, elasticity);
-		Vector2 cent = collisionBox.getBoundingRectangle().getCenter(new Vector2());
-		setPosition(cent.x, cent.y, Align.center);
-
+		setPosition(collisionBox.getX(), collisionBox.getY(), Align.center);
 	}
 
 	public void setActionState(ActionState newState)
@@ -147,7 +148,16 @@ public class Fighter extends Group
 		currentState = newState;
 		addAction(newState);
 		newState.onStart();
+	}
 
+	public void interruptActionState(ActionState newState)
+	{
+		if (currentState != null) {
+			removeAction(currentState);
+		}
+		currentState = newState;
+		addAction(newState);
+		newState.onStart();
 	}
 
 	public void addStatusEffect(StatusEffect newEffect)
@@ -164,10 +174,8 @@ public class Fighter extends Group
 	public void setCollisionBox()
 	{
 		Rectangle rect = this.sprite.getBoundingRectangle();
-		float[] vertices = {rect.getX()+rect.getWidth()/2, rect.getY(),
-				rect.getX()+rect.getWidth(), rect.getY()+rect.getHeight()/2,
-				rect.getX()+rect.getWidth()/2, rect.getY()+rect.getHeight(),
-				rect.getX(), rect.getY()+rect.getHeight()/2};
+		float[] vertices = {0, -rect.getHeight()/2, rect.getWidth()/2, 0,
+				0, rect.getHeight()/2, -rect.getWidth()/2, 0};
 		collisionBox = new ECB(vertices);
 	}
 

@@ -150,7 +150,8 @@ public class ECB extends Polygon
 	public void setCenter(float centerx, float centery)
 	{
 		Rectangle rect = this.getBoundingRectangle();
-		setPosition(centerx-rect.getWidth()/2, centery-rect.getHeight()/2);
+		setOrigin(rect.getWidth()/2, rect.getHeight()/2);
+		setPosition(centerx, centery);
 	}
 
 }

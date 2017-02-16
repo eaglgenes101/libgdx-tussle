@@ -83,4 +83,6 @@ public abstract class StageElement extends Actor
 
 	//Determine if there is a point where the StageElement would intercept the movement
 	public abstract float checkMovement(Vector2 velocity, Polygon ecb);
+
+	public abstract boolean isGrounded(Vector2 leg, Vector2 foot, float yVelocity);
 }

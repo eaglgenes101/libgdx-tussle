@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -35,10 +36,7 @@ import com.tussle.input.Controller;
 import com.tussle.main.Utility;
 import com.tussle.stage.StageElement;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Fighter extends Group
 {
@@ -48,6 +46,8 @@ public class Fighter extends Group
 	Sprite sprite;
 
 	Vector2 startCenter;
+	Vector2 leg;
+	Vector2 foot;
 	Vector2 velocity;
 	float preferredXVelocity;
 	float preferredYVelocity;
@@ -75,6 +75,7 @@ public class Fighter extends Group
 
 	ShapeRenderer debugDrawer;
 	float elasticity = 0.0f;
+	ArrayList<Vector2> currentNormals;
 
 	public Fighter(Controller ctrl, String path, Vector2 center)
 	{
@@ -86,6 +87,9 @@ public class Fighter extends Group
 		startCenter = center;
 		debugDrawer = new ShapeRenderer();
 		debugDrawer.setAutoShapeType(true);
+		currentNormals = new ArrayList<>();
+		leg = new Vector2();
+		foot = new Vector2();
 	}
 
 	public void draw(Batch batch, float parentAlpha)
@@ -107,9 +111,12 @@ public class Fighter extends Group
 
 	public void onSpawn()
 	{
+		currentNormals.clear();
 		setSize(sprite.getWidth(), sprite.getHeight());
 		setOrigin(Align.center);
 		setPosition(startCenter.x, startCenter.y, Align.center);
+		leg.set(getX(Align.center), getY(Align.bottom)+4);
+		foot.set(getX(Align.center), getY(Align.bottom)-4);
 		interruptActionState(new IdleState());
 		setCollisionBox();
 		setVelocity(new Vector2());
@@ -126,6 +133,7 @@ public class Fighter extends Group
 	{
 		super.act(delta);
 		//Move self
+		currentNormals.clear();
 		List<StageElement> stageElements = new LinkedList<>();
 		for (Actor act : getStage().getActors())
 			if (act instanceof StageElement)
@@ -136,7 +144,14 @@ public class Fighter extends Group
 				Utility.addFrom(velocity.y, -0.5f, preferredYVelocity));
 		collisionBox.checkMovement(velocity, elementArray);
 		collisionBox.eject(velocity, elementArray, elasticity);
+		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
+		for (Intersector.MinimumTranslationVector normal : normals)
+			if (normal != null)
+				currentNormals.add(normal.normal);
 		setPosition(collisionBox.getX(), collisionBox.getY(), Align.center);
+		leg.set(getX(Align.center), getY(Align.bottom)+4);
+		foot.set(getX(Align.center), getY(Align.bottom)-4);
+		System.out.println(isGrounded());
 	}
 
 	public void setActionState(ActionState newState)
@@ -212,6 +227,19 @@ public class Fighter extends Group
 	public void setPreferredXVelocity(float newVelocity)
 	{
 		preferredXVelocity = newVelocity;
+	}
+
+	public boolean isGrounded()
+	{
+		List<StageElement> stageElements = new LinkedList<>();
+		for (Actor act : getStage().getActors())
+			if (act instanceof StageElement)
+				stageElements.add((StageElement)act);
+		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
+		for (StageElement surface : elementArray)
+			if (surface.isGrounded(leg, foot, velocity.y))
+				return true;
+		return false;
 	}
 
 	public Controller getController()

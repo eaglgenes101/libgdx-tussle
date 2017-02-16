@@ -26,6 +26,8 @@ import com.tussle.main.Utility;
 public class Platform extends StageElement
 {
 	Polygon hitSurface;
+	Vector2 start;
+	Vector2 end;
 	Vector2 normal;
 	float tolerance;
 
@@ -35,6 +37,8 @@ public class Platform extends StageElement
 		float[] constructedSurface = new float[8];
 		Vector2 difference = end.cpy().sub(start);
 		normal = new Vector2(-difference.y, difference.x).setLength2(1.0f);
+		this.start = start;
+		this.end = end;
 		constructedSurface[0] = start.x;
 		constructedSurface[1] = start.y;
 		constructedSurface[2] = start.x-normal.x*tolerance*2;
@@ -118,5 +122,12 @@ public class Platform extends StageElement
 		drawDebug(debugDrawer);
 		debugDrawer.end();
 		batch.begin();
+	}
+
+	public boolean isGrounded(Vector2 leg, Vector2 foot, float yVelocity)
+	{
+		return this.yVelocity-yVelocity > -0.5 &&
+				Intersector.intersectSegments(leg, foot, start, end, null) &&
+				this.normal.y > 0;
 	}
 }

@@ -140,8 +140,11 @@ public class Fighter extends Group
 				stageElements.add((StageElement)act);
 		collisionBox.setCenter(getX(Align.center), getY(Align.center));
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
-		velocity.set(Utility.addFrom(velocity.x, -0.5f, preferredXVelocity),
-				Utility.addFrom(velocity.y, -0.5f, preferredYVelocity));
+		if (isGrounded())
+			velocity.x = Utility.addFrom(velocity.x, -0.3f, preferredXVelocity);
+		else
+			velocity.x = Utility.addFrom(velocity.x, -0.2f, preferredXVelocity);
+		velocity.y = Utility.addFrom(velocity.y, -0.5f, preferredYVelocity);
 		collisionBox.checkMovement(velocity, elementArray);
 		collisionBox.eject(velocity, elementArray, elasticity);
 		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
@@ -227,6 +230,11 @@ public class Fighter extends Group
 	public void setPreferredXVelocity(float newVelocity)
 	{
 		preferredXVelocity = newVelocity;
+	}
+
+	public void xAccel(float factor)
+	{
+		velocity.x = Utility.addFrom(velocity.x, -factor, preferredXVelocity);
 	}
 
 	public boolean isGrounded()

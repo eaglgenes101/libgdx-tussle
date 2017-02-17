@@ -19,43 +19,39 @@ package com.tussle.actionstate;
 
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
-import com.tussle.input.BufferChecker;
 import com.tussle.input.InputState;
-import com.tussle.input.InputToken;
 
-public class IdleState extends ActionState
+/**
+ * Created by eaglgenes101 on 2/16/17.
+ */
+public class LandState extends ActionState
 {
+	int frame;
+
+	public LandState()
+	{
+		frame = 0;
+	}
+
 	public void onStart()
 	{
-		((Fighter)actor).setPreferredXVelocity(0);
+		frame = 0;
 	}
+
 
 	public ActionState eachFrame()
 	{
-		if (!((Fighter) actor).isGrounded())
-			return new AirState();
-		if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) > 0)
+		frame += 1;
+		if (frame > 5)
 		{
-			((Fighter) actor).setFacing(1);
-			return new WalkState();
+			return new IdleState();
 		}
-		else if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) < 0)
+		else
 		{
-			((Fighter) actor).setFacing(-1);
-			return new WalkState();
-		}
-		BufferChecker[] b = {
-				new BufferChecker(12, new InputToken(1, InputState.JUMP))
-		};
-		int choice = ((Fighter)actor).getController().matchInput(b);
-		switch (choice)
-		{
-			case -1:
+			if (!((Fighter) actor).isGrounded())
+				return new AirState();
+			else
 				return this;
-			case 0:
-				return new JumpState();
-			default:
-				return null; //Something went wrong
 		}
 	}
 

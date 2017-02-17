@@ -23,7 +23,10 @@ import com.tussle.input.BufferChecker;
 import com.tussle.input.InputState;
 import com.tussle.input.InputToken;
 
-public class IdleState extends ActionState
+/**
+ * Created by eaglgenes101 on 2/16/17.
+ */
+public class AirState extends ActionState
 {
 	public void onStart()
 	{
@@ -32,28 +35,35 @@ public class IdleState extends ActionState
 
 	public ActionState eachFrame()
 	{
-		if (!((Fighter) actor).isGrounded())
-			return new AirState();
-		if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) > 0)
-		{
-			((Fighter) actor).setFacing(1);
-			return new WalkState();
-		}
-		else if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) < 0)
-		{
-			((Fighter) actor).setFacing(-1);
-			return new WalkState();
-		}
+		if (((Fighter) actor).isGrounded())
+			return new LandState();
 		BufferChecker[] b = {
 				new BufferChecker(12, new InputToken(1, InputState.JUMP))
 		};
+		if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) > 0)
+		{
+			((Fighter) actor).setPreferredXVelocity(5);
+			if (((Fighter) actor).getVelocity().x < 5)
+				((Fighter) actor).xAccel(0.2f);
+		}
+		else if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) < 0)
+		{
+			((Fighter) actor).setPreferredXVelocity(-5);
+			if (((Fighter) actor).getVelocity().x > -5)
+				((Fighter) actor).xAccel(0.2f);
+		}
+		else
+		{
+			((Fighter) actor).setPreferredXVelocity(0);
+			((Fighter) actor).xAccel(0.2f);
+		}
 		int choice = ((Fighter)actor).getController().matchInput(b);
 		switch (choice)
 		{
 			case -1:
 				return this;
 			case 0:
-				return new JumpState();
+				return new AirJumpState();
 			default:
 				return null; //Something went wrong
 		}
@@ -61,5 +71,6 @@ public class IdleState extends ActionState
 
 	public void onEnd(Terminable nextAction)
 	{
+		((Fighter) actor).setPreferredXVelocity(0);
 	}
 }

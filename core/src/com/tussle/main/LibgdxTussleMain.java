@@ -63,7 +63,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(0, 300));
-		float[] testVertices = {-300, 10, 0, 0, 300, 10, 0, 20};
+		float[] testVertices = {-300, 0, -100, -10, 100, -10, 300, 0, 100, 10, -100, 10};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");
 		StageElement platform1 = new Platform(new Vector2(-300, 200), new Vector2(-200, 200),

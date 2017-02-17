@@ -44,10 +44,19 @@ public class JumpState extends ActionState
 				((Fighter) actor).setYVelocity(10);
 			else
 				((Fighter) actor).setYVelocity(7);
-			return new IdleState();
+			return new AirState();
 		}
 		else
-			return this;
+		{
+			if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) > 0)
+				((Fighter) actor).setFacing(1);
+			else if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) < 0)
+				((Fighter) actor).setFacing(-1);
+			if (!((Fighter) actor).isGrounded())
+				return new AirState();
+			else
+				return this;
+		}
 	}
 
 	public void onEnd(Terminable nextAction)

@@ -38,16 +38,20 @@ public class WalkState extends ActionState
 	{
 		side = ((Fighter)actor).getFacing();
 		frame = 0;
-		((Fighter)actor).setPreferredXVelocity(5*side); //Replace this constant at some point
+		((Fighter)actor).setPreferredXVelocity(7*side); //Replace this constant at some point
 	}
 
 	public ActionState eachFrame()
 	{
+		if (((Fighter) actor).getVelocity().x*side < 7)
+			((Fighter) actor).xAccel(0.3f);
 		frame += 1;
 		if (frame > 0)
 		{
 			if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT)*side <= 0)
 				return new IdleState();
+			else if (!((Fighter)actor).isGrounded())
+				return new AirState();
 		}
 		BufferChecker[] b = {
 				new BufferChecker(12, new InputToken(-side, InputState.HOR_MOVEMENT)),
@@ -71,5 +75,6 @@ public class WalkState extends ActionState
 
 	public void onEnd(Terminable nextAction)
 	{
+		((Fighter) actor).setPreferredXVelocity(0);
 	}
 }

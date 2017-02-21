@@ -42,6 +42,7 @@ public class LedgeState extends ActionState
 
 	public void onStart()
 	{
+		((Fighter) actor).decrementLedgeGrabs();
 		frame = 0;
 		side = holding.getFacing();
 		if (side == 1)

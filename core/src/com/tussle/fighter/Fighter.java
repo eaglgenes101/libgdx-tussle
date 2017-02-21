@@ -68,6 +68,7 @@ public class Fighter extends Group
 
 	int jumps;
 	int airdodges;
+	int ledgeGrabs;
 	double damage;
 
 	int hitlag_frames;
@@ -155,6 +156,8 @@ public class Fighter extends Group
 		setPosition(collisionBox.getX(), collisionBox.getY(), Align.center);
 		leg.set(getX(Align.center), getY(Align.bottom)+4);
 		foot.set(getX(Align.center), getY(Align.bottom)-4);
+		if (isGrounded())
+			ledgeGrabs = 1;
 	}
 
 	public void setActionState(ActionState newState)
@@ -292,10 +295,17 @@ public class Fighter extends Group
 
 	public Ledge getLedge()
 	{
+		if (ledgeGrabs <= 0)
+			return null;
 		for (Actor act : getStage().getActors())
 			if (act instanceof Ledge)
 				if (Intersector.overlaps(collisionBox.getBoundingRectangle(), ((Ledge) act).getRect()))
 					return (Ledge)act;
 		return null;
+	}
+
+	public void decrementLedgeGrabs()
+	{
+		ledgeGrabs--;
 	}
 }

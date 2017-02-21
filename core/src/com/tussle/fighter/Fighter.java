@@ -34,6 +34,7 @@ import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
 import com.tussle.input.Controller;
 import com.tussle.main.Utility;
+import com.tussle.stage.Ledge;
 import com.tussle.stage.StageElement;
 
 import java.util.*;
@@ -64,8 +65,6 @@ public class Fighter extends Group
 	Set<Hurtbox> hurtboxes;
 	List<Armor> armors;
 	Set<Hitbox> hitboxLocks;
-
-	//Ledge currentLedge;
 
 	int jumps;
 	int airdodges;
@@ -119,6 +118,8 @@ public class Fighter extends Group
 		foot.set(getX(Align.center), getY(Align.bottom)-4);
 		interruptActionState(new IdleState());
 		setCollisionBox();
+		setSize(collisionBox.getBoundingRectangle().getWidth(),
+				collisionBox.getBoundingRectangle().getHeight());
 		setVelocity(new Vector2());
 		setPreferredXVelocity(0.0f);
 		preferredYVelocity = -30;
@@ -154,7 +155,6 @@ public class Fighter extends Group
 		setPosition(collisionBox.getX(), collisionBox.getY(), Align.center);
 		leg.set(getX(Align.center), getY(Align.bottom)+4);
 		foot.set(getX(Align.center), getY(Align.bottom)-4);
-		System.out.println(isGrounded());
 	}
 
 	public void setActionState(ActionState newState)
@@ -197,6 +197,36 @@ public class Fighter extends Group
 		collisionBox = new ECB(vertices);
 	}
 
+	/** Sets the position using the specified {@link Align alignment}. Note this may set the position to non-integer
+	 * coordinates. */
+	public void setPosition (float x, float y, int alignment)
+	{
+		if (collisionBox == null)
+		{
+			super.setPosition(x, y, alignment);
+		}
+		else
+		{
+			if ((alignment & Align.right) != 0)
+				x -= collisionBox.getBoundingRectangle().getWidth();
+			else if ((alignment & Align.left) == 0) //
+				x -= collisionBox.getBoundingRectangle().getWidth() / 2;
+
+			if ((alignment & Align.top) != 0)
+				y -= collisionBox.getBoundingRectangle().getHeight();
+			else if ((alignment & Align.bottom) == 0) //
+				y -= collisionBox.getBoundingRectangle().getHeight() / 2;
+
+			if (this.getX() != x || this.getY() != y)
+			{
+				setX(x);
+				setY(y);
+				positionChanged();
+			}
+			collisionBox.setCenter(this.getX(Align.center), this.getY(Align.center));
+		}
+	}
+
 	public int getFacing()
 	{
 		return facing;
@@ -209,7 +239,7 @@ public class Fighter extends Group
 
 	public void setVelocity(Vector2 newVelocity)
 	{
-		velocity = newVelocity;
+		velocity = newVelocity.cpy();
 	}
 
 	public void setXVelocity(float x)
@@ -230,6 +260,11 @@ public class Fighter extends Group
 	public void setPreferredXVelocity(float newVelocity)
 	{
 		preferredXVelocity = newVelocity;
+	}
+
+	public void setPreferredYVelocity(float newVelocity)
+	{
+		preferredYVelocity = newVelocity;
 	}
 
 	public void xAccel(float factor)
@@ -253,5 +288,14 @@ public class Fighter extends Group
 	public Controller getController()
 	{
 		return controller;
+	}
+
+	public Ledge getLedge()
+	{
+		for (Actor act : getStage().getActors())
+			if (act instanceof Ledge)
+				if (Intersector.overlaps(collisionBox.getBoundingRectangle(), ((Ledge) act).getRect()))
+					return (Ledge)act;
+		return null;
 	}
 }

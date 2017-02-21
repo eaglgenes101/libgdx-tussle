@@ -17,6 +17,8 @@
 
 package com.tussle.actionstate;
 
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.input.BufferChecker;
@@ -25,45 +27,48 @@ import com.tussle.input.InputToken;
 import com.tussle.stage.Ledge;
 
 /**
- * Created by eaglgenes101 on 2/16/17.
+ * Created by eaglgenes101 on 2/21/17.
  */
-public class AirState extends ActionState
+public class LedgeState extends ActionState
 {
+	Ledge holding;
+	int frame;
+	int side;
+
+	public LedgeState(Ledge ledge)
+	{
+		holding = ledge;
+	}
+
 	public void onStart()
 	{
-		((Fighter)actor).setPreferredXVelocity(0);
+		frame = 0;
+		side = holding.getFacing();
+		if (side == 1)
+			actor.setPosition(holding.getClingX(), holding.getClingY(), Align.topRight);
+		else if (side == -1)
+			actor.setPosition(holding.getClingX(), holding.getClingY(), Align.topLeft);
+		((Fighter) actor).setVelocity(Vector2.Zero);
+		((Fighter) actor).setPreferredXVelocity(0);
+		((Fighter) actor).setPreferredYVelocity(0);
 	}
 
 	public ActionState eachFrame()
 	{
-		if (((Fighter) actor).isGrounded())
-			return new LandState();
+		if (side == 1)
+			actor.setPosition(holding.getClingX(), holding.getClingY(), Align.topRight);
+		else if (side == -1)
+			actor.setPosition(holding.getClingX(), holding.getClingY(), Align.topLeft);
+		((Fighter) actor).setVelocity(Vector2.Zero);
+		((Fighter) actor).setPreferredXVelocity(0);
+		((Fighter) actor).setPreferredYVelocity(0);
+		if (frame > 240)
+			return new AirState();
 		BufferChecker[] b = {
-				new BufferChecker(12, new InputToken(1, InputState.JUMP))
+				new BufferChecker(12, new InputToken(1, InputState.JUMP)),
+				new BufferChecker(12, new InputToken(-holding.getFacing(),
+						InputState.HOR_MOVEMENT))
 		};
-		if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) > 0)
-		{
-			((Fighter) actor).setPreferredXVelocity(5);
-			if (((Fighter) actor).getVelocity().x < 5)
-				((Fighter) actor).xAccel(0.2f);
-		}
-		else if (((Fighter) actor).getController().getState(InputState.HOR_MOVEMENT) < 0)
-		{
-			((Fighter) actor).setPreferredXVelocity(-5);
-			if (((Fighter) actor).getVelocity().x > -5)
-				((Fighter) actor).xAccel(0.2f);
-		}
-		else
-		{
-			((Fighter) actor).setPreferredXVelocity(0);
-			((Fighter) actor).xAccel(0.2f);
-		}
-		Ledge checkLedge = ((Fighter) actor).getLedge();
-		if (checkLedge != null)
-		{
-			((Fighter) actor).setFacing(checkLedge.getFacing());
-			return new LedgeState(checkLedge);
-		}
 		int choice = ((Fighter)actor).getController().matchInput(b);
 		switch (choice)
 		{
@@ -71,6 +76,8 @@ public class AirState extends ActionState
 				return this;
 			case 0:
 				return new AirJumpState();
+			case 1:
+				return new AirState();
 			default:
 				return null; //Something went wrong
 		}
@@ -78,6 +85,6 @@ public class AirState extends ActionState
 
 	public void onEnd(Terminable nextAction)
 	{
-		((Fighter) actor).setPreferredXVelocity(0);
+		((Fighter) actor).setPreferredYVelocity(-30);
 	}
 }

@@ -42,10 +42,19 @@ public abstract class StageElement extends Actor
 
 	public StageElement(String path, Vector2 center)
 	{
-		texture = new Texture(path);
-		sprite = new Sprite(texture);
-		baseDir = path;
-		setSize(sprite.getWidth(), sprite.getHeight());
+		if (path != null)
+		{
+			texture = new Texture(path);
+			sprite = new Sprite(texture);
+			baseDir = path;
+			setSize(sprite.getWidth(), sprite.getHeight());
+		}
+		else
+		{
+			texture = null;
+			sprite = null;
+			baseDir = null;
+		}
 		setOrigin(Align.center);
 		setPosition(center.x, center.y, Align.center);
 		debugDrawer = new ShapeRenderer();
@@ -54,11 +63,14 @@ public abstract class StageElement extends Actor
 
 	public void draw(Batch batch, float parentAlpha)
 	{
-		sprite.setOriginCenter();
-		sprite.setFlip(facing < 0, false);
-		sprite.setRotation(angle);
-		sprite.setPosition(getX(), getY());
-		sprite.draw(batch, parentAlpha);
+		if (sprite != null)
+		{
+			sprite.setOriginCenter();
+			sprite.setFlip(facing < 0, false);
+			sprite.setRotation(angle);
+			sprite.setPosition(getX(), getY());
+			sprite.draw(batch, parentAlpha);
+		}
 	}
 
 	public void act(float delta)
@@ -73,6 +85,11 @@ public abstract class StageElement extends Actor
 	{
 		xVelocity = newVelocity.x;
 		yVelocity = newVelocity.y;
+	}
+
+	public void onContact(Actor actor)
+	{
+		//Nothing by default
 	}
 
 	//Determine the normal to the ECB if it exists

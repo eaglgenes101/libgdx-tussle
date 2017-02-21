@@ -21,6 +21,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.tussle.input.*;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -35,7 +36,8 @@ public class KeyboardController implements InputProcessor, Controller
 	int currentFrames;
 
 	public KeyboardController(java.util.Map<Integer, InputToken> inputDict,
-							  java.util.Map<Integer, InputToken> releaseDict, int len)
+							  java.util.Map<Integer, InputToken> releaseDict,
+							  int len)
 	{
 		inputMap = inputDict;
 		releaseMap = releaseDict;
@@ -133,8 +135,9 @@ public class KeyboardController implements InputProcessor, Controller
 	{
 		if (inputMap.containsKey(keycode))
 		{
-			buffer.addLast(inputMap.get(keycode));
-			currents.put(inputMap.get(keycode).state(), inputMap.get(keycode).intensity());
+			InputToken i = inputMap.get(keycode);
+			buffer.addLast(i);
+			currents.put(i.state(), i.intensity());
 			return true; //OM NOM NOM
 		}
 		else return false; //Pass!
@@ -149,8 +152,9 @@ public class KeyboardController implements InputProcessor, Controller
 	{
 		if (releaseMap.containsKey(keycode))
 		{
-			buffer.addLast(releaseMap.get(keycode));
-			currents.put(releaseMap.get(keycode).state(), releaseMap.get(keycode).intensity());
+			InputToken i = releaseMap.get(keycode);
+			buffer.addLast(i);
+			currents.put(i.state(), i.intensity());
 			return true; //OM NOM NOM
 		}
 		else return false; //Pass!

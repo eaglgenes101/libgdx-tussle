@@ -299,8 +299,16 @@ public class Fighter extends Group
 			return null;
 		for (Actor act : getStage().getActors())
 			if (act instanceof Ledge)
-				if (Intersector.overlaps(collisionBox.getBoundingRectangle(), ((Ledge) act).getRect()))
+			{
+				if (Intersector.intersectSegments(
+						this.getX(Align.left)+this.getFacing()*16, this.getY(Align.top),
+						this.getX(Align.right)+this.getFacing()*16, this.getY(Align.top),
+						((Ledge)act).getClingX(), ((Ledge)act).getClingY(),
+						((Ledge)act).getClingX(), ((Ledge)act).getBottom(), null))
+				{
 					return (Ledge)act;
+				}
+			}
 		return null;
 	}
 

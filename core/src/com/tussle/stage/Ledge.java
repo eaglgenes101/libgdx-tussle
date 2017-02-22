@@ -75,6 +75,19 @@ public class Ledge extends StageElement
 		return hitSurface.getY()+hitSurface.getHeight();
 	}
 
+	public float getFarEdge()
+	{
+		if (side == -1)
+			return hitSurface.getX()+hitSurface.getWidth();
+		else
+			return hitSurface.getX();
+	}
+
+	public float getBottom()
+	{
+		return hitSurface.getY();
+	}
+
 	public Intersector.MinimumTranslationVector getNormal(Polygon ecb)
 	{
 		return null;

@@ -62,6 +62,27 @@ public class Ledge extends StageElement
 		return hitSurface;
 	}
 
+	public boolean isOccupied()
+	{
+		return currentFighter != null;
+	}
+
+	public boolean checkCling(Fighter fighter)
+	{
+		if (isOccupied()) //Edgehogging
+			return false;
+		else
+		{
+			currentFighter = fighter;
+			return true;
+		}
+	}
+
+	public void release()
+	{
+		currentFighter = null;
+	}
+
 	public float getClingX()
 	{
 		if (side == 1)

@@ -15,47 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle;
 
-import com.tussle.fighter.Fighter;
-import com.tussle.fighter.Terminable;
-import com.tussle.input.InputState;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Json;
 
 /**
- * Created by eaglgenes101 on 2/16/17.
+ * Created by eaglgenes101 on 2/27/17.
  */
-public class LandState extends ActionState
+public abstract class Subaction implements Json.Serializable
 {
-	int frame;
-
-	public LandState()
-	{
-		frame = 0;
-	}
-
-	public void onStart()
-	{
-		frame = 0;
-	}
-
-
-	public ActionState eachFrame()
-	{
-		frame += 1;
-		if (frame > 5)
-		{
-			return new IdleState();
-		}
-		else
-		{
-			if (!((Fighter) actor).isGrounded())
-				return new AirState();
-			else
-				return this;
-		}
-	}
-
-	public void onEnd(Terminable nextAction)
-	{
-	}
+	public abstract void apply(Actor actor);
 }

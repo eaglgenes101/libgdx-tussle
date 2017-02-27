@@ -15,7 +15,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.fighter;
+package com.tussle.collision;
 
-public class Armor {
+import com.tussle.Subaction;
+
+import java.util.List;
+import java.util.function.BiPredicate;
+
+/**
+ * Created by eaglgenes101 on 2/27/17.
+ */
+public abstract class Armor implements BiPredicate<Hitbox, List<Subaction>>
+{
 }

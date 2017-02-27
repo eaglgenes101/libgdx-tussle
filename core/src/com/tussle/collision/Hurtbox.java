@@ -17,8 +17,80 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.Align;
+import com.tussle.main.Utility;
 
-public class Hurtbox extends Polygon
+import java.util.ArrayList;
+import java.util.List;
+
+public class Hurtbox extends Actor
 {
+	Vector2 start;
+	Vector2 end;
+	float radius;
+	ShapeRenderer debugDrawer;
+	ArrayList<Armor> armors;
+
+	public Hurtbox(Vector2 s, Vector2 e, float rad)
+	{
+		start = s;
+		end = e;
+		radius = rad;
+		setBounds(start.x-radius, start.y-radius,
+				radius*2+end.x-start.x, radius*2+end.y-start.y);
+		setOrigin(Align.center);
+		debugDrawer = new ShapeRenderer();
+		debugDrawer.setAutoShapeType(true);
+	}
+
+	public void draw(Batch batch, float parentAlpha)
+	{
+		super.draw(batch, parentAlpha);
+		batch.end();
+		debugDrawer.begin();
+		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
+		debugDrawer.setColor(1, 0, 0, 1);
+		debugDrawer.circle(start.x, start.y, radius);
+		debugDrawer.circle(end.x, end.y, radius);
+		debugDrawer.rectLine(start, end, radius);
+		drawDebug(debugDrawer);
+		debugDrawer.end();
+		batch.begin();
+	}
+
+	public Vector2 getStart()
+	{
+		return start.cpy();
+	}
+
+	public Vector2 getEnd()
+	{
+		return end.cpy();
+	}
+
+	public float getRadius()
+	{
+		return radius;
+	}
+
+	public boolean doesHit(Hitbox other)
+	{
+		return Utility.intersectStadia(start, end,
+				other.getStart(), other.getEnd(), radius+other.getRadius());
+	}
+
+	public boolean doesHit(Hurtbox other)
+	{
+		return Utility.intersectStadia(start, end,
+				other.getStart(), other.getEnd(), radius+other.getRadius());
+	}
+
+	public List<Armor> getArmors()
+	{
+		return (List)armors.clone();
+	}
 }

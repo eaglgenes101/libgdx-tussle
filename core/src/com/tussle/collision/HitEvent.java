@@ -15,47 +15,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.collision;
 
-import com.tussle.fighter.Fighter;
-import com.tussle.fighter.Terminable;
-import com.tussle.input.InputState;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.tussle.Subaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by eaglgenes101 on 2/16/17.
+ * Created by eaglgenes101 on 2/27/17.
  */
-public class LandState extends ActionState
+public class HitEvent extends Event
 {
-	int frame;
+	Hitbox hitbox;
+	List<Subaction> effects;
 
-	public LandState()
+	public HitEvent(Hitbox hbox, List<Subaction> effs)
 	{
-		frame = 0;
+		super();
+		hitbox = hbox;
+		effects = effs;
 	}
 
-	public void onStart()
+	public List<Subaction> getEffects()
 	{
-		frame = 0;
+		return effects; //Intentionally mutable
 	}
 
-
-	public ActionState eachFrame()
+	public Hitbox getHitbox()
 	{
-		frame += 1;
-		if (frame > 5)
-		{
-			return new IdleState();
-		}
-		else
-		{
-			if (!((Fighter) actor).isGrounded())
-				return new AirState();
-			else
-				return this;
-		}
-	}
-
-	public void onEnd(Terminable nextAction)
-	{
+		return hitbox;
 	}
 }

@@ -17,6 +17,7 @@
 
 package com.tussle.main;
 
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
@@ -192,6 +193,16 @@ public class Utility
 			return Float.NaN;
 		else
 			return minTime;
+	}
+
+	public static boolean intersectStadia(Vector2 start1, Vector2 end1,
+										  Vector2 start2, Vector2 end2,
+										  float sumRadius)
+	{
+		return Intersector.distanceSegmentPoint(start1, end1, start2) <= sumRadius ||
+				Intersector.distanceSegmentPoint(start1, end1, end2) <= sumRadius ||
+				Intersector.distanceSegmentPoint(start2, end2, start1) <= sumRadius ||
+				Intersector.distanceSegmentPoint(start2, end2, end1) <= sumRadius;
 	}
 }
 

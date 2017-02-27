@@ -29,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 import com.tussle.actionstate.ActionState;
 import com.tussle.actionstate.IdleState;
+import com.tussle.collision.Armor;
 import com.tussle.collision.ECB;
 import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
@@ -61,8 +62,6 @@ public class Fighter extends Group
 	HashMap<String, Integer> counts;
 
 	ECB collisionBox;
-	Set<Hitbox> hitboxes;
-	Set<Hurtbox> hurtboxes;
 	List<Armor> armors;
 	Set<Hitbox> hitboxLocks;
 
@@ -303,7 +302,7 @@ public class Fighter extends Group
 				if (Intersector.intersectSegments(
 						this.getX(Align.left)+this.getFacing()*16, this.getY(Align.top),
 						this.getX(Align.right)+this.getFacing()*16, this.getY(Align.top),
-						((Ledge)act).getClingX(), ((Ledge)act).getClingY(),
+						((Ledge)act).getFarEdge(), ((Ledge)act).getClingY(),
 						((Ledge)act).getClingX(), ((Ledge)act).getBottom(), null))
 				{
 					return (Ledge)act;
@@ -315,5 +314,10 @@ public class Fighter extends Group
 	public void decrementLedgeGrabs()
 	{
 		ledgeGrabs--;
+	}
+
+	public List<Armor> getArmors()
+	{
+		return armors;
 	}
 }

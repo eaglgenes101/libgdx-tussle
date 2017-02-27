@@ -199,7 +199,8 @@ public class Utility
 										  Vector2 start2, Vector2 end2,
 										  float sumRadius)
 	{
-		return Intersector.distanceSegmentPoint(start1, end1, start2) <= sumRadius ||
+		return Intersector.intersectSegments(start1, end1, start2, end2, null) ||
+				Intersector.distanceSegmentPoint(start1, end1, start2) <= sumRadius ||
 				Intersector.distanceSegmentPoint(start1, end1, end2) <= sumRadius ||
 				Intersector.distanceSegmentPoint(start2, end2, start1) <= sumRadius ||
 				Intersector.distanceSegmentPoint(start2, end2, end1) <= sumRadius;

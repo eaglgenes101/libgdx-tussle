@@ -95,6 +95,21 @@ public class Hitbox extends Actor
 
 	public List<Subaction> getOwnerOnHitSubactions()
 	{
-		return (List)ownerOnHitSubactions.clone();
+		return (List<Subaction>)ownerOnHitSubactions.clone();
+	}
+
+	public List<Subaction> getOtherOnHitSubactions()
+	{
+		return (List<Subaction>)otherOnHitSubactions.clone();
+	}
+
+	public List<Subaction> getOwnerOnClankSubactions()
+	{
+		return (List<Subaction>)ownerOnClankSubactions.clone();
+	}
+
+	public List<Subaction> getOtherOnClankSubactions()
+	{
+		return (List<Subaction>)otherOnHitSubactions.clone();
 	}
 }

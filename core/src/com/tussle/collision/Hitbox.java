@@ -22,7 +22,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
-import com.tussle.Subaction;
+import com.tussle.subaction.Subaction;
 import com.tussle.main.Utility;
 
 import java.util.LinkedList;
@@ -34,10 +34,6 @@ public class Hitbox extends Actor
 	Vector2 end;
 	float radius;
 	ShapeRenderer debugDrawer;
-	LinkedList<Subaction> ownerOnHitSubactions;
-	LinkedList<Subaction> otherOnHitSubactions;
-	LinkedList<Subaction> ownerOnClankSubactions;
-	LinkedList<Subaction> otherOnClankSubactions;
 
 	public Hitbox(Vector2 s, Vector2 e, float rad)
 	{
@@ -93,23 +89,23 @@ public class Hitbox extends Actor
 				other.getStart(), other.getEnd(), radius+other.getRadius());
 	}
 
-	public List<Subaction> getOwnerOnHitSubactions()
+	public EffectList getOwnerOnHitSubactions(Actor victim)
 	{
-		return (List<Subaction>)ownerOnHitSubactions.clone();
+		return new EffectList(getParent());
 	}
 
-	public List<Subaction> getOtherOnHitSubactions()
+	public List<Subaction> getOtherOnHitSubactions(Actor victim)
 	{
-		return (List<Subaction>)otherOnHitSubactions.clone();
+		return new EffectList(victim);
 	}
 
-	public List<Subaction> getOwnerOnClankSubactions()
+	public List<Subaction> getOwnerOnClankSubactions(Actor victim)
 	{
-		return (List<Subaction>)ownerOnClankSubactions.clone();
+		return new EffectList(getParent());
 	}
 
-	public List<Subaction> getOtherOnClankSubactions()
+	public List<Subaction> getOtherOnClankSubactions(Actor victim)
 	{
-		return (List<Subaction>)otherOnHitSubactions.clone();
+		return new EffectList(victim);
 	}
 }

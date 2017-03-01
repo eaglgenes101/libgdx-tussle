@@ -15,16 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.collision;
+package com.tussle.subaction;
 
-import com.tussle.subaction.Subaction;
-
-import java.util.List;
-import java.util.function.BiPredicate;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.tussle.fighter.Terminable;
 
 /**
  * Created by eaglgenes101 on 2/27/17.
  */
-public abstract class Armor implements BiPredicate<Hitbox, EffectList>
+public abstract class Subaction
 {
+	public abstract void apply(Terminable action, Actor actor);
 }

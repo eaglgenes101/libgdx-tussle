@@ -17,14 +17,44 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.tussle.fighter.Terminable;
 import com.tussle.subaction.Subaction;
 
-import java.util.List;
-import java.util.function.BiPredicate;
+import java.util.LinkedList;
 
 /**
- * Created by eaglgenes101 on 2/27/17.
+ * Created by eaglgenes101 on 3/1/17.
  */
-public abstract class Armor implements BiPredicate<Hitbox, EffectList>
+public class EffectList extends LinkedList<Subaction> implements Terminable
 {
+	Actor target;
+
+	public EffectList(LinkedList<Subaction> subactionList, Actor actor)
+	{
+		super((LinkedList<Subaction>)(subactionList.clone()));
+		target = actor;
+	}
+
+	public EffectList(Actor actor)
+	{
+		super();
+		target = actor;
+	}
+
+	public void onStart()
+	{
+		for (Subaction subaction : this)
+			subaction.apply(this, target);
+	}
+
+	public Terminable eachFrame()
+	{
+		return null; //That's all, folks
+	}
+
+	public void onEnd(Terminable terminable)
+	{
+		//Nothin'.
+	}
 }

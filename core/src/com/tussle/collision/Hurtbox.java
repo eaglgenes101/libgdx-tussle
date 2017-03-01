@@ -22,9 +22,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
-import com.tussle.Subaction;
+import com.tussle.subaction.Subaction;
 import com.tussle.fighter.Fighter;
-import com.tussle.main.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,19 +84,16 @@ public class Hurtbox extends Actor
 		return (List)armors.clone();
 	}
 
-	public void onHit(Hitbox hbox, List<Subaction> subactions)
+	public void onHit(Hitbox hbox, EffectList subactions)
 	{
 		Fighter fighter = (Fighter)(this.getParent());
-		BiPredicate<Hitbox, List<Subaction>> aggregateFilter =
-				(Hitbox h, List<Subaction> subacts) -> true; //Yay lambdas
+		BiPredicate<Hitbox, EffectList> aggregateFilter =
+				(Hitbox h, EffectList subacts) -> true; //Yay lambdas
 		for (Armor armor : fighter.getArmors())
 			aggregateFilter = armor.and(aggregateFilter);
 		for (Armor armor : getArmors())
 			aggregateFilter = armor.and(aggregateFilter);
 		if(aggregateFilter.test(hbox, subactions))
-		{
-			for (Subaction subaction : subactions)
-				subaction.apply(fighter);
-		}
+			subactions.onStart();
 	}
 }

@@ -88,6 +88,26 @@ public abstract class StageElement extends Group
 		yVelocity = newVelocity.y;
 	}
 
+	public float getXVelocity()
+	{
+		return xVelocity;
+	}
+
+	public float getYVelocity()
+	{
+		return yVelocity;
+	}
+
+	public void setXVelocity(float newVel)
+	{
+		xVelocity = newVel;
+	}
+
+	public void setYVelocity(float newVel)
+	{
+		yVelocity = newVel;
+	}
+
 	public void onContact(Actor actor)
 	{
 		//Nothing by default

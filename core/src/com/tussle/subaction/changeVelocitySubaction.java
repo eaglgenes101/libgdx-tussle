@@ -15,15 +15,42 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle;
+package com.tussle.subaction;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.utils.Json;
+import com.tussle.fighter.Fighter;
+import com.tussle.fighter.Terminable;
+import com.tussle.stage.StageElement;
+
+import java.util.function.Function;
 
 /**
- * Created by eaglgenes101 on 2/27/17.
+ * Created by eaglgenes101 on 2/28/17.
  */
-public abstract class Subaction implements Json.Serializable
+
+public class changeVelocitySubaction extends Subaction
 {
-	public abstract void apply(Actor actor);
+	float xVel;
+	float yVel;
+
+	public changeVelocitySubaction(float dx, float dy)
+	{
+		xVel = dx;
+		yVel = dy;
+	}
+
+	public void apply(Terminable action, Actor actor)
+	{
+		if (actor instanceof Fighter)
+		{
+			((Fighter) actor).setXVelocity(xVel);
+			((Fighter) actor).setYVelocity(yVel);
+		}
+		else if (actor instanceof StageElement)
+		{
+			((StageElement) actor).setXVelocity(xVel);
+			((StageElement) actor).setYVelocity(yVel);
+		}
+	}
 }

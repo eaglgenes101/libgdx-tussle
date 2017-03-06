@@ -36,17 +36,15 @@ public class addVelocitySubaction
 		yVel = dy;
 	}
 
-	public void apply(Terminable action, Actor actor)
+	public void apply(Terminable action, Fighter actor)
 	{
-		if (actor instanceof Fighter)
-		{
-			((Fighter) actor).setXVelocity(xVel+((Fighter) actor).getVelocity().x);
-			((Fighter) actor).setYVelocity(yVel+((Fighter) actor).getVelocity().y);
-		}
-		else if (actor instanceof StageElement)
-		{
-			((StageElement) actor).setXVelocity(xVel+((StageElement) actor).getXVelocity());
-			((StageElement) actor).setYVelocity(yVel+((StageElement) actor).getYVelocity());
-		}
+		actor.setXVelocity(xVel+actor.getVelocity().x);
+		actor.setYVelocity(yVel+actor.getVelocity().y);
+	}
+
+	public void apply(Terminable action, StageElement actor)
+	{
+		actor.setXVelocity(xVel+actor.getXVelocity());
+		actor.setYVelocity(yVel+actor.getYVelocity());
 	}
 }

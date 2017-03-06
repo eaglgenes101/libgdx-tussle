@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.actionstate.ActionState;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.stage.StageElement;
 
 /**
  * Created by eaglgenes101 on 2/28/17.
@@ -34,16 +35,13 @@ public class changeActionSubaction extends Subaction
 		state = newState;
 	}
 
-	public void apply(Terminable action, Actor actor)
+	public void apply(Terminable action, Fighter actor)
 	{
-		if (actor instanceof Fighter)
-		{
-			Fighter fighter = (Fighter)actor;
-			fighter.setActionState(state);
-		}
-		else
-		{
-			// Lolwut?
-		}
+		actor.setActionState(state);
+	}
+
+	public void apply(Terminable action, StageElement actor)
+	{
+		//Lolwut?
 	}
 }

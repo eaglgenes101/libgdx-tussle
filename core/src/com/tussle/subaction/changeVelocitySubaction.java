@@ -40,17 +40,15 @@ public class changeVelocitySubaction extends Subaction
 		yVel = dy;
 	}
 
-	public void apply(Terminable action, Actor actor)
+	public void apply(Terminable action, Fighter actor)
 	{
-		if (actor instanceof Fighter)
-		{
-			((Fighter) actor).setXVelocity(xVel);
-			((Fighter) actor).setYVelocity(yVel);
-		}
-		else if (actor instanceof StageElement)
-		{
-			((StageElement) actor).setXVelocity(xVel);
-			((StageElement) actor).setYVelocity(yVel);
-		}
+		actor.setXVelocity(xVel);
+		actor.setYVelocity(yVel);
+	}
+
+	public void apply(Terminable action, StageElement actor)
+	{
+		actor.setXVelocity(xVel);
+		actor.setYVelocity(yVel);
 	}
 }

@@ -18,12 +18,27 @@
 package com.tussle.subaction;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.stage.StageElement;
 
 /**
  * Created by eaglgenes101 on 2/27/17.
  */
 public abstract class Subaction
 {
-	public abstract void apply(Terminable action, Actor actor);
+	public void apply(Terminable action, Actor actor)
+	{
+		if (actor instanceof Fighter)
+		{
+			apply(action, (Fighter)actor);
+		}
+		else if (actor instanceof StageElement)
+		{
+			apply(action, (StageElement)actor);
+		}
+	}
+
+	public abstract void apply(Terminable action, Fighter actor);
+	public abstract void apply(Terminable action, StageElement actor);
 }

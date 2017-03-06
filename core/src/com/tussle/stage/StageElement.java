@@ -27,85 +27,23 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
+import com.tussle.main.BaseBody;
 
-public abstract class StageElement extends Group
+public abstract class StageElement extends BaseBody
 {
-	String baseDir;
-	Texture texture;
-	Sprite sprite;
-
-	float xVelocity;
-	float yVelocity;
-	int facing;
-	float angle;
-
-	ShapeRenderer debugDrawer;
-
 	public StageElement(String path, Vector2 center)
 	{
-		if (path != null)
-		{
-			texture = new Texture(path);
-			sprite = new Sprite(texture);
-			baseDir = path;
-			setSize(sprite.getWidth(), sprite.getHeight());
-		}
-		else
-		{
-			texture = null;
-			sprite = null;
-			baseDir = null;
-		}
-		setOrigin(Align.center);
-		setPosition(center.x, center.y, Align.center);
-		debugDrawer = new ShapeRenderer();
-		debugDrawer.setAutoShapeType(true);
-	}
-
-	public void draw(Batch batch, float parentAlpha)
-	{
-		if (sprite != null)
-		{
-			sprite.setOriginCenter();
-			sprite.setFlip(facing < 0, false);
-			sprite.setRotation(angle);
-			sprite.setPosition(getX(), getY());
-			sprite.draw(batch, parentAlpha);
-		}
+		super(path, center);
 	}
 
 	public void act(float delta)
 	{
 		super.act(delta);
 		//Move self
-		setX(getX()+xVelocity);
-		setY(getY()+yVelocity);
-	}
-
-	public void setVelocity(Vector2 newVelocity)
-	{
-		xVelocity = newVelocity.x;
-		yVelocity = newVelocity.y;
-	}
-
-	public float getXVelocity()
-	{
-		return xVelocity;
-	}
-
-	public float getYVelocity()
-	{
-		return yVelocity;
-	}
-
-	public void setXVelocity(float newVel)
-	{
-		xVelocity = newVel;
-	}
-
-	public void setYVelocity(float newVel)
-	{
-		yVelocity = newVel;
+		xAccel(.5f);
+		yAccel(.5f);
+		setX(getX()+getXVelocity());
+		setY(getY()+getYVelocity());
 	}
 
 	public void onContact(Actor actor)

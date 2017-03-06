@@ -21,6 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.main.BaseBody;
 import com.tussle.stage.StageElement;
 
 import java.util.function.Function;
@@ -40,13 +41,7 @@ public class changeVelocitySubaction extends Subaction
 		yVel = dy;
 	}
 
-	public void apply(Terminable action, Fighter actor)
-	{
-		actor.setXVelocity(xVel);
-		actor.setYVelocity(yVel);
-	}
-
-	public void apply(Terminable action, StageElement actor)
+	public void apply(Terminable action, BaseBody actor)
 	{
 		actor.setXVelocity(xVel);
 		actor.setYVelocity(yVel);

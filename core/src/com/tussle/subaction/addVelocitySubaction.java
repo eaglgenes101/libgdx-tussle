@@ -20,6 +20,7 @@ package com.tussle.subaction;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.main.BaseBody;
 import com.tussle.stage.StageElement;
 
 /**
@@ -36,15 +37,9 @@ public class addVelocitySubaction
 		yVel = dy;
 	}
 
-	public void apply(Terminable action, Fighter actor)
+	public void apply(Terminable action, BaseBody actor)
 	{
 		actor.setXVelocity(xVel+actor.getVelocity().x);
 		actor.setYVelocity(yVel+actor.getVelocity().y);
-	}
-
-	public void apply(Terminable action, StageElement actor)
-	{
-		actor.setXVelocity(xVel+actor.getXVelocity());
-		actor.setYVelocity(yVel+actor.getYVelocity());
 	}
 }

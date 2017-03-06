@@ -34,27 +34,21 @@ import com.tussle.collision.ECB;
 import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
 import com.tussle.input.Controller;
+import com.tussle.main.BaseBody;
 import com.tussle.main.Utility;
 import com.tussle.stage.Ledge;
 import com.tussle.stage.StageElement;
 
+import javax.rmi.CORBA.Util;
 import java.util.*;
 
-public class Fighter extends Group
+public class Fighter extends BaseBody
 {
 	Controller controller;
-	String baseDir;
-	Texture texture;
-	Sprite sprite;
 
 	Vector2 startCenter;
 	Vector2 leg;
 	Vector2 foot;
-	Vector2 velocity;
-	float preferredXVelocity;
-	float preferredYVelocity;
-	int facing;
-	float angle;
 
 	ActionState currentState;
 
@@ -72,20 +66,14 @@ public class Fighter extends Group
 
 	int hitlag_frames;
 
-	ShapeRenderer debugDrawer;
 	float elasticity = 0.0f;
 	ArrayList<Vector2> currentNormals;
 
 	public Fighter(Controller ctrl, String path, Vector2 center)
 	{
-		velocity = new Vector2();
-		texture = new Texture(path);
-		sprite = new Sprite(texture);
+		super(path, center);
 		controller = ctrl;
-		baseDir = path;
 		startCenter = center;
-		debugDrawer = new ShapeRenderer();
-		debugDrawer.setAutoShapeType(true);
 		currentNormals = new ArrayList<>();
 		leg = new Vector2();
 		foot = new Vector2();
@@ -93,11 +81,7 @@ public class Fighter extends Group
 
 	public void draw(Batch batch, float parentAlpha)
 	{
-		sprite.setOriginCenter();
-		sprite.setFlip(facing < 0, false);
-		sprite.setRotation(angle);
-		sprite.setPosition(getX(), getY());
-		sprite.draw(batch, parentAlpha);
+		super.draw(batch, parentAlpha);
 		batch.end();
 		debugDrawer.begin();
 		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
@@ -122,7 +106,7 @@ public class Fighter extends Group
 				collisionBox.getBoundingRectangle().getHeight());
 		setVelocity(new Vector2());
 		setPreferredXVelocity(0.0f);
-		preferredYVelocity = -30;
+		setPreferredYVelocity(-30);
 	}
 
 	public void onDeath()
@@ -142,12 +126,12 @@ public class Fighter extends Group
 		collisionBox.setCenter(getX(Align.center), getY(Align.center));
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
 		if (isGrounded())
-			velocity.x = Utility.addFrom(velocity.x, -0.3f, preferredXVelocity);
+			xAccel(0.3f);
 		else
-			velocity.x = Utility.addFrom(velocity.x, -0.2f, preferredXVelocity);
-		velocity.y = Utility.addFrom(velocity.y, -0.5f, preferredYVelocity);
-		collisionBox.checkMovement(velocity, elementArray);
-		collisionBox.eject(velocity, elementArray, elasticity);
+			xAccel(0.2f);
+		yAccel(0.5f);
+		collisionBox.checkMovement(getVelocity(), elementArray);
+		collisionBox.eject(getVelocity(), elementArray, elasticity);
 		Intersector.MinimumTranslationVector[] normals = collisionBox.getNormals(elementArray);
 		for (Intersector.MinimumTranslationVector normal : normals)
 			if (normal != null)
@@ -229,51 +213,6 @@ public class Fighter extends Group
 		}
 	}
 
-	public int getFacing()
-	{
-		return facing;
-	}
-
-	public Vector2 getVelocity()
-	{
-		return velocity;
-	}
-
-	public void setVelocity(Vector2 newVelocity)
-	{
-		velocity = newVelocity.cpy();
-	}
-
-	public void setXVelocity(float x)
-	{
-		velocity.x = x;
-	}
-
-	public void setYVelocity(float y)
-	{
-		velocity.y = y;
-	}
-
-	public void setFacing(int newFacing)
-	{
-		facing = newFacing;
-	}
-
-	public void setPreferredXVelocity(float newVelocity)
-	{
-		preferredXVelocity = newVelocity;
-	}
-
-	public void setPreferredYVelocity(float newVelocity)
-	{
-		preferredYVelocity = newVelocity;
-	}
-
-	public void xAccel(float factor)
-	{
-		velocity.x = Utility.addFrom(velocity.x, -factor, preferredXVelocity);
-	}
-
 	public boolean isGrounded()
 	{
 		List<StageElement> stageElements = new LinkedList<>();
@@ -282,7 +221,7 @@ public class Fighter extends Group
 				stageElements.add((StageElement)act);
 		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
 		for (StageElement surface : elementArray)
-			if (surface.isGrounded(leg, foot, velocity.y))
+			if (surface.isGrounded(leg, foot, getYVelocity()))
 				return true;
 		return false;
 	}

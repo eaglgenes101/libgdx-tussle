@@ -20,6 +20,7 @@ package com.tussle.subaction;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.main.BaseBody;
 import com.tussle.stage.StageElement;
 
 /**
@@ -27,18 +28,5 @@ import com.tussle.stage.StageElement;
  */
 public abstract class Subaction
 {
-	public void apply(Terminable action, Actor actor)
-	{
-		if (actor instanceof Fighter)
-		{
-			apply(action, (Fighter)actor);
-		}
-		else if (actor instanceof StageElement)
-		{
-			apply(action, (StageElement)actor);
-		}
-	}
-
-	public abstract void apply(Terminable action, Fighter actor);
-	public abstract void apply(Terminable action, StageElement actor);
+	public abstract void apply(Terminable action, BaseBody actor);
 }

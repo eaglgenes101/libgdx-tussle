@@ -88,7 +88,7 @@ public class SolidSurface extends StageElement
 
 	public boolean isGrounded(Vector2 leg, Vector2 foot, float yVelocity)
 	{
-		return this.yVelocity-yVelocity > -0.5 &&
+		return getYVelocity()-yVelocity > -0.5 &&
 				Intersector.intersectSegmentPolygon(leg, foot, hitSurface);
 	}
 }

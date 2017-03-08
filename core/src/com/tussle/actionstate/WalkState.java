@@ -41,7 +41,7 @@ public class WalkState extends ActionState
 		((Fighter)actor).setPreferredXVelocity(7*side); //Replace this constant at some point
 	}
 
-	public ActionState eachFrame()
+	public Terminable eachFrame()
 	{
 		if (((Fighter) actor).getVelocity().x*side < 7)
 			((Fighter) actor).xAccel(0.3f);

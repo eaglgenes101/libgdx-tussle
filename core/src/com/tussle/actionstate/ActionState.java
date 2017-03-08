@@ -21,11 +21,11 @@ import com.badlogic.gdx.scenes.scene2d.Action;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 
-public abstract class ActionState extends Action implements Terminable
+public abstract class ActionState extends Terminable
 {
     public boolean act(float delta)
     {
-        ActionState newAction = eachFrame();
+        ActionState newAction = (ActionState)eachFrame();
         if (newAction != null && newAction != this)
         {
             ((Fighter)getActor()).setActionState(newAction);
@@ -33,6 +33,4 @@ public abstract class ActionState extends Action implements Terminable
         }
         return false;
     }
-
-    public abstract ActionState eachFrame(); //Each frame
 }

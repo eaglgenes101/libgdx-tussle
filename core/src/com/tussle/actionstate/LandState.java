@@ -39,7 +39,7 @@ public class LandState extends ActionState
 	}
 
 
-	public ActionState eachFrame()
+	public Terminable eachFrame()
 	{
 		frame += 1;
 		if (frame > 5)

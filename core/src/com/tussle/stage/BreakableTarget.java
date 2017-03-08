@@ -26,12 +26,11 @@ import com.tussle.collision.Hurtbox;
 /**
  * Created by eaglgenes101 on 2/22/17.
  */
-public class Strikeable extends StageElement
+public class BreakableTarget extends StageElement
 {
-	public Strikeable(Hurtbox hbox, String path)
+	public BreakableTarget(Vector2 center, String path)
 	{
-		super(path, new Vector2(hbox.getWidth(), hbox.getHeight()));
-		this.addActor(hbox);
+		super(path, center);
 	}
 
 	public void draw(Batch batch, float parentAlpha)

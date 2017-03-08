@@ -15,29 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.fighter;
+package com.tussle.collision;
 
-public abstract class StatusEffect extends Terminable
+/**
+ * Created by eaglgenes101 on 3/8/17.
+ */
+public class HitboxLock
 {
-	public abstract void onStart(); //After construction and initialization
-
-	public boolean act(float delta)
-	{
-		StatusEffect newEffect = eachFrame();
-		if (newEffect == this)
-		{
-			return false;
-		}
-		else
-		{
-			onEnd(newEffect);
-			if (newEffect != null)
-				((Fighter)actor).addStatusEffect(newEffect);
-			return true;
-		}
-	}
-
-	public abstract StatusEffect eachFrame(); //Each frame
-
-	public abstract void onEnd(StatusEffect nextEffect); //Before disposal
 }

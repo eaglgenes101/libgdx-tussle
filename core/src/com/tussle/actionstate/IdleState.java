@@ -30,7 +30,7 @@ public class IdleState extends ActionState
 		((Fighter)actor).setPreferredXVelocity(0);
 	}
 
-	public ActionState eachFrame()
+	public Terminable eachFrame()
 	{
 		if (!((Fighter) actor).isGrounded())
 			return new AirState();

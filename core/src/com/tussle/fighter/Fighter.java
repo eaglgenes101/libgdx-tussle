@@ -56,8 +56,6 @@ public class Fighter extends BaseBody
 	HashMap<String, Integer> counts;
 
 	ECB collisionBox;
-	List<Armor> armors;
-	Set<Hitbox> hitboxLocks;
 
 	int jumps;
 	int airdodges;
@@ -253,10 +251,5 @@ public class Fighter extends BaseBody
 	public void decrementLedgeGrabs()
 	{
 		ledgeGrabs--;
-	}
-
-	public List<Armor> getArmors()
-	{
-		return armors;
 	}
 }

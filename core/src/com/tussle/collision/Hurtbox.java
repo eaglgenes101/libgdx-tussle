@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
+import com.tussle.main.BaseBody;
 import com.tussle.subaction.Subaction;
 import com.tussle.fighter.Fighter;
 
@@ -29,54 +30,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-public class Hurtbox extends Actor
+public class Hurtbox extends Stadium
 {
-	Vector2 start;
-	Vector2 end;
-	float radius;
-	ShapeRenderer debugDrawer;
 	ArrayList<Armor> armors;
+	BaseBody owner;
 
-	public Hurtbox(Vector2 s, Vector2 e, float rad)
+	public Hurtbox(float startx, float starty, float endx, float endy, float rad, ArrayList<Armor> armorList, BaseBody owner)
 	{
-		start = s;
-		end = e;
-		radius = rad;
-		setBounds(start.x-radius, start.y-radius,
-				radius*2+end.x-start.x, radius*2+end.y-start.y);
-		setOrigin(Align.center);
-		debugDrawer = new ShapeRenderer();
-		debugDrawer.setAutoShapeType(true);
-	}
-
-	public void draw(Batch batch, float parentAlpha)
-	{
-		super.draw(batch, parentAlpha);
-		batch.end();
-		debugDrawer.begin();
-		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
-		debugDrawer.setColor(1, 0, 0, 1);
-		debugDrawer.circle(start.x, start.y, radius);
-		debugDrawer.circle(end.x, end.y, radius);
-		debugDrawer.rectLine(start, end, radius);
-		drawDebug(debugDrawer);
-		debugDrawer.end();
-		batch.begin();
-	}
-
-	public Vector2 getStart()
-	{
-		return start.cpy();
-	}
-
-	public Vector2 getEnd()
-	{
-		return end.cpy();
-	}
-
-	public float getRadius()
-	{
-		return radius;
+		super(startx, starty, endx, endy, rad);
+		armors = armorList;
+		this.owner = owner;
 	}
 
 	public List<Armor> getArmors()
@@ -86,11 +49,14 @@ public class Hurtbox extends Actor
 
 	public void onHit(Hitbox hbox, EffectList subactions)
 	{
-		Fighter fighter = (Fighter)(this.getParent());
 		BiPredicate<Hitbox, EffectList> aggregateFilter =
 				(Hitbox h, EffectList subacts) -> true; //Yay lambdas
-		for (Armor armor : fighter.getArmors())
-			aggregateFilter = armor.and(aggregateFilter);
+		if (owner instanceof Fighter)
+		{
+			Fighter fighter = (Fighter) owner;
+			for (Armor armor : fighter.getArmors())
+				aggregateFilter = armor.and(aggregateFilter);
+		}
 		for (Armor armor : getArmors())
 			aggregateFilter = armor.and(aggregateFilter);
 		if(aggregateFilter.test(hbox, subactions))

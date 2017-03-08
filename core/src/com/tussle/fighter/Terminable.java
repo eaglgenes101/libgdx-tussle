@@ -17,9 +17,15 @@
 
 package com.tussle.fighter;
 
-public interface Terminable
+import com.badlogic.gdx.scenes.scene2d.Action;
+import com.tussle.main.BaseBody;
+
+public abstract class Terminable extends Action
 {
-	void onStart(); //After construction and initialization
-	Terminable eachFrame(); //Each frame
-	void onEnd(Terminable nextState); //Before disposal
+	public abstract void onStart(); //After construction and initialization
+	public abstract Terminable eachFrame(); //Each frame
+	public void onEnd(Terminable nextState) //Before disposal
+	{
+		((BaseBody)getActor()).removeTerminable(this);
+	}
 }

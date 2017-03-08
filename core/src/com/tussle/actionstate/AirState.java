@@ -34,7 +34,7 @@ public class AirState extends ActionState
 		((Fighter)actor).setPreferredXVelocity(0);
 	}
 
-	public ActionState eachFrame()
+	public Terminable eachFrame()
 	{
 		if (((Fighter) actor).isGrounded())
 			return new LandState();

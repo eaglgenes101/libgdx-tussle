@@ -28,13 +28,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.tussle.collision.Hitbox;
+import com.tussle.collision.Hurtbox;
 import com.tussle.fighter.Fighter;
 import com.tussle.input.Controller;
 import com.tussle.input.KeyboardController;
-import com.tussle.stage.Ledge;
-import com.tussle.stage.Platform;
-import com.tussle.stage.SolidSurface;
-import com.tussle.stage.StageElement;
+import com.tussle.stage.*;
 
 public class LibgdxTussleMain extends ApplicationAdapter {
 
@@ -74,12 +73,16 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				4.0f, "core/assets/sprites/default_franchise_icon.png");
 		StageElement leftLedge = new Ledge(new Rectangle(-320, -20, 20, 20), 1);
 		StageElement rightLedge = new Ledge(new Rectangle(300, -20, 20, 20), -1);
+		//StageElement target = new BreakableTarget(new Vector2(0, 100),
+		//		new Hurtbox(new Vector2(0, 0), new Vector2(0, 0),50),
+		//		"core/assets/sprites/default_franchise_icon.png");
 		stage.addActor(fighter);
 		stage.addActor(surface);
 		stage.addActor(platform1);
 		stage.addActor(platform2);
 		stage.addActor(leftLedge);
 		stage.addActor(rightLedge);
+		//stage.addActor(target);
 		stage.setDebugAll(true);
 		fighter.onSpawn();
 		Gdx.input.setInputProcessor(inputs);

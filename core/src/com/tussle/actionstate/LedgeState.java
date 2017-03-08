@@ -54,7 +54,7 @@ public class LedgeState extends ActionState
 		((Fighter) actor).setPreferredYVelocity(0);
 	}
 
-	public ActionState eachFrame()
+	public Terminable eachFrame()
 	{
 		if (side == 1)
 			actor.setPosition(holding.getClingX(), holding.getClingY(), Align.topRight);

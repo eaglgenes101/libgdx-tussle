@@ -17,8 +17,8 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.fighter.Terminable;
+import com.tussle.main.BaseBody;
 import com.tussle.subaction.Subaction;
 
 import java.util.LinkedList;
@@ -26,26 +26,29 @@ import java.util.LinkedList;
 /**
  * Created by eaglgenes101 on 3/1/17.
  */
-public class EffectList extends LinkedList<Subaction> implements Terminable
+public class EffectList extends Terminable
 {
-	Actor target;
+	LinkedList<Subaction> subactions;
 
-	public EffectList(LinkedList<Subaction> subactionList, Actor actor)
+	public EffectList(LinkedList<Subaction> subactionList)
 	{
-		super((LinkedList<Subaction>)(subactionList.clone()));
-		target = actor;
+		subactions = subactionList;
 	}
 
-	public EffectList(Actor actor)
+	public EffectList()
 	{
-		super();
-		target = actor;
+		subactions = new LinkedList<>();
 	}
 
 	public void onStart()
 	{
-		for (Subaction subaction : this)
-			subaction.apply(this, target);
+		for (Subaction subaction : subactions)
+			subaction.apply(this, (BaseBody)getActor());
+	}
+
+	public boolean act(float delta)
+	{
+		return true;
 	}
 
 	public Terminable eachFrame()

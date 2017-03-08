@@ -22,90 +22,54 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
+import com.tussle.main.BaseBody;
 import com.tussle.subaction.Subaction;
 import com.tussle.main.Utility;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class Hitbox extends Actor
+public class Hitbox extends Stadium
 {
-	Vector2 start;
-	Vector2 end;
-	float radius;
-	ShapeRenderer debugDrawer;
+	BaseBody owner;
 
-	public Hitbox(Vector2 s, Vector2 e, float rad)
+	public Hitbox(float startx, float starty, float endx, float endy, float rad, BaseBody owner)
 	{
-		start = s;
-		end = e;
-		radius = rad;
-		setBounds(start.x-radius, start.y-radius,
-				radius*2+end.x-start.x, radius*2+end.y-start.y);
-		setOrigin(Align.center);
-		debugDrawer = new ShapeRenderer();
-		debugDrawer.setAutoShapeType(true);
-	}
-
-	public void draw(Batch batch, float parentAlpha)
-	{
-		super.draw(batch, parentAlpha);
-		batch.end();
-		debugDrawer.begin();
-		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
-		debugDrawer.setColor(1, 1, 1, 1);
-		debugDrawer.circle(start.x, start.y, radius);
-		debugDrawer.circle(end.x, end.y, radius);
-		debugDrawer.rectLine(start, end, radius);
-		drawDebug(debugDrawer);
-		debugDrawer.end();
-		batch.begin();
-	}
-
-	public Vector2 getStart()
-	{
-		return start.cpy();
-	}
-
-	public Vector2 getEnd()
-	{
-		return end.cpy();
-	}
-
-	public float getRadius()
-	{
-		return radius;
+		super(startx, starty, endx, endy, rad);
+		this.owner = owner;
 	}
 
 	public boolean doesHit(Hitbox other)
 	{
-		return Utility.intersectStadia(start, end,
-				other.getStart(), other.getEnd(), radius+other.getRadius());
+		return Utility.intersectStadia(getTransformedStart(), getTransformedEnd(),
+				other.getTransformedStart(), other.getTransformedEnd(),
+				getTransformedRadius()+other.getTransformedRadius());
 	}
 
 	public boolean doesHit(Hurtbox other)
 	{
-		return Utility.intersectStadia(start, end,
-				other.getStart(), other.getEnd(), radius+other.getRadius());
+		return Utility.intersectStadia(getTransformedStart(), getTransformedEnd(),
+				other.getTransformedStart(), other.getTransformedEnd(),
+				getTransformedRadius()+other.getTransformedRadius());
 	}
 
-	public EffectList getOwnerOnHitSubactions(Actor victim)
+	public EffectList getOwnerOnHitSubactions(BaseBody victim)
 	{
-		return new EffectList(getParent());
+		return new EffectList();
 	}
 
-	public List<Subaction> getOtherOnHitSubactions(Actor victim)
+	public EffectList getOtherOnHitSubactions(BaseBody victim)
 	{
-		return new EffectList(victim);
+		return new EffectList();
 	}
 
-	public List<Subaction> getOwnerOnClankSubactions(Actor victim)
+	public EffectList getOwnerOnClankSubactions(BaseBody victim)
 	{
-		return new EffectList(getParent());
+		return new EffectList();
 	}
 
-	public List<Subaction> getOtherOnClankSubactions(Actor victim)
+	public EffectList getOtherOnClankSubactions(BaseBody victim)
 	{
-		return new EffectList(victim);
+		return new EffectList();
 	}
 }

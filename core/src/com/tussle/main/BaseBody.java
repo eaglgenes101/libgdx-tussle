@@ -87,7 +87,7 @@ public abstract class BaseBody extends Group
 				hitbox.setPosition(getX(Align.center), getY(Align.center));
 				hitbox.setRotation(getRotation());
 				hitbox.setScale(getScaleY());
-				hitbox.setFlipped(getScaleX() < 0);
+				hitbox.setFlipped(facing < 0);
 			}
 		}
 		for (Set<Hurtbox> hurtboxSet : hurtboxes.values())
@@ -97,7 +97,7 @@ public abstract class BaseBody extends Group
 				hurtbox.setPosition(getX(Align.center), getY(Align.center));
 				hurtbox.setRotation(getRotation());
 				hurtbox.setScale(getScaleY());
-				hurtbox.setFlipped(getScaleX() < 0);
+				hurtbox.setFlipped(facing < 0);
 			}
 		}
 	}

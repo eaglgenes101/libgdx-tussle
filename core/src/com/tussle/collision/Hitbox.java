@@ -17,17 +17,8 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.utils.Align;
 import com.tussle.main.BaseBody;
-import com.tussle.subaction.Subaction;
 import com.tussle.main.Utility;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class Hitbox extends Stadium
 {

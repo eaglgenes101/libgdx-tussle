@@ -17,7 +17,6 @@
 
 package com.tussle.actionstate;
 
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 

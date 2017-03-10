@@ -17,29 +17,20 @@
 
 package com.tussle.fighter;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 import com.tussle.actionstate.ActionState;
 import com.tussle.actionstate.IdleState;
-import com.tussle.collision.Armor;
 import com.tussle.collision.ECB;
-import com.tussle.collision.Hitbox;
-import com.tussle.collision.Hurtbox;
 import com.tussle.input.Controller;
 import com.tussle.main.BaseBody;
-import com.tussle.main.Utility;
 import com.tussle.stage.Ledge;
 import com.tussle.stage.StageElement;
 
-import javax.rmi.CORBA.Util;
 import java.util.*;
 
 public class Fighter extends BaseBody
@@ -114,6 +105,7 @@ public class Fighter extends BaseBody
 
 	public void act(float delta)
 	{
+		System.out.println(getFacing());
 		super.act(delta);
 		//Move self
 		currentNormals.clear();

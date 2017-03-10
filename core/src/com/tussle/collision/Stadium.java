@@ -34,7 +34,8 @@ public class Stadium implements Shape2D
 	private float rotation;
 	private float scale = 1;
 	private boolean flipped = false;
-	private boolean dirty = true;
+	private boolean startDirty = true;
+	private boolean endDirty = true;
 	private Rectangle bounds;
 
 	public Stadium(float startx, float starty, float endx, float endy, float radius)
@@ -63,8 +64,8 @@ public class Stadium implements Shape2D
 
 	public Vector2 getTransformedStart()
 	{
-		if (!dirty) return new Vector2(worldStartx, worldStarty);
-		dirty = false;
+		if (!startDirty) return new Vector2(worldStartx, worldStarty);
+		startDirty = false;
 
 		final float positionX = x;
 		final float positionY = y;
@@ -85,15 +86,16 @@ public class Stadium implements Shape2D
 			y *= scaleFactor;
 		}
 
-		if (flipped)
-			x *= -1;
-
 		if (rotation != 0)
 		{
 			float oldX = x;
 			x = cos*x - sin*y;
 			y = sin*oldX + cos*y;
 		}
+
+		if (flipped)
+			x *= -1;
+
 		worldStartx = x+positionX+originX;
 		worldStarty = y+positionY+originY;
 
@@ -103,8 +105,8 @@ public class Stadium implements Shape2D
 
 	public Vector2 getTransformedEnd()
 	{
-		if (!dirty) return new Vector2(worldStartx, worldStarty);
-		dirty = false;
+		if (!endDirty) return new Vector2(worldEndx, worldEndy);
+		endDirty = false;
 
 		final float positionX = x;
 		final float positionY = y;
@@ -150,82 +152,91 @@ public class Stadium implements Shape2D
 	{
 		this.originX = originX;
 		this.originY = originY;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void setPosition(float x, float y)
 	{
 		this.x = x;
 		this.y = y;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void setStart(float x, float y)
 	{
 		localStartx = x;
 		localStarty = y;
-		dirty = true;
+		startDirty = true;
 	}
 
 	public void setEnd(float x, float y)
 	{
 		localEndx = x;
 		localEndy = y;
-		dirty = true;
+		endDirty = true;
 	}
 
 	public void setRadius(float radius)
 	{
 		this.radius = radius;
-		dirty = true;
 	}
 
 	public void translate(float x, float y)
 	{
 		this.x += x;
 		this.y += y;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void setRotation(float degrees)
 	{
 		this.rotation = degrees;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void rotate(float degrees)
 	{
 		this.rotation += degrees;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void setScale(float scale)
 	{
 		this.scale = scale;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void scale(float scale)
 	{
 		this.scale *= scale;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void setFlipped(boolean flipped)
 	{
 		this.flipped = flipped;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void flip()
 	{
 		flipped = !flipped;
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public void dirty()
 	{
-		dirty = true;
+		startDirty = true;
+		endDirty = true;
 	}
 
 	public Rectangle getBoundingRectangle ()

@@ -17,9 +17,6 @@
 
 package com.tussle.collision;
 
-import com.tussle.subaction.Subaction;
-
-import java.util.List;
 import java.util.function.BiPredicate;
 
 /**

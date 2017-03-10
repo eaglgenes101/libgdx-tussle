@@ -28,6 +28,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.tussle.actionstate.ActionState;
+import com.tussle.actionstate.IdleState;
 import com.tussle.collision.Hitbox;
 import com.tussle.collision.Hurtbox;
 import com.tussle.fighter.Fighter;
@@ -61,9 +63,11 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
+		ActionState dummyAction = new IdleState();
 		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(0, 300));
+		fighter.addHitbox(new Hitbox(0, 0, 30, 0, 20, fighter), dummyAction);
 		float[] testVertices = {-300, 0, -100, -10, 100, -10, 300, 0, 100, 10, -100, 10};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");

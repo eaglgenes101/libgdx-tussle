@@ -36,6 +36,13 @@ public class Hurtbox extends Stadium
 		this.owner = owner;
 	}
 
+	public Hurtbox(float startx, float starty, float endx, float endy, float rad, BaseBody owner)
+	{
+		super(startx, starty, endx, endy, rad);
+		armors = new ArrayList<>();
+		this.owner = owner;
+	}
+
 	public List<Armor> getArmors()
 	{
 		return (List)armors.clone();

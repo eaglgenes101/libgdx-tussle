@@ -24,8 +24,7 @@ import com.badlogic.gdx.math.*;
  */
 public class Stadium implements Shape2D
 {
-	private float localStartx, localStarty, localEndx, localEndy;
-	private float worldStartx, worldStarty, worldEndx, worldEndy;
+	private Vector2 localStart, localEnd, worldStart, worldEnd;
 
 	private float radius;
 
@@ -40,21 +39,21 @@ public class Stadium implements Shape2D
 
 	public Stadium(float startx, float starty, float endx, float endy, float radius)
 	{
-		localStartx = startx;
-		localStarty = starty;
-		localEndx = endx;
-		localEndy = endy;
+		localStart = new Vector2(startx, starty);
+		localEnd = new Vector2(endx, endy);
+		worldStart = new Vector2();
+		worldEnd = new Vector2();
 		this.radius = radius;
 	}
 
 	public Vector2 getStart()
 	{
-		return new Vector2(localStartx, localStarty);
+		return localStart;
 	}
 
 	public Vector2 getEnd()
 	{
-		return new Vector2(localEndx, localEndy);
+		return localEnd;
 	}
 
 	public float getRadius()
@@ -64,7 +63,7 @@ public class Stadium implements Shape2D
 
 	public Vector2 getTransformedStart()
 	{
-		if (!startDirty) return new Vector2(worldStartx, worldStarty);
+		if (!startDirty) return worldStart;
 		startDirty = false;
 
 		final float positionX = x;
@@ -77,8 +76,8 @@ public class Stadium implements Shape2D
 		final float cos = MathUtils.cosDeg(rotation);
 		final float sin = MathUtils.sinDeg(rotation);
 
-		float x = localStartx - originX;
-		float y = localStarty - originY;
+		float x = localStart.x - originX;
+		float y = localStart.y - originY;
 
 		if (scale)
 		{
@@ -96,16 +95,15 @@ public class Stadium implements Shape2D
 		if (flipped)
 			x *= -1;
 
-		worldStartx = x+positionX+originX;
-		worldStarty = y+positionY+originY;
+		worldStart.set(x+positionX+originX, y+positionY+originY);
 
-		return new Vector2(worldStartx, worldStarty);
+		return worldStart;
 	}
 
 
 	public Vector2 getTransformedEnd()
 	{
-		if (!endDirty) return new Vector2(worldEndx, worldEndy);
+		if (!endDirty) return worldEnd;
 		endDirty = false;
 
 		final float positionX = x;
@@ -118,8 +116,8 @@ public class Stadium implements Shape2D
 		final float cos = MathUtils.cosDeg(rotation);
 		final float sin = MathUtils.sinDeg(rotation);
 
-		float x = localEndx - originX;
-		float y = localEndy - originY;
+		float x = localEnd.x - originX;
+		float y = localEnd.y - originY;
 
 		if (scale)
 		{
@@ -137,10 +135,9 @@ public class Stadium implements Shape2D
 		if (flipped)
 			x *= -1;
 
-		worldEndx = x+positionX+originX;
-		worldEndy = y+positionY+originY;
+		worldEnd.set(x+positionX+originX, y+positionY+originY);
 
-		return new Vector2(worldEndx, worldEndy);
+		return worldEnd;
 	}
 
 	public float getTransformedRadius()
@@ -166,15 +163,13 @@ public class Stadium implements Shape2D
 
 	public void setStart(float x, float y)
 	{
-		localStartx = x;
-		localStarty = y;
+		localStart.set(x, y);
 		startDirty = true;
 	}
 
 	public void setEnd(float x, float y)
 	{
-		localEndx = x;
-		localEndy = y;
+		localEnd.set(x, y);
 		endDirty = true;
 	}
 

@@ -39,8 +39,6 @@ public abstract class BaseBody extends Group
 	protected Sprite sprite;
 
 	Vector2 velocity;
-	int facing;
-	float angle;
 	float preferredXVelocity;
 	float preferredYVelocity;
 
@@ -87,7 +85,7 @@ public abstract class BaseBody extends Group
 				hitbox.setPosition(getX(Align.center), getY(Align.center));
 				hitbox.setRotation(getRotation());
 				hitbox.setScale(getScaleY());
-				hitbox.setFlipped(facing < 0);
+				hitbox.setFlipped(getScaleX() < 0);
 			}
 		}
 		for (Set<Hurtbox> hurtboxSet : hurtboxes.values())
@@ -97,7 +95,7 @@ public abstract class BaseBody extends Group
 				hurtbox.setPosition(getX(Align.center), getY(Align.center));
 				hurtbox.setRotation(getRotation());
 				hurtbox.setScale(getScaleY());
-				hurtbox.setFlipped(facing < 0);
+				hurtbox.setFlipped(getScaleX() < 0);
 			}
 		}
 	}
@@ -108,8 +106,8 @@ public abstract class BaseBody extends Group
 		if (sprite != null)
 		{
 			sprite.setOriginCenter();
-			sprite.setFlip(facing < 0, false);
-			sprite.setRotation(angle);
+			sprite.setFlip(getScaleX() < 0, false);
+			sprite.setRotation(getRotation());
 			sprite.setPosition(getX(), getY());
 			sprite.draw(batch, parentAlpha);
 		}
@@ -129,7 +127,6 @@ public abstract class BaseBody extends Group
 						hitbox.getTransformedRadius() * 2);
 			}
 		}
-		drawDebug(debugDrawer);
 		debugDrawer.setColor(0, 1, 1, 1);
 		for (Set<Hurtbox> hurtboxSet : hurtboxes.values())
 		{
@@ -212,7 +209,7 @@ public abstract class BaseBody extends Group
 
 	public int getFacing()
 	{
-		return facing;
+		return getScaleX()>0?1:-1;
 	}
 
 	public Vector2 getVelocity()
@@ -247,7 +244,7 @@ public abstract class BaseBody extends Group
 
 	public void setFacing(int newFacing)
 	{
-		facing = newFacing;
+		setScaleX(getScaleY()*newFacing);
 	}
 
 	public void setPreferredXVelocity(float newVelocity)

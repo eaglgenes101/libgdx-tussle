@@ -105,7 +105,6 @@ public class Fighter extends BaseBody
 
 	public void act(float delta)
 	{
-		System.out.println(getFacing());
 		super.act(delta);
 		//Move self
 		currentNormals.clear();

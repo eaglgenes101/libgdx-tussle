@@ -77,16 +77,16 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				4.0f, "core/assets/sprites/default_franchise_icon.png");
 		StageElement leftLedge = new Ledge(new Rectangle(-320, -20, 20, 20), 1);
 		StageElement rightLedge = new Ledge(new Rectangle(300, -20, 20, 20), -1);
-		//StageElement target = new BreakableTarget(new Vector2(0, 100),
-		//		new Hurtbox(new Vector2(0, 0), new Vector2(0, 0),50),
-		//		"core/assets/sprites/default_franchise_icon.png");
+		StageElement target = new BreakableTarget(new Vector2(0, 100),
+				"core/assets/sprites/default_franchise_icon.png");
+		target.addHurtbox(new Hurtbox(0, 0, 0, 0, 20, target), dummyAction);
 		stage.addActor(fighter);
 		stage.addActor(surface);
 		stage.addActor(platform1);
 		stage.addActor(platform2);
 		stage.addActor(leftLedge);
 		stage.addActor(rightLedge);
-		//stage.addActor(target);
+		stage.addActor(target);
 		stage.setDebugAll(true);
 		fighter.onSpawn();
 		Gdx.input.setInputProcessor(inputs);

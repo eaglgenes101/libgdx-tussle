@@ -22,6 +22,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.utils.Align;
 import com.tussle.collision.*;
@@ -32,7 +33,7 @@ import java.util.*;
 /**
  * Created by eaglgenes101 on 3/6/17.
  */
-public abstract class BaseBody extends Group
+public abstract class PhysicalBody extends Group
 {
 	String baseDir;
 	Texture texture;
@@ -43,18 +44,14 @@ public abstract class BaseBody extends Group
 	float preferredYVelocity;
 
 	List<Armor> armors;
-	WeakHashMap<HitboxLock, HitboxLock> hitboxLocks;
-	HashMap<Terminable, HashSet<Hitbox>> hitboxes;
-	HashMap<Terminable, HashSet<Hurtbox>> hurtboxes;
+	Set<HitboxLock> hitboxLocks;
 
 	protected ShapeRenderer debugDrawer;
 
-	public BaseBody(String path, Vector2 center)
+	public PhysicalBody(String path, Vector2 center)
 	{
 		armors = new LinkedList<>();
-		hitboxLocks = new WeakHashMap<>();
-		hitboxes = new HashMap<>();
-		hurtboxes = new HashMap<>();
+		hitboxLocks = Collections.newSetFromMap(new WeakHashMap<HitboxLock, Boolean>());
 		if (path != null)
 		{
 			texture = new Texture(path);
@@ -78,24 +75,25 @@ public abstract class BaseBody extends Group
 	public void act(float delta)
 	{
 		super.act(delta);
-		for (Set<Hitbox> hitboxSet : hitboxes.values())
+		for (Action action : getActions())
 		{
-			for (Hitbox hitbox : hitboxSet)
+			if (action instanceof Terminable)
 			{
-				hitbox.setPosition(getX(Align.center), getY(Align.center));
-				hitbox.setRotation(getRotation());
-				hitbox.setScale(getScaleY());
-				hitbox.setFlipped(getScaleX() < 0);
-			}
-		}
-		for (Set<Hurtbox> hurtboxSet : hurtboxes.values())
-		{
-			for (Hurtbox hurtbox :hurtboxSet)
-			{
-				hurtbox.setPosition(getX(Align.center), getY(Align.center));
-				hurtbox.setRotation(getRotation());
-				hurtbox.setScale(getScaleY());
-				hurtbox.setFlipped(getScaleX() < 0);
+				for (Hitbox hitbox : ((Terminable) action).getHitboxes())
+				{
+					hitbox.setPosition(getX(Align.center), getY(Align.center));
+					hitbox.setRotation(getRotation());
+					hitbox.setScale(getScaleY());
+					hitbox.setFlipped(getScaleX() < 0);
+				}
+
+				for (Hurtbox hurtbox : ((Terminable) action).getHurtboxes())
+				{
+					hurtbox.setPosition(getX(Align.center), getY(Align.center));
+					hurtbox.setRotation(getRotation());
+					hurtbox.setScale(getScaleY());
+					hurtbox.setFlipped(getScaleX() < 0);
+				}
 			}
 		}
 	}
@@ -114,30 +112,31 @@ public abstract class BaseBody extends Group
 		batch.end();
 		debugDrawer.begin();
 		debugDrawer.setProjectionMatrix(this.getStage().getCamera().combined);
-		debugDrawer.setColor(0, 0, 1, 1);
-		for (Set<Hitbox> hitboxSet : hitboxes.values())
+		for (Action action : getActions())
 		{
-			for (Hitbox hitbox : hitboxSet)
+			if (action instanceof Terminable)
 			{
-				debugDrawer.circle(hitbox.getTransformedStart().x, hitbox.getTransformedStart().y,
-						hitbox.getTransformedRadius());
-				debugDrawer.circle(hitbox.getTransformedEnd().x, hitbox.getTransformedEnd().y,
-						hitbox.getTransformedRadius());
-				debugDrawer.rectLine(hitbox.getTransformedStart(), hitbox.getTransformedEnd(),
-						hitbox.getTransformedRadius() * 2);
-			}
-		}
-		debugDrawer.setColor(0, 1, 1, 1);
-		for (Set<Hurtbox> hurtboxSet : hurtboxes.values())
-		{
-			for (Hurtbox hurtbox : hurtboxSet)
-			{
-				debugDrawer.circle(hurtbox.getTransformedStart().x, hurtbox.getTransformedStart().y,
-						hurtbox.getTransformedRadius());
-				debugDrawer.circle(hurtbox.getTransformedEnd().x, hurtbox.getTransformedEnd().y,
-					hurtbox.getTransformedRadius());
-				debugDrawer.rectLine(hurtbox.getTransformedStart(), hurtbox.getTransformedEnd(),
-						hurtbox.getTransformedRadius() * 2);
+				debugDrawer.setColor(0, 0, 1, 1);
+				for (Hitbox hitbox : ((Terminable) action).getHitboxes())
+				{
+					debugDrawer.circle(hitbox.getTransformedStart().x, hitbox.getTransformedStart().y,
+							hitbox.getTransformedRadius());
+					debugDrawer.circle(hitbox.getTransformedEnd().x, hitbox.getTransformedEnd().y,
+							hitbox.getTransformedRadius());
+					debugDrawer.rectLine(hitbox.getTransformedStart(), hitbox.getTransformedEnd(),
+							hitbox.getTransformedRadius() * 2);
+				}
+
+				debugDrawer.setColor(0, 1, 1, 1);
+				for (Hurtbox hurtbox : ((Terminable) action).getHurtboxes())
+				{
+					debugDrawer.circle(hurtbox.getTransformedStart().x, hurtbox.getTransformedStart().y,
+							hurtbox.getTransformedRadius());
+					debugDrawer.circle(hurtbox.getTransformedEnd().x, hurtbox.getTransformedEnd().y,
+							hurtbox.getTransformedRadius());
+					debugDrawer.rectLine(hurtbox.getTransformedStart(), hurtbox.getTransformedEnd(),
+							hurtbox.getTransformedRadius() * 2);
+				}
 			}
 		}
 		drawDebug(debugDrawer);
@@ -145,65 +144,21 @@ public abstract class BaseBody extends Group
 		batch.begin();
 	}
 
-	public void addHitbox(Hitbox hitbox, Terminable lifetime)
-	{
-		if (!hitboxes.containsKey(lifetime))
-		{
-			hitboxes.put(lifetime, new HashSet<>());
-		}
-		hitboxes.get(lifetime).add(hitbox);
-	}
-
-	public void addHurtbox(Hurtbox hurtbox, Terminable lifetime)
-	{
-		if (!hurtboxes.containsKey(lifetime))
-		{
-			hurtboxes.put(lifetime, new HashSet<>());
-		}
-		hurtboxes.get(lifetime).add(hurtbox);
-	}
-
-	public void removeHitbox(Hitbox hitbox)
-	{
-		for (Terminable terminable : hitboxes.keySet())
-		{
-			if (hitboxes.get(terminable).remove(hitbox))
-				break;
-		}
-	}
-
-	public void removeHurtbox(Hurtbox hurtbox)
-	{
-		for (Terminable terminable : hurtboxes.keySet())
-		{
-			if (hurtboxes.get(terminable).remove(hurtbox))
-				break;
-		}
-	}
-
-	public void removeTerminable(Terminable terminable)
-	{
-		hitboxes.remove(terminable);
-		hurtboxes.remove(terminable);
-	}
-
 	public Set<Hitbox> getHitboxes()
 	{
 		Set<Hitbox> superset = new HashSet<>();
-		for (Set<Hitbox> set : hitboxes.values())
-		{
-			superset.addAll(set);
-		}
+		for (Action action : getActions())
+			if (action instanceof Terminable)
+				superset.addAll(((Terminable)action).getHitboxes());
 		return superset;
 	}
 
 	public Set<Hurtbox> getHurtboxes()
 	{
 		Set<Hurtbox> superset = new HashSet<>();
-		for (Set<Hurtbox> set : hurtboxes.values())
-		{
-			superset.addAll(set);
-		}
+		for (Action action : getActions())
+			if (action instanceof Terminable)
+				superset.addAll(((Terminable)action).getHurtboxes());
 		return superset;
 	}
 
@@ -270,5 +225,19 @@ public abstract class BaseBody extends Group
 	public List<Armor> getArmors()
 	{
 		return armors;
+	}
+
+	//Return if the lock is in the set
+	public boolean doesHit(HitboxLock lock)
+	{
+		if (hitboxLocks.contains(lock))
+		{
+			return false;
+		}
+		else
+		{
+			hitboxLocks.add(lock);
+			return true;
+		}
 	}
 }

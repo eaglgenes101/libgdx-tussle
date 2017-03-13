@@ -67,7 +67,6 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(0, 300));
-		fighter.addHitbox(new Hitbox(0, 0, 30, 0, 20, fighter), dummyAction);
 		float[] testVertices = {-300, 0, -100, -10, 100, -10, 300, 0, 100, 10, -100, 10};
 		StageElement surface = new SolidSurface(new Polygon(testVertices),
 				"core/assets/sprites/default_franchise_icon.png");
@@ -79,7 +78,6 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		StageElement rightLedge = new Ledge(new Rectangle(300, -20, 20, 20), -1);
 		StageElement target = new BreakableTarget(new Vector2(0, 100),
 				"core/assets/sprites/default_franchise_icon.png");
-		target.addHurtbox(new Hurtbox(0, 0, 0, 0, 20, target), dummyAction);
 		stage.addActor(fighter);
 		stage.addActor(surface);
 		stage.addActor(platform1);
@@ -150,6 +148,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	
 	@Override
 	public void dispose () {
+		stage.dispose();
 	}
 
 	public void resize(int width, int height)

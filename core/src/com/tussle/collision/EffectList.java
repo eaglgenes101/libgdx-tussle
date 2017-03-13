@@ -17,11 +17,14 @@
 
 package com.tussle.collision;
 
+import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
-import com.tussle.main.BaseBody;
+import com.tussle.main.PhysicalBody;
 import com.tussle.subaction.Subaction;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Created by eaglgenes101 on 3/1/17.
@@ -43,7 +46,7 @@ public class EffectList extends Terminable
 	public void onStart()
 	{
 		for (Subaction subaction : subactions)
-			subaction.apply(this, (BaseBody)getActor());
+			subaction.apply(this, (PhysicalBody)getActor());
 	}
 
 	public boolean act(float delta)
@@ -59,5 +62,25 @@ public class EffectList extends Terminable
 	public void onEnd(Terminable terminable)
 	{
 		//Nothin'.
+	}
+
+	public Fighter getOwner()
+	{
+		return null; //If this gets called, something is wrong
+	}
+
+	public PhysicalBody getBody()
+	{
+		return null; //If this gets called, something is wrong
+	}
+
+	public Set<Hitbox> getHitboxes()
+	{
+		return Collections.emptySet();
+	}
+
+	public Set<Hurtbox> getHurtboxes()
+	{
+		return Collections.emptySet();
 	}
 }

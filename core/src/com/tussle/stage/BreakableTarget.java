@@ -22,12 +22,19 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.tussle.collision.Hurtbox;
+import com.tussle.fighter.PersistentHurtboxStatusEffect;
 
 /**
  * Created by eaglgenes101 on 2/22/17.
  */
 public class BreakableTarget extends StageElement
 {
+	public BreakableTarget(Vector2 start, Vector2 end, float radius, String path)
+	{
+		super(path, new Vector2((start.x+end.x)/2, (start.y+end.y)/2));
+		this.addAction(new PersistentHurtboxStatusEffect(start.x, start.y, end.x, end.y, radius));
+	}
+
 	public BreakableTarget(Vector2 center, String path)
 	{
 		super(path, center);

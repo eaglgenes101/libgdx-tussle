@@ -17,16 +17,13 @@
 
 package com.tussle.subaction;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
-import com.tussle.main.BaseBody;
-import com.tussle.stage.StageElement;
+import com.tussle.main.PhysicalBody;
 
 /**
  * Created by eaglgenes101 on 2/27/17.
  */
 public abstract class Subaction
 {
-	public abstract void apply(Terminable action, BaseBody actor);
+	public abstract void apply(Terminable action, PhysicalBody actor);
 }

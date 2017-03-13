@@ -18,7 +18,11 @@
 package com.tussle.fighter;
 
 import com.badlogic.gdx.scenes.scene2d.Action;
-import com.tussle.main.BaseBody;
+import com.tussle.collision.Hitbox;
+import com.tussle.collision.Hurtbox;
+import com.tussle.main.PhysicalBody;
+
+import java.util.Set;
 
 public abstract class Terminable extends Action
 {
@@ -26,6 +30,10 @@ public abstract class Terminable extends Action
 	public abstract Terminable eachFrame(); //Each frame
 	public void onEnd(Terminable nextState) //Before disposal
 	{
-		((BaseBody)getActor()).removeTerminable(this);
+		//Nothing by default
 	}
+	public abstract Fighter getOwner(); //Who ultimately owns this action
+	public abstract PhysicalBody getBody(); //Who to pass callbacks to
+	public abstract Set<Hitbox> getHitboxes();
+	public abstract Set<Hurtbox> getHurtboxes();
 }

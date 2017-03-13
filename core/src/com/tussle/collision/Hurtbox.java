@@ -17,7 +17,7 @@
 
 package com.tussle.collision;
 
-import com.tussle.main.BaseBody;
+import com.tussle.fighter.Terminable;
 import com.tussle.fighter.Fighter;
 
 import java.util.ArrayList;
@@ -27,20 +27,13 @@ import java.util.function.BiPredicate;
 public class Hurtbox extends Stadium
 {
 	ArrayList<Armor> armors;
-	BaseBody owner;
+	Terminable associated;
 
-	public Hurtbox(float startx, float starty, float endx, float endy, float rad, ArrayList<Armor> armorList, BaseBody owner)
-	{
-		super(startx, starty, endx, endy, rad);
-		armors = armorList;
-		this.owner = owner;
-	}
-
-	public Hurtbox(float startx, float starty, float endx, float endy, float rad, BaseBody owner)
+	public Hurtbox(float startx, float starty, float endx, float endy, float rad, Terminable associated)
 	{
 		super(startx, starty, endx, endy, rad);
 		armors = new ArrayList<>();
-		this.owner = owner;
+		this.associated = associated;
 	}
 
 	public List<Armor> getArmors()
@@ -52,9 +45,9 @@ public class Hurtbox extends Stadium
 	{
 		BiPredicate<Hitbox, EffectList> aggregateFilter =
 				(Hitbox h, EffectList subacts) -> true; //Yay lambdas
-		if (owner instanceof Fighter)
+		if (associated.getBody() instanceof Fighter)
 		{
-			Fighter fighter = (Fighter) owner;
+			Fighter fighter = (Fighter)associated.getBody();
 			for (Armor armor : fighter.getArmors())
 				aggregateFilter = armor.and(aggregateFilter);
 		}

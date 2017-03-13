@@ -17,6 +17,8 @@
 
 package com.tussle.fighter;
 
+import com.tussle.main.PhysicalBody;
+
 public abstract class StatusEffect extends Terminable
 {
 	public abstract void onStart(); //After construction and initialization
@@ -40,4 +42,18 @@ public abstract class StatusEffect extends Terminable
 	public abstract StatusEffect eachFrame(); //Each frame
 
 	public abstract void onEnd(StatusEffect nextEffect); //Before disposal
+
+	public Fighter getOwner()
+	{
+		//TODO: Insert more behavior for articles
+		if (getActor() instanceof Fighter)
+			return (Fighter)getActor();
+		else
+			return null;
+	}
+
+	public PhysicalBody getBody()
+	{
+		return (PhysicalBody)getActor();
+	}
 }

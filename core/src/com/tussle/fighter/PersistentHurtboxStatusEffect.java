@@ -17,9 +17,49 @@
 
 package com.tussle.fighter;
 
+import com.tussle.collision.Hitbox;
+import com.tussle.collision.Hurtbox;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by eaglgenes101 on 3/10/17.
  */
-public abstract class PersistentHurtboxStatusEffect extends StatusEffect
+public class PersistentHurtboxStatusEffect extends StatusEffect
 {
+	HashSet<Hurtbox> hurtboxes;
+
+	public PersistentHurtboxStatusEffect(float startx, float starty, float endx, float endy, float radius)
+	{
+		Hurtbox associatedHurtbox = new Hurtbox(startx, starty, endx, endy, radius, this);
+		hurtboxes.add(associatedHurtbox);
+	}
+
+	public void onStart()
+	{
+		//Nothing...
+	}
+
+	public StatusEffect eachFrame()
+	{
+		return this;
+	}
+
+	public void onEnd(StatusEffect nextEffect)
+	{
+		//Nothing...
+	}
+
+	public Set<Hitbox> getHitboxes()
+	{
+		return Collections.emptySet();
+	}
+
+	public Set<Hurtbox> getHurtboxes()
+	{
+		return hurtboxes;
+	}
+
 }

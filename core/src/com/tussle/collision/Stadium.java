@@ -46,6 +46,15 @@ public class Stadium implements Shape2D
 		this.radius = radius;
 	}
 
+	public Stadium(Vector2 start, Vector2 end, float radius)
+	{
+		localStart = start.cpy();
+		localEnd = end.cpy();
+		worldStart = new Vector2();
+		worldEnd = new Vector2();
+		this.radius = radius;
+	}
+
 	public Vector2 getStart()
 	{
 		return localStart;

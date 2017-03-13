@@ -27,13 +27,13 @@ import com.tussle.actionstate.ActionState;
 import com.tussle.actionstate.IdleState;
 import com.tussle.collision.ECB;
 import com.tussle.input.Controller;
-import com.tussle.main.BaseBody;
+import com.tussle.main.PhysicalBody;
 import com.tussle.stage.Ledge;
 import com.tussle.stage.StageElement;
 
 import java.util.*;
 
-public class Fighter extends BaseBody
+public class Fighter extends PhysicalBody
 {
 	Controller controller;
 

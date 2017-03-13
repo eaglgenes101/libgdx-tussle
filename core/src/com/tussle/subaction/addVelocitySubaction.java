@@ -17,11 +17,8 @@
 
 package com.tussle.subaction;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
-import com.tussle.main.BaseBody;
-import com.tussle.stage.StageElement;
+import com.tussle.main.PhysicalBody;
 
 /**
  * Created by eaglgenes101 on 3/1/17.
@@ -37,7 +34,7 @@ public class addVelocitySubaction
 		yVel = dy;
 	}
 
-	public void apply(Terminable action, BaseBody actor)
+	public void apply(Terminable action, PhysicalBody actor)
 	{
 		actor.setXVelocity(xVel+actor.getVelocity().x);
 		actor.setYVelocity(yVel+actor.getVelocity().y);

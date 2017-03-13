@@ -17,12 +17,10 @@
 
 package com.tussle.subaction;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.tussle.actionstate.ActionState;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
-import com.tussle.main.BaseBody;
-import com.tussle.stage.StageElement;
+import com.tussle.main.PhysicalBody;
 
 /**
  * Created by eaglgenes101 on 2/28/17.
@@ -36,7 +34,7 @@ public class changeActionSubaction extends Subaction
 		state = newState;
 	}
 
-	public void apply(Terminable action, BaseBody actor)
+	public void apply(Terminable action, PhysicalBody actor)
 	{
 		if (actor instanceof Fighter)
 		{

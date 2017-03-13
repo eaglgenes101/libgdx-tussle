@@ -17,17 +17,18 @@
 
 package com.tussle.collision;
 
-import com.tussle.main.BaseBody;
+import com.tussle.fighter.Terminable;
+import com.tussle.main.PhysicalBody;
 import com.tussle.main.Utility;
 
 public class Hitbox extends Stadium
 {
-	BaseBody owner;
+	Terminable associated;
 
-	public Hitbox(float startx, float starty, float endx, float endy, float rad, BaseBody owner)
+	public Hitbox(float startx, float starty, float endx, float endy, float rad, Terminable associated)
 	{
 		super(startx, starty, endx, endy, rad);
-		this.owner = owner;
+		this.associated = associated;
 	}
 
 	public boolean doesHit(Hitbox other)
@@ -44,22 +45,22 @@ public class Hitbox extends Stadium
 				getTransformedRadius()+other.getTransformedRadius());
 	}
 
-	public EffectList getOwnerOnHitSubactions(BaseBody victim)
+	public EffectList getOwnerOnHitSubactions(PhysicalBody victim)
 	{
 		return new EffectList();
 	}
 
-	public EffectList getOtherOnHitSubactions(BaseBody victim)
+	public EffectList getOtherOnHitSubactions(PhysicalBody victim)
 	{
 		return new EffectList();
 	}
 
-	public EffectList getOwnerOnClankSubactions(BaseBody victim)
+	public EffectList getOwnerOnClankSubactions(PhysicalBody victim)
 	{
 		return new EffectList();
 	}
 
-	public EffectList getOtherOnClankSubactions(BaseBody victim)
+	public EffectList getOtherOnClankSubactions(PhysicalBody victim)
 	{
 		return new EffectList();
 	}

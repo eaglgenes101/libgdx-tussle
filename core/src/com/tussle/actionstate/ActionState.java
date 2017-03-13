@@ -19,6 +19,7 @@ package com.tussle.actionstate;
 
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
+import com.tussle.main.PhysicalBody;
 
 public abstract class ActionState extends Terminable
 {
@@ -31,5 +32,15 @@ public abstract class ActionState extends Terminable
             return true;
         }
         return false;
+    }
+
+    public Fighter getOwner()
+    {
+        return (Fighter)getActor();
+    }
+
+    public PhysicalBody getBody()
+    {
+        return (PhysicalBody)getActor();
     }
 }

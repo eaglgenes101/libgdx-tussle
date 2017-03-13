@@ -20,9 +20,17 @@ package com.tussle.main;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.tussle.collision.HitboxLock;
+import com.tussle.collision.Hurtbox;
+
+import java.util.LinkedHashSet;
 
 public class Utility
 {
+	public static final LinkedHashSet<HitboxLock> emptyLockSet = new LinkedHashSet<>();
+
+	public static final LinkedHashSet<Hurtbox> emptyHurtboxSet = new LinkedHashSet<>();
+
 	public static Vector2 getXYfromDM(double direction, double magnitude)
 	{
 		return new Vector2((float)(magnitude*Math.cos(direction*Math.PI/180)),

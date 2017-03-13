@@ -17,22 +17,22 @@
 
 package com.tussle.fighter;
 
-import com.tussle.collision.Hitbox;
+import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
+import com.tussle.main.Utility;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 /**
  * Created by eaglgenes101 on 3/10/17.
  */
 public class PersistentHurtboxStatusEffect extends StatusEffect
 {
-	HashSet<Hurtbox> hurtboxes;
+	LinkedHashSet<Hurtbox> hurtboxes;
 
 	public PersistentHurtboxStatusEffect(float startx, float starty, float endx, float endy, float radius)
 	{
+		hurtboxes = new LinkedHashSet<>();
 		Hurtbox associatedHurtbox = new Hurtbox(startx, starty, endx, endy, radius, this);
 		hurtboxes.add(associatedHurtbox);
 	}
@@ -52,12 +52,12 @@ public class PersistentHurtboxStatusEffect extends StatusEffect
 		//Nothing...
 	}
 
-	public Set<Hitbox> getHitboxes()
+	public LinkedHashSet<HitboxLock> getHitboxLocks()
 	{
-		return Collections.emptySet();
+		return Utility.emptyLockSet;
 	}
 
-	public Set<Hurtbox> getHurtboxes()
+	public LinkedHashSet<Hurtbox> getHurtboxes()
 	{
 		return hurtboxes;
 	}

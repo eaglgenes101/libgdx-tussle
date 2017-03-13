@@ -18,23 +18,27 @@
 package com.tussle.fighter;
 
 import com.tussle.collision.Hitbox;
+import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
+import com.tussle.main.Utility;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by eaglgenes101 on 3/10/17.
  */
 public class PersistentHitboxStatusEffect extends StatusEffect
 {
-	HashSet<Hitbox> hitboxes;
+	LinkedHashSet<HitboxLock> associatedLocks;
+	Hitbox associatedHitbox;
 
 	public PersistentHitboxStatusEffect(float startx, float starty, float endx, float endy, float radius)
 	{
-		Hitbox associatedHitbox = new Hitbox(startx, starty, endx, endy, radius, this);
-		hitboxes.add(associatedHitbox);
+		associatedHitbox = new Hitbox(startx, starty, endx, endy, radius, this);
+		associatedLocks = new LinkedHashSet<>();
+		HitboxLock associatedLock = new HitboxLock();
+		associatedLock.addHitbox(associatedHitbox);
+		associatedLocks.add(associatedLock);
 	}
 
 	public void onStart()
@@ -52,13 +56,13 @@ public class PersistentHitboxStatusEffect extends StatusEffect
 		//Nothing...
 	}
 
-	public Set<Hitbox> getHitboxes()
+	public LinkedHashSet<HitboxLock> getHitboxLocks()
 	{
-		return hitboxes;
+		return associatedLocks;
 	}
 
-	public Set<Hurtbox> getHurtboxes()
+	public LinkedHashSet<Hurtbox> getHurtboxes()
 	{
-		return Collections.emptySet();
+		return Utility.emptyHurtboxSet;
 	}
 }

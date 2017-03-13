@@ -17,9 +17,14 @@
 
 package com.tussle.actionstate;
 
+import com.tussle.collision.HitboxLock;
+import com.tussle.collision.Hurtbox;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.main.PhysicalBody;
+import com.tussle.main.Utility;
+
+import java.util.LinkedHashSet;
 
 public abstract class ActionState extends Terminable
 {
@@ -42,5 +47,15 @@ public abstract class ActionState extends Terminable
     public PhysicalBody getBody()
     {
         return (PhysicalBody)getActor();
+    }
+
+    public LinkedHashSet<HitboxLock> getHitboxLocks()
+    {
+        return Utility.emptyLockSet;
+    }
+
+    public LinkedHashSet<Hurtbox> getHurtboxes()
+    {
+        return Utility.emptyHurtboxSet;
     }
 }

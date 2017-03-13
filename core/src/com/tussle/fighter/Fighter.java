@@ -83,6 +83,8 @@ public class Fighter extends PhysicalBody
 
 	public void onSpawn()
 	{
+		clearActions();
+		clearChildren();
 		currentNormals.clear();
 		setSize(sprite.getWidth(), sprite.getHeight());
 		setOrigin(Align.center);

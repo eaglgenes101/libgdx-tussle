@@ -40,11 +40,6 @@ public abstract class StageElement extends PhysicalBody
 		setY(getY()+getYVelocity());
 	}
 
-	public void onContact(Actor actor)
-	{
-		//Nothing by default
-	}
-
 	//Determine the normal to the ECB if it exists
 	public abstract Intersector.MinimumTranslationVector getNormal(Polygon ecb);
 

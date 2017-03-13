@@ -35,11 +35,6 @@ public class BreakableTarget extends StageElement
 		this.addAction(new PersistentHurtboxStatusEffect(start.x, start.y, end.x, end.y, radius));
 	}
 
-	public BreakableTarget(Vector2 center, String path)
-	{
-		super(path, center);
-	}
-
 	public void draw(Batch batch, float parentAlpha)
 	{
 		super.draw(batch, parentAlpha);

@@ -20,11 +20,11 @@ package com.tussle.collision;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.main.PhysicalBody;
+import com.tussle.main.Utility;
 import com.tussle.subaction.Subaction;
 
-import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * Created by eaglgenes101 on 3/1/17.
@@ -74,13 +74,13 @@ public class EffectList extends Terminable
 		return null; //If this gets called, something is wrong
 	}
 
-	public Set<Hitbox> getHitboxes()
+	public LinkedHashSet<HitboxLock> getHitboxLocks()
 	{
-		return Collections.emptySet();
+		return Utility.emptyLockSet;
 	}
 
-	public Set<Hurtbox> getHurtboxes()
+	public LinkedHashSet<Hurtbox> getHurtboxes()
 	{
-		return Collections.emptySet();
+		return Utility.emptyHurtboxSet;
 	}
 }

@@ -79,12 +79,15 @@ public abstract class PhysicalBody extends Group
 		{
 			if (action instanceof Terminable)
 			{
-				for (Hitbox hitbox : ((Terminable) action).getHitboxes())
+				for (HitboxLock hitboxLocks : ((Terminable) action).getHitboxLocks())
 				{
-					hitbox.setPosition(getX(Align.center), getY(Align.center));
-					hitbox.setRotation(getRotation());
-					hitbox.setScale(getScaleY());
-					hitbox.setFlipped(getScaleX() < 0);
+					for (Hitbox hitbox : hitboxLocks.getHitboxes())
+					{
+						hitbox.setPosition(getX(Align.center), getY(Align.center));
+						hitbox.setRotation(getRotation());
+						hitbox.setScale(getScaleY());
+						hitbox.setFlipped(getScaleX() < 0);
+					}
 				}
 
 				for (Hurtbox hurtbox : ((Terminable) action).getHurtboxes())
@@ -117,14 +120,17 @@ public abstract class PhysicalBody extends Group
 			if (action instanceof Terminable)
 			{
 				debugDrawer.setColor(0, 0, 1, 1);
-				for (Hitbox hitbox : ((Terminable) action).getHitboxes())
+				for (HitboxLock hitboxLocks : ((Terminable) action).getHitboxLocks())
 				{
-					debugDrawer.circle(hitbox.getTransformedStart().x, hitbox.getTransformedStart().y,
-							hitbox.getTransformedRadius());
-					debugDrawer.circle(hitbox.getTransformedEnd().x, hitbox.getTransformedEnd().y,
-							hitbox.getTransformedRadius());
-					debugDrawer.rectLine(hitbox.getTransformedStart(), hitbox.getTransformedEnd(),
-							hitbox.getTransformedRadius() * 2);
+					for (Hitbox hitbox : hitboxLocks.getHitboxes())
+					{
+						debugDrawer.circle(hitbox.getTransformedStart().x, hitbox.getTransformedStart().y,
+								hitbox.getTransformedRadius());
+						debugDrawer.circle(hitbox.getTransformedEnd().x, hitbox.getTransformedEnd().y,
+								hitbox.getTransformedRadius());
+						debugDrawer.rectLine(hitbox.getTransformedStart(), hitbox.getTransformedEnd(),
+								hitbox.getTransformedRadius() * 2);
+					}
 				}
 
 				debugDrawer.setColor(0, 1, 1, 1);
@@ -144,18 +150,18 @@ public abstract class PhysicalBody extends Group
 		batch.begin();
 	}
 
-	public Set<Hitbox> getHitboxes()
+	public Set<HitboxLock> getHitboxes()
 	{
-		Set<Hitbox> superset = new HashSet<>();
+		Set<HitboxLock> superset = new LinkedHashSet<>();
 		for (Action action : getActions())
 			if (action instanceof Terminable)
-				superset.addAll(((Terminable)action).getHitboxes());
+				superset.addAll(((Terminable)action).getHitboxLocks());
 		return superset;
 	}
 
 	public Set<Hurtbox> getHurtboxes()
 	{
-		Set<Hurtbox> superset = new HashSet<>();
+		Set<Hurtbox> superset = new LinkedHashSet<>();
 		for (Action action : getActions())
 			if (action instanceof Terminable)
 				superset.addAll(((Terminable)action).getHurtboxes());
@@ -230,14 +236,12 @@ public abstract class PhysicalBody extends Group
 	//Return if the lock is in the set
 	public boolean doesHit(HitboxLock lock)
 	{
-		if (hitboxLocks.contains(lock))
-		{
-			return false;
-		}
-		else
-		{
-			hitboxLocks.add(lock);
-			return true;
-		}
+		return !hitboxLocks.contains(lock);
+	}
+
+	public void doSubactions(EffectList list)
+	{
+		list.onStart(); //Just do it
+		list.onEnd(null); //Do cleanup if necessary
 	}
 }

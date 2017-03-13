@@ -37,6 +37,8 @@ import com.tussle.input.Controller;
 import com.tussle.input.KeyboardController;
 import com.tussle.stage.*;
 
+import java.util.*;
+
 public class LibgdxTussleMain extends ApplicationAdapter {
 
 	Stage stage;
@@ -63,7 +65,6 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-		ActionState dummyAction = new IdleState();
 		stage = new Stage(new ExtendViewport(640, 480));
 		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
 				new Vector2(0, 300));
@@ -76,7 +77,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				4.0f, "core/assets/sprites/default_franchise_icon.png");
 		StageElement leftLedge = new Ledge(new Rectangle(-320, -20, 20, 20), 1);
 		StageElement rightLedge = new Ledge(new Rectangle(300, -20, 20, 20), -1);
-		StageElement target = new BreakableTarget(new Vector2(0, 100),
+		StageElement target = new BreakableTarget(new Vector2(), new Vector2(0, 100), 40,
 				"core/assets/sprites/default_franchise_icon.png");
 		stage.addActor(fighter);
 		stage.addActor(surface);
@@ -92,6 +93,33 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 
 	@Override
 	public void render ()
+	{
+		focusCamera();
+		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		stage.act();
+		stage.draw();
+		for (Controller controller : controllers)
+		{
+			controller.pumpBuffer();
+		}
+		frameCount++;
+	}
+/*
+	public Map<PhysicalBody, Hitbox> getHits()
+	{
+		Map<PhysicalBody, Hitbox> superMap = new HashMap<>();
+		for (Actor victim : stage.getActors())
+		{
+			if (victim instanceof PhysicalBody)
+			{
+
+			}
+		}
+	}
+	*/
+
+	public void focusCamera()
 	{
 		float xMin = Float.POSITIVE_INFINITY;
 		float xMax = Float.NEGATIVE_INFINITY;
@@ -135,15 +163,6 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		stage.getCamera().position.set(centerx, centery, stage.getCamera().position.z);
 		stage.getViewport().setWorldSize(zoomScale*screenWidth, zoomScale*screenHeight);
 		stage.getViewport().apply();
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		stage.act();
-		stage.draw();
-		for (Controller controller : controllers)
-		{
-			controller.pumpBuffer();
-		}
-		frameCount++;
 	}
 	
 	@Override

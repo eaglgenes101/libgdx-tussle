@@ -18,11 +18,11 @@
 package com.tussle.fighter;
 
 import com.badlogic.gdx.scenes.scene2d.Action;
-import com.tussle.collision.Hitbox;
+import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 import com.tussle.main.PhysicalBody;
 
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public abstract class Terminable extends Action
 {
@@ -34,6 +34,6 @@ public abstract class Terminable extends Action
 	}
 	public abstract Fighter getOwner(); //Who ultimately owns this action
 	public abstract PhysicalBody getBody(); //Who to pass callbacks to
-	public abstract Set<Hitbox> getHitboxes();
-	public abstract Set<Hurtbox> getHurtboxes();
+	public abstract LinkedHashSet<HitboxLock> getHitboxLocks();
+	public abstract LinkedHashSet<Hurtbox> getHurtboxes();
 }

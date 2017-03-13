@@ -17,9 +17,16 @@
 
 package com.tussle.actionstate;
 
+import com.tussle.collision.HitboxLock;
+import com.tussle.collision.Hurtbox;
 import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.input.InputState;
+import com.tussle.main.Utility;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Created by eaglgenes101 on 2/16/17.

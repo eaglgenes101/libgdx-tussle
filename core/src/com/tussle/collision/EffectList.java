@@ -23,13 +23,12 @@ import com.tussle.main.PhysicalBody;
 import com.tussle.main.Utility;
 import com.tussle.subaction.Subaction;
 
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 /**
  * Created by eaglgenes101 on 3/1/17.
  */
-public class EffectList extends Terminable
+public class EffectList extends Subaction
 {
 	LinkedList<Subaction> subactions;
 
@@ -43,44 +42,11 @@ public class EffectList extends Terminable
 		subactions = new LinkedList<>();
 	}
 
-	public void onStart()
+	public void apply(Terminable terminable, PhysicalBody physicalBody)
 	{
 		for (Subaction subaction : subactions)
-			subaction.apply(this, (PhysicalBody)getActor());
-	}
-
-	public boolean act(float delta)
-	{
-		return true;
-	}
-
-	public Terminable eachFrame()
-	{
-		return null; //That's all, folks
-	}
-
-	public void onEnd(Terminable terminable)
-	{
-		//Nothin'.
-	}
-
-	public Fighter getOwner()
-	{
-		return null; //If this gets called, something is wrong
-	}
-
-	public PhysicalBody getBody()
-	{
-		return null; //If this gets called, something is wrong
-	}
-
-	public LinkedHashSet<HitboxLock> getHitboxLocks()
-	{
-		return Utility.emptyLockSet;
-	}
-
-	public LinkedHashSet<Hurtbox> getHurtboxes()
-	{
-		return Utility.emptyHurtboxSet;
+		{
+			subaction.apply(terminable, physicalBody);
+		}
 	}
 }

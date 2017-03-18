@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -150,18 +151,28 @@ public abstract class PhysicalBody extends Group
 		batch.begin();
 	}
 
-	public Set<HitboxLock> getHitboxes()
+	public boolean hitboxLocked(HitboxLock lock)
 	{
-		Set<HitboxLock> superset = new LinkedHashSet<>();
+		return hitboxLocks.contains(lock);
+	}
+
+	public void addHitboxLock(HitboxLock lock)
+	{
+		hitboxLocks.add(lock);
+	}
+
+	public LinkedHashSet<HitboxLock> getHitboxGroups()
+	{
+		LinkedHashSet<HitboxLock> superset = new LinkedHashSet<>();
 		for (Action action : getActions())
 			if (action instanceof Terminable)
 				superset.addAll(((Terminable)action).getHitboxLocks());
 		return superset;
 	}
 
-	public Set<Hurtbox> getHurtboxes()
+	public LinkedHashSet<Hurtbox> getHurtboxes()
 	{
-		Set<Hurtbox> superset = new LinkedHashSet<>();
+		LinkedHashSet<Hurtbox> superset = new LinkedHashSet<>();
 		for (Action action : getActions())
 			if (action instanceof Terminable)
 				superset.addAll(((Terminable)action).getHurtboxes());
@@ -237,11 +248,5 @@ public abstract class PhysicalBody extends Group
 	public boolean doesHit(HitboxLock lock)
 	{
 		return !hitboxLocks.contains(lock);
-	}
-
-	public void doSubactions(EffectList list)
-	{
-		list.onStart(); //Just do it
-		list.onEnd(null); //Do cleanup if necessary
 	}
 }

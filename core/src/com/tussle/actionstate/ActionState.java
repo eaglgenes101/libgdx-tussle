@@ -24,7 +24,8 @@ import com.tussle.fighter.Terminable;
 import com.tussle.main.PhysicalBody;
 import com.tussle.main.Utility;
 
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class ActionState extends Terminable
 {
@@ -39,6 +40,11 @@ public abstract class ActionState extends Terminable
         return false;
     }
 
+    public void onClanked(PhysicalBody other)
+    {
+        //Nothing by default
+    }
+
     public Fighter getOwner()
     {
         return (Fighter)getActor();
@@ -49,13 +55,13 @@ public abstract class ActionState extends Terminable
         return (PhysicalBody)getActor();
     }
 
-    public LinkedHashSet<HitboxLock> getHitboxLocks()
+    public List<HitboxLock> getHitboxLocks()
     {
-        return Utility.emptyLockSet;
+        return Utility.emptyLockList;
     }
 
-    public LinkedHashSet<Hurtbox> getHurtboxes()
+    public List<Hurtbox> getHurtboxes()
     {
-        return Utility.emptyHurtboxSet;
+        return Utility.emptyHurtboxList;
     }
 }

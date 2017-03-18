@@ -15,30 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.subaction;
-
-import com.tussle.actionstate.ActionState;
-import com.tussle.fighter.Fighter;
-import com.tussle.fighter.Terminable;
-import com.tussle.main.PhysicalBody;
+package com.tussle.collision;
 
 /**
- * Created by eaglgenes101 on 2/28/17.
+ * Created by eaglgenes101 on 3/13/17.
  */
-public class changeActionSubaction extends Subaction
+public class HitPair
 {
-	ActionState state;
+	public Hitbox hitbox;
+	public Hurtbox hurtbox;
 
-	public changeActionSubaction(ActionState newState)
+	public HitPair(Hitbox hitbox, Hurtbox hurtbox)
 	{
-		state = newState;
-	}
-
-	public void apply(Terminable action, PhysicalBody actor)
-	{
-		if (actor instanceof Fighter)
-		{
-			((Fighter)actor).setActionState(state);
-		}
+		this.hitbox = hitbox;
+		this.hurtbox = hurtbox;
 	}
 }

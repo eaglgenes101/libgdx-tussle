@@ -17,26 +17,28 @@
 
 package com.tussle.subaction;
 
+import com.tussle.actionstate.ActionState;
+import com.tussle.fighter.Fighter;
 import com.tussle.fighter.Terminable;
 import com.tussle.main.PhysicalBody;
 
 /**
- * Created by eaglgenes101 on 3/1/17.
+ * Created by eaglgenes101 on 2/28/17.
  */
-public class addVelocitySubaction
+public class ChangeActionSubaction extends Subaction
 {
-	float xVel;
-	float yVel;
+	ActionState state;
 
-	public addVelocitySubaction(float dx, float dy)
+	public ChangeActionSubaction(ActionState newState)
 	{
-		xVel = dx;
-		yVel = dy;
+		state = newState;
 	}
 
 	public void apply(Terminable action, PhysicalBody actor)
 	{
-		actor.setXVelocity(xVel+actor.getVelocity().x);
-		actor.setYVelocity(yVel+actor.getVelocity().y);
+		if (actor instanceof Fighter)
+		{
+			((Fighter)actor).setActionState(state);
+		}
 	}
 }

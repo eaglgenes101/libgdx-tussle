@@ -25,7 +25,8 @@ public class Hitbox extends Stadium
 {
 	Terminable associated;
 
-	public Hitbox(float startx, float starty, float endx, float endy, float rad, Terminable associated)
+	public Hitbox(float startx, float starty, float endx, float endy, float rad,
+				  Terminable associated)
 	{
 		super(startx, starty, endx, endy, rad);
 		this.associated = associated;
@@ -45,6 +46,11 @@ public class Hitbox extends Stadium
 				getTransformedRadius()+other.getTransformedRadius());
 	}
 
+	public Terminable getAssociated()
+	{
+		return associated;
+	}
+
 	public EffectList getOwnerOnHitSubactions(PhysicalBody victim)
 	{
 		return new EffectList();
@@ -55,13 +61,8 @@ public class Hitbox extends Stadium
 		return new EffectList();
 	}
 
-	public EffectList getOwnerOnClankSubactions(PhysicalBody victim)
+	public boolean doesClank(Hitbox other)
 	{
-		return new EffectList();
-	}
-
-	public EffectList getOtherOnClankSubactions(PhysicalBody victim)
-	{
-		return new EffectList();
+		return false; //Default
 	}
 }

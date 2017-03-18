@@ -24,12 +24,12 @@ import com.tussle.main.PhysicalBody;
  * Created by eaglgenes101 on 2/28/17.
  */
 
-public class changeVelocitySubaction extends Subaction
+public class ChangeVelocitySubaction extends Subaction
 {
 	float xVel;
 	float yVel;
 
-	public changeVelocitySubaction(float dx, float dy)
+	public ChangeVelocitySubaction(float dx, float dy)
 	{
 		xVel = dx;
 		yVel = dy;

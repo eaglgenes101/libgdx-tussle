@@ -53,7 +53,7 @@ public class Hurtbox extends Stadium
 		}
 		for (Armor armor : getArmors())
 			aggregateFilter = armor.and(aggregateFilter);
-		if(aggregateFilter.test(hbox, subactions))
-			subactions.onStart();
+
+		//TODO: apply effects
 	}
 }

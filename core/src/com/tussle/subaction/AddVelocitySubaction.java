@@ -15,37 +15,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.input;
+package com.tussle.subaction;
 
-public class InputToken
+import com.tussle.fighter.Terminable;
+import com.tussle.main.PhysicalBody;
+
+/**
+ * Created by eaglgenes101 on 3/1/17.
+ */
+public class AddVelocitySubaction
 {
-	int intensity;
-	InputState state;
+	float xVel;
+	float yVel;
 
-	public InputToken(int i, InputState s)
+	public AddVelocitySubaction(float dx, float dy)
 	{
-		intensity = i;
-		state = s;
+		xVel = dx;
+		yVel = dy;
 	}
 
-	public int intensity()
+	public void apply(Terminable action, PhysicalBody actor)
 	{
-		return intensity;
-	}
-
-	public InputState state()
-	{
-		return state;
-	}
-
-	public boolean equals(Object o)
-	{
-		return o instanceof InputToken && ((InputToken) o).intensity() == intensity
-				&& ((InputToken) o).state().equals(state);
-	}
-
-	public int hashCode()
-	{
-		return Integer.hashCode(intensity) ^ Integer.hashCode(state.ordinal());
+		actor.setXVelocity(xVel+actor.getVelocity().x);
+		actor.setYVelocity(yVel+actor.getVelocity().y);
 	}
 }

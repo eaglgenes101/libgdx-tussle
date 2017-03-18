@@ -18,7 +18,6 @@
 package com.tussle.collision;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.tussle.main.Utility;
 
 import java.util.*;
 import java.util.List;
@@ -58,51 +57,31 @@ public class HitboxLock
 		return hitboxes;
 	}
 
-	public Map<Hitbox, Hitbox> getClanks(HitboxLock other)
+	public ClankPair getClanks(HitboxLock other)
 	{
-		Map<Hitbox, Hitbox> returnMap = new HashMap<>();
 		for (Hitbox hitbox : hitboxes)
 			for (Hitbox target : other.getHitboxes())
-				if (Utility.intersectStadia(hitbox.getTransformedStart(),
-						hitbox.getTransformedEnd(), target.getTransformedStart(),
-						target.getTransformedEnd(),
-						hitbox.getTransformedRadius()+target.getTransformedRadius()))
-					if (hitbox.doesHit(target))
-					{
-						returnMap.put(hitbox, target);
-						break;
-					}
-		return returnMap;
+				if (hitbox.doesHit(target) && hitbox.doesClank(target))
+					return new ClankPair(hitbox, target);
+		return null;
 	}
 
 	public Rectangle getBoundingBox()
 	{
-		if (hitboxes.size() == 0)
-		{
+		if (hitboxes.isEmpty())
 			return null;
-		}
 		Rectangle returnRect = new Rectangle(hitboxes.getFirst().getBoundingRectangle());
 		for (Hitbox hitbox : hitboxes)
-		{
 			returnRect = returnRect.merge(hitbox.getBoundingRectangle());
-		}
 		return returnRect;
 	}
 
-	public Map<Hitbox, Hurtbox> getHits(List<Hurtbox> other)
+	public HitPair getHits(List<Hurtbox> other)
 	{
-		Map<Hitbox, Hurtbox> returnMap = new HashMap<>();
 		for (Hitbox hitbox : hitboxes)
 			for (Hurtbox target : other)
-				if (Utility.intersectStadia(hitbox.getTransformedStart(),
-						hitbox.getTransformedEnd(), target.getTransformedStart(),
-						target.getTransformedEnd(),
-						hitbox.getTransformedRadius()+target.getTransformedRadius()))
-					if (hitbox.doesHit(target))
-					{
-						returnMap.put(hitbox, target);
-						break;
-					}
-		return returnMap;
+				if (hitbox.doesHit(target))
+					return new HitPair(hitbox, target);
+		return null;
 	}
 }

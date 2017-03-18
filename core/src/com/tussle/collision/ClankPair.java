@@ -15,37 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.input;
+package com.tussle.collision;
 
-public class InputToken
+/**
+ * Created by eaglgenes101 on 3/13/17.
+ */
+public class ClankPair
 {
-	int intensity;
-	InputState state;
+	public Hitbox first;
+	public Hitbox second;
 
-	public InputToken(int i, InputState s)
+	public ClankPair(Hitbox first, Hitbox second)
 	{
-		intensity = i;
-		state = s;
-	}
-
-	public int intensity()
-	{
-		return intensity;
-	}
-
-	public InputState state()
-	{
-		return state;
-	}
-
-	public boolean equals(Object o)
-	{
-		return o instanceof InputToken && ((InputToken) o).intensity() == intensity
-				&& ((InputToken) o).state().equals(state);
-	}
-
-	public int hashCode()
-	{
-		return Integer.hashCode(intensity) ^ Integer.hashCode(state.ordinal());
+		this.first = first;
+		this.second = second;
 	}
 }

@@ -194,12 +194,9 @@ public class Fighter extends PhysicalBody
 			else if ((alignment & Align.bottom) == 0) //
 				y -= collisionBox.getBoundingRectangle().getHeight() / 2;
 
-			if (this.getX() != x || this.getY() != y)
-			{
-				setX(x);
-				setY(y);
-				positionChanged();
-			}
+			setX(x);
+			setY(y);
+			positionChanged();
 			collisionBox.setCenter(this.getX(Align.center), this.getY(Align.center));
 		}
 	}

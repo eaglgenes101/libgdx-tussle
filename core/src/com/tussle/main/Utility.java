@@ -23,13 +23,17 @@ import com.badlogic.gdx.math.Vector2;
 import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 
-import java.util.LinkedHashSet;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Utility
 {
-	public static final LinkedHashSet<HitboxLock> emptyLockSet = new LinkedHashSet<>();
+	public static final List<HitboxLock> emptyLockList =
+			Collections.unmodifiableList(new LinkedList<HitboxLock>());
 
-	public static final LinkedHashSet<Hurtbox> emptyHurtboxSet = new LinkedHashSet<>();
+	public static final List<Hurtbox> emptyHurtboxList =
+			Collections.unmodifiableList(new LinkedList<Hurtbox>());
 
 	public static Vector2 getXYfromDM(double direction, double magnitude)
 	{

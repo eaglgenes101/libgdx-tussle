@@ -21,18 +21,19 @@ import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 import com.tussle.main.Utility;
 
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by eaglgenes101 on 3/10/17.
  */
 public class PersistentHurtboxStatusEffect extends StatusEffect
 {
-	LinkedHashSet<Hurtbox> hurtboxes;
+	LinkedList<Hurtbox> hurtboxes;
 
 	public PersistentHurtboxStatusEffect(float startx, float starty, float endx, float endy, float radius)
 	{
-		hurtboxes = new LinkedHashSet<>();
+		hurtboxes = new LinkedList<>();
 		Hurtbox associatedHurtbox = new Hurtbox(startx, starty, endx, endy, radius, this);
 		hurtboxes.add(associatedHurtbox);
 	}
@@ -52,12 +53,12 @@ public class PersistentHurtboxStatusEffect extends StatusEffect
 		//Nothing...
 	}
 
-	public LinkedHashSet<HitboxLock> getHitboxLocks()
+	public List<HitboxLock> getHitboxLocks()
 	{
-		return Utility.emptyLockSet;
+		return Utility.emptyLockList;
 	}
 
-	public LinkedHashSet<Hurtbox> getHurtboxes()
+	public List<Hurtbox> getHurtboxes()
 	{
 		return hurtboxes;
 	}

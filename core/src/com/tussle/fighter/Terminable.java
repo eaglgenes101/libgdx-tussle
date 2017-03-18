@@ -17,12 +17,14 @@
 
 package com.tussle.fighter;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 import com.tussle.main.PhysicalBody;
 
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class Terminable extends Action
 {
@@ -34,6 +36,36 @@ public abstract class Terminable extends Action
 	}
 	public abstract Fighter getOwner(); //Who ultimately owns this action
 	public abstract PhysicalBody getBody(); //Who to pass callbacks to
-	public abstract LinkedHashSet<HitboxLock> getHitboxLocks();
-	public abstract LinkedHashSet<Hurtbox> getHurtboxes();
+	public abstract List<HitboxLock> getHitboxLocks();
+	public abstract List<Hurtbox> getHurtboxes();
+
+	public Rectangle getHitboxBounds()
+	{
+		LinkedList<Rectangle> bounds = new LinkedList<>();
+		for (HitboxLock hitboxLock : getHitboxLocks())
+		{
+			bounds.add(hitboxLock.getBoundingBox());
+		}
+		if (bounds.size() == 0)
+			return null;
+		Rectangle returnRect = bounds.getFirst();
+		for (Rectangle rectangle : bounds)
+		{
+			returnRect.merge(rectangle);
+		}
+		return returnRect;
+	}
+
+	public Rectangle getHurtboxBounds()
+	{
+		List<Hurtbox> hurtboxes = getHurtboxes();
+		if (hurtboxes.size() == 0)
+			return null;
+		Rectangle returnRect = hurtboxes.get(0).getBoundingRectangle();
+		for (Hurtbox hurtbox : hurtboxes)
+		{
+			returnRect.merge(hurtbox.getBoundingRectangle());
+		}
+		return returnRect;
+	}
 }

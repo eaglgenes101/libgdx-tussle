@@ -34,6 +34,7 @@ public class Platform extends StageElement
 	public Platform(Vector2 start, Vector2 end, float tolerance, String path)
 	{
 		super(path, start.cpy().add(end.cpy()).scl(0.5f));
+		this.tolerance = tolerance;
 		float[] constructedSurface = new float[8];
 		Vector2 difference = end.cpy().sub(start);
 		normal = new Vector2(-difference.y, difference.x).setLength2(1.0f);

@@ -24,15 +24,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.tussle.actionstate.ActionState;
-import com.tussle.actionstate.IdleState;
-import com.tussle.collision.Hitbox;
-import com.tussle.collision.Hurtbox;
+import com.tussle.collision.*;
 import com.tussle.fighter.Fighter;
+import com.tussle.fighter.Terminable;
 import com.tussle.input.Controller;
 import com.tussle.input.KeyboardController;
 import com.tussle.stage.*;
@@ -55,7 +54,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 
 	public LibgdxTussleMain(KeyboardController[] ctrl)
 	{
-		controllers = ctrl;
+		controllers = ctrl.clone();
 		inputs = new InputMultiplexer();
 		for (KeyboardController g : ctrl)
 		{
@@ -105,21 +104,103 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		}
 		frameCount++;
 	}
-/*
-	public Map<PhysicalBody, Hitbox> getHits()
-	{
-		Map<PhysicalBody, Hitbox> superMap = new HashMap<>();
-		for (Actor victim : stage.getActors())
-		{
-			if (victim instanceof PhysicalBody)
-			{
 
+	//Do a first pass for collisions, eliminating unlikely clanks
+	private Map<Terminable, LinkedHashSet<Terminable>> getProbableClanks()
+	{
+		LinkedHashMap<Terminable, Rectangle> boundingBoxes = new LinkedHashMap<>();
+		for (Actor actor : stage.getActors())
+		{
+			if (actor instanceof PhysicalBody)
+			{
+				for (Action action : actor.getActions())
+				{
+					if (action instanceof Terminable)
+					{
+						boundingBoxes.put((Terminable)action, ((Terminable)action).getHitboxBounds());
+					}
+				}
 			}
 		}
+		HashMap<Terminable, LinkedHashSet<Terminable>> returnMap = new HashMap<>();
+		for (Terminable first : boundingBoxes.keySet())
+			for (Terminable second : boundingBoxes.keySet())
+				if (boundingBoxes.get(first) != null && boundingBoxes.get(second) != null)
+					if (boundingBoxes.get(first).overlaps(boundingBoxes.get(second)))
+					{
+						if (!returnMap.containsKey(first))
+							returnMap.put(first, new LinkedHashSet<>());
+						returnMap.get(first).add(second);
+					}
+		return returnMap;
 	}
-	*/
 
-	public void focusCamera()
+	//Do a first pass for collisions, eliminating unlikely hits
+	private Map<Terminable, LinkedHashSet<Terminable>> getProbableHits()
+	{
+		HashMap<Terminable, Rectangle> boundingBoxes = new HashMap<>();
+		LinkedHashMap<Terminable, Rectangle> hurtBounds = new LinkedHashMap<>();
+		for (Actor actor : stage.getActors())
+		{
+			if (actor instanceof PhysicalBody)
+			{
+				for (Action action : actor.getActions())
+				{
+					if (action instanceof Terminable)
+					{
+						boundingBoxes.put((Terminable)action, ((Terminable)action).getHitboxBounds());
+						hurtBounds.put((Terminable)action, ((Terminable)action).getHurtboxBounds());
+					}
+				}
+			}
+		}
+		HashMap<Terminable, LinkedHashSet<Terminable>> returnMap = new HashMap<>();
+		for (Terminable first : boundingBoxes.keySet())
+			for (Terminable second : hurtBounds.keySet())
+				if (boundingBoxes.get(first) != null && hurtBounds.get(second) != null)
+					if (boundingBoxes.get(first).overlaps(hurtBounds.get(second)))
+					{
+						if (!returnMap.containsKey(first))
+							returnMap.put(first, new LinkedHashSet<>());
+						returnMap.get(first).add(second);
+					}
+		return returnMap;
+	}
+
+	private void handleClanks()
+	{
+		Map<Terminable, LinkedHashSet<Terminable>> probableClanks = getProbableClanks();
+		Map<PhysicalBody, LinkedHashSet<HitboxLock>> lockPairs = new HashMap<>();
+		Map<Hitbox, LinkedList<Hitbox>> doClankMap = new LinkedHashMap<>();
+		for (Terminable ourAction : probableClanks.keySet())
+		{
+			for (Terminable otherAction : probableClanks.get(ourAction))
+			{
+				for (HitboxLock otherLock : otherAction.getHitboxLocks())
+				{
+					if (!ourAction.getBody().hitboxLocked(otherLock))
+					{
+						for (HitboxLock ourLock : ourAction.getHitboxLocks())
+						{
+							ClankPair pair = ourLock.getClanks(otherLock);
+							if (pair != null && pair.first.doesClank(pair.second))
+							{
+								if (!lockPairs.containsKey(ourAction.getBody()))
+									lockPairs.put(ourAction.getBody(), new LinkedHashSet<>());
+								if (!doClankMap.containsKey(pair.first))
+									doClankMap.put(pair.first, new LinkedList<>());
+								lockPairs.get(ourAction.getBody()).add(otherLock);
+								doClankMap.get(pair.first).add(pair.second);
+							}
+						}
+					}
+				}
+			}
+		}
+		//TODO: Add callback code
+	}
+
+	private void focusCamera()
 	{
 		float xMin = Float.POSITIVE_INFINITY;
 		float xMax = Float.NEGATIVE_INFINITY;

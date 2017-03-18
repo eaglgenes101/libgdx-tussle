@@ -29,13 +29,13 @@ import java.util.*;
  */
 public class PersistentHitboxStatusEffect extends StatusEffect
 {
-	LinkedHashSet<HitboxLock> associatedLocks;
+	LinkedList<HitboxLock> associatedLocks;
 	Hitbox associatedHitbox;
 
 	public PersistentHitboxStatusEffect(float startx, float starty, float endx, float endy, float radius)
 	{
 		associatedHitbox = new Hitbox(startx, starty, endx, endy, radius, this);
-		associatedLocks = new LinkedHashSet<>();
+		associatedLocks = new LinkedList<>();
 		HitboxLock associatedLock = new HitboxLock();
 		associatedLock.addHitbox(associatedHitbox);
 		associatedLocks.add(associatedLock);
@@ -56,13 +56,13 @@ public class PersistentHitboxStatusEffect extends StatusEffect
 		//Nothing...
 	}
 
-	public LinkedHashSet<HitboxLock> getHitboxLocks()
+	public List<HitboxLock> getHitboxLocks()
 	{
 		return associatedLocks;
 	}
 
-	public LinkedHashSet<Hurtbox> getHurtboxes()
+	public List<Hurtbox> getHurtboxes()
 	{
-		return Utility.emptyHurtboxSet;
+		return Utility.emptyHurtboxList;
 	}
 }

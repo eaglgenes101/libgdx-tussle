@@ -97,6 +97,8 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		stage.act();
+		handleClanks();
+		handleHits();
 		stage.draw();
 		for (Controller controller : controllers)
 		{
@@ -105,7 +107,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		frameCount++;
 	}
 
-	//Do a first pass for collisions, eliminating unlikely clanks
+	//Do a first pass for collisions, eliminating impossible clanks
 	private Map<Terminable, LinkedHashSet<Terminable>> getProbableClanks()
 	{
 		LinkedHashMap<Terminable, Rectangle> boundingBoxes = new LinkedHashMap<>();
@@ -135,7 +137,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		return returnMap;
 	}
 
-	//Do a first pass for collisions, eliminating unlikely hits
+	//Do a first pass for collisions, eliminating impossible hits
 	private Map<Terminable, LinkedHashSet<Terminable>> getProbableHits()
 	{
 		HashMap<Terminable, Rectangle> boundingBoxes = new HashMap<>();
@@ -176,22 +178,52 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		{
 			for (Terminable otherAction : probableClanks.get(ourAction))
 			{
-				for (HitboxLock otherLock : otherAction.getHitboxLocks())
+				for (HitboxLock ourLock : ourAction.getHitboxLocks())
 				{
-					if (!ourAction.getBody().hitboxLocked(otherLock))
+					if (!otherAction.getBody().hitboxLocked(ourLock))
 					{
-						for (HitboxLock ourLock : ourAction.getHitboxLocks())
+						for (HitboxLock otherLock : otherAction.getHitboxLocks())
 						{
 							ClankPair pair = ourLock.getClanks(otherLock);
-							if (pair != null && pair.first.doesClank(pair.second))
+							if (pair != null && pair.second.doesClank(pair.first))
 							{
-								if (!lockPairs.containsKey(ourAction.getBody()))
-									lockPairs.put(ourAction.getBody(), new LinkedHashSet<>());
+								if (!lockPairs.containsKey(otherAction.getBody()))
+									lockPairs.put(otherAction.getBody(), new LinkedHashSet<>());
 								if (!doClankMap.containsKey(pair.first))
 									doClankMap.put(pair.first, new LinkedList<>());
-								lockPairs.get(ourAction.getBody()).add(otherLock);
+								lockPairs.get(otherAction.getBody()).add(otherLock);
 								doClankMap.get(pair.first).add(pair.second);
 							}
+						}
+					}
+				}
+			}
+		}
+		//TODO: Add callback code
+	}
+
+	private void handleHits()
+	{
+		Map<Terminable, LinkedHashSet<Terminable>> probableHits = getProbableHits();
+		Map<PhysicalBody, LinkedHashSet<HitboxLock>> lockPairs = new HashMap<>();
+		Map<Hitbox, LinkedList<Hurtbox>> doHitMap = new LinkedHashMap<>();
+		for (Terminable ourAction : probableHits.keySet())
+		{
+			for (Terminable otherAction : probableHits.get(ourAction))
+			{
+				for (HitboxLock ourLock : ourAction.getHitboxLocks())
+				{
+					if (!otherAction.getBody().hitboxLocked(ourLock))
+					{
+						HitPair pair = ourLock.getHits(otherAction.getHurtboxes());
+						if (pair != null)
+						{
+							if (!lockPairs.containsKey(ourAction.getBody()))
+								lockPairs.put(ourAction.getBody(), new LinkedHashSet<>());
+							if (!doHitMap.containsKey(pair.hitbox))
+								doHitMap.put(pair.hitbox, new LinkedList<>());
+							lockPairs.get(otherAction.getBody()).add(ourLock);
+							doHitMap.get(pair.hitbox).add(pair.hurtbox);
 						}
 					}
 				}

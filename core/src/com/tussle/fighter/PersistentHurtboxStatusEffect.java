@@ -19,6 +19,7 @@ package com.tussle.fighter;
 
 import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
+import com.tussle.main.PhysicalBody;
 import com.tussle.main.Utility;
 
 import java.util.LinkedList;
@@ -62,5 +63,4 @@ public class PersistentHurtboxStatusEffect extends StatusEffect
 	{
 		return hurtboxes;
 	}
-
 }

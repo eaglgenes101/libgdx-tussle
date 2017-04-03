@@ -157,8 +157,8 @@ public class Fighter extends PhysicalBody
 
 	public void addStatusEffect(StatusEffect newEffect)
 	{
-		newEffect.onStart();
 		this.addAction(newEffect);
+		newEffect.onStart();
 	}
 
 	public void setCollisionBox(ECB ecb)

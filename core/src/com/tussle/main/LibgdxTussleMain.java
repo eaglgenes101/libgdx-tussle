@@ -31,6 +31,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.tussle.collision.*;
 import com.tussle.fighter.Fighter;
+import com.tussle.fighter.PersistentHitboxStatusEffect;
 import com.tussle.fighter.Terminable;
 import com.tussle.input.Controller;
 import com.tussle.input.KeyboardController;
@@ -87,6 +88,7 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 		stage.addActor(target);
 		stage.setDebugAll(true);
 		fighter.onSpawn();
+		fighter.addStatusEffect(new PersistentHitboxStatusEffect(0, 0, 30, 0, 10));
 		Gdx.input.setInputProcessor(inputs);
 	}
 
@@ -218,8 +220,8 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 						HitPair pair = ourLock.getHits(otherAction.getHurtboxes());
 						if (pair != null)
 						{
-							if (!lockPairs.containsKey(ourAction.getBody()))
-								lockPairs.put(ourAction.getBody(), new LinkedHashSet<>());
+							if (!lockPairs.containsKey(otherAction.getBody()))
+								lockPairs.put(otherAction.getBody(), new LinkedHashSet<>());
 							if (!doHitMap.containsKey(pair.hitbox))
 								doHitMap.put(pair.hitbox, new LinkedList<>());
 							lockPairs.get(otherAction.getBody()).add(ourLock);
@@ -229,6 +231,8 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				}
 			}
 		}
+		if (!doHitMap.isEmpty())
+			System.out.println("Made contact!");
 		//TODO: Add callback code
 	}
 

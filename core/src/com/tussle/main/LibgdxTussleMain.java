@@ -53,11 +53,11 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 	float topBound = 1000f;
 	int frameCount = 0;
 
-	public LibgdxTussleMain(KeyboardController[] ctrl)
+	public LibgdxTussleMain(Controller[] ctrl)
 	{
 		controllers = ctrl.clone();
 		inputs = new InputMultiplexer();
-		for (KeyboardController g : ctrl)
+		for (Controller g : ctrl)
 		{
 			inputs.addProcessor(g);
 		}
@@ -201,7 +201,18 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				}
 			}
 		}
-		//TODO: Add callback code
+		for (PhysicalBody body : lockPairs.keySet())
+		{
+			for (HitboxLock lock : lockPairs.get(body))
+			{
+				body.addHitboxLock(lock);
+			}
+		}
+		for (Hitbox ourBox : doClankMap.keySet())
+		{
+			for (Hitbox otherBox : doClankMap.get(ourBox))
+				otherBox.getAssociated().onClank(otherBox, ourBox);
+		}
 	}
 
 	private void handleHits()
@@ -231,9 +242,21 @@ public class LibgdxTussleMain extends ApplicationAdapter {
 				}
 			}
 		}
-		if (!doHitMap.isEmpty())
-			System.out.println("Made contact!");
-		//TODO: Add callback code
+		for (PhysicalBody body : lockPairs.keySet())
+		{
+			for (HitboxLock lock : lockPairs.get(body))
+			{
+				body.addHitboxLock(lock);
+			}
+		}
+		for (Hitbox ourBox : doHitMap.keySet())
+		{
+			for (Hurtbox otherBox : doHitMap.get(ourBox))
+			{
+				otherBox.onHit(ourBox,
+						ourBox.getOtherOnHitSubactions(otherBox.getAssociated().getBody()));
+			}
+		}
 	}
 
 	private void focusCamera()

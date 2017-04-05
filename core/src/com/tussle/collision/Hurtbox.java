@@ -44,7 +44,7 @@ public class Hurtbox extends Stadium
 	public void onHit(Hitbox hbox, EffectList subactions)
 	{
 		BiPredicate<Hitbox, EffectList> aggregateFilter =
-				(Hitbox h, EffectList subacts) -> true; //Yay lambdas
+				new ApplyEffectsArmor(getAssociated().getBody());
 		if (associated.getBody() instanceof Fighter)
 		{
 			Fighter fighter = (Fighter)associated.getBody();
@@ -54,6 +54,15 @@ public class Hurtbox extends Stadium
 		for (Armor armor : getArmors())
 			aggregateFilter = armor.and(aggregateFilter);
 
-		//TODO: apply effects
+		if (aggregateFilter.test(hbox, subactions))
+		{
+			hbox.getOwnerOnHitSubactions(this.getAssociated().getBody())
+					.apply(hbox.getAssociated(), hbox.getAssociated().getBody());
+		}
+	}
+
+	public Terminable getAssociated()
+	{
+		return associated;
 	}
 }

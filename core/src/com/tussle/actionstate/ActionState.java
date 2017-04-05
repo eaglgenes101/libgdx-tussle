@@ -17,6 +17,7 @@
 
 package com.tussle.actionstate;
 
+import com.tussle.collision.Hitbox;
 import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 import com.tussle.fighter.Fighter;
@@ -40,7 +41,7 @@ public abstract class ActionState extends Terminable
         return false;
     }
 
-    public void onClanked(PhysicalBody other)
+    public void onClank(Hitbox ourBox, Hitbox otherBox)
     {
         //Nothing by default
     }

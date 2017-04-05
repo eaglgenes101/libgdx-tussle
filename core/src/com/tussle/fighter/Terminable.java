@@ -19,6 +19,7 @@ package com.tussle.fighter;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.tussle.collision.Hitbox;
 import com.tussle.collision.HitboxLock;
 import com.tussle.collision.Hurtbox;
 import com.tussle.main.PhysicalBody;
@@ -34,6 +35,8 @@ public abstract class Terminable extends Action
 	{
 		//Nothing by default
 	}
+
+	public abstract void onClank(Hitbox ourBox, Hitbox otherBox);
 	public abstract Fighter getOwner(); //Who ultimately owns this action
 	public abstract PhysicalBody getBody(); //Who to pass callbacks to
 	public abstract List<HitboxLock> getHitboxLocks();

@@ -15,17 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.input;
+package com.tussle.collision;
 
-import com.badlogic.gdx.InputProcessor;
+import com.tussle.main.PhysicalBody;
 
-import java.util.LinkedList;
-import java.util.function.Function;
-
-public interface Controller extends InputProcessor
+/**
+ * Created by eaglgenes101 on 4/5/17.
+ */
+public class ApplyEffectsArmor extends Armor
 {
-	void flushInputs();
-	void pumpBuffer();
-	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
-	int getState(InputState state);
+	PhysicalBody owner;
+
+	public ApplyEffectsArmor(PhysicalBody owner)
+	{
+		this.owner = owner;
+	}
+
+	public boolean test(Hitbox hitbox, EffectList effectList)
+	{
+		effectList.apply(hitbox.getAssociated(), hitbox.getAssociated().getBody());
+		return true;
+	}
 }

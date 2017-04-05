@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class KeyboardController implements InputProcessor, Controller
+public class KeyboardController implements Controller
 {
 	java.util.Map<Integer, InputToken> inputMap;
 	java.util.Map<Integer, InputToken> releaseMap;

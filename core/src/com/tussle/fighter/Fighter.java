@@ -115,7 +115,7 @@ public class Fighter extends PhysicalBody
 			if (act instanceof StageElement)
 				stageElements.add((StageElement)act);
 		collisionBox.setCenter(getX(Align.center), getY(Align.center));
-		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
+		StageElement[] elementArray = stageElements.toArray(new StageElement[stageElements.size()]);
 		if (isGrounded())
 			xAccel(0.3f);
 		else
@@ -207,7 +207,7 @@ public class Fighter extends PhysicalBody
 		for (Actor act : getStage().getActors())
 			if (act instanceof StageElement)
 				stageElements.add((StageElement)act);
-		StageElement[] elementArray = stageElements.toArray(new StageElement[0]);
+		StageElement[] elementArray = stageElements.toArray(new StageElement[stageElements.size()]);
 		for (StageElement surface : elementArray)
 			if (surface.isGrounded(leg, foot, getYVelocity()))
 				return true;

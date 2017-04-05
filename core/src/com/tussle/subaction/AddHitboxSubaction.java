@@ -15,17 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.input;
+package com.tussle.subaction;
 
-import com.badlogic.gdx.InputProcessor;
-
-import java.util.LinkedList;
-import java.util.function.Function;
-
-public interface Controller extends InputProcessor
+/**
+ * Created by eaglgenes101 on 4/3/17.
+ */
+public class AddHitboxSubaction extends Subaction
 {
-	void flushInputs();
-	void pumpBuffer();
-	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
-	int getState(InputState state);
 }

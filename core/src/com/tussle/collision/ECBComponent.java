@@ -15,43 +15,44 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.collision;
 
+import com.badlogic.ashley.core.Component;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/24/17.
+ */
+public class ECBComponent implements Component
 {
-    private Entity owner;
+	private CollisionBox ecb;
 
-    //Each frame
-    public abstract void act();
+	public ECBComponent()
+	{
+		ecb = new CollisionBox();
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public ECBComponent(Stadium start)
+	{
+		ecb = new CollisionBox(start);
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
+	public CollisionBox getEcb()
+	{
+		return ecb;
+	}
 
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
+	public void update(double x, double y, double angle, double scale, boolean flipped)
+	{
+		ecb.setPosition(x, y);
+		ecb.setRotation(angle);
+		ecb.setScale(scale);
+		ecb.setFlipped(flipped);
+		ecb.step();
+	}
 
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public void setStadium(Stadium newStart)
+	{
+		ecb.setStadium(newStart);
+		ecb.step();
+	}
 }

@@ -17,303 +17,72 @@
 
 package com.tussle.main;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.tussle.collision.*;
-import com.tussle.fighter.Fighter;
-import com.tussle.fighter.PersistentHitboxStatusEffect;
-import com.tussle.fighter.Terminable;
-import com.tussle.input.Controller;
-import com.tussle.input.KeyboardController;
-import com.tussle.stage.*;
+import com.tussle.control.Controller;
+import com.tussle.motion.PositionComponent;
+import com.tussle.motion.VelocityComponent;
+import com.tussle.sprite.SpriteComponent;
 
-import java.util.*;
-
-public class LibgdxTussleMain extends ApplicationAdapter {
-
-	Stage stage;
-	InputMultiplexer inputs;
-	Controller[] controllers;
-	int screenWidth = 640;
-	int screenHeight = 480;
-	float zoomScale = 1.0f;
-	float leftBound = -1000f;
-	float rightBound = 1000f;
-	float bottomBound = -1000f;
-	float topBound = 1000f;
-	int frameCount = 0;
+public class LibgdxTussleMain extends ApplicationAdapter
+{
+	TussleEngine engine;
+	Entity ball;
+	Entity cage;
 
 	public LibgdxTussleMain(Controller[] ctrl)
 	{
-		controllers = ctrl.clone();
-		inputs = new InputMultiplexer();
-		for (Controller g : ctrl)
-		{
-			inputs.addProcessor(g);
-		}
+		super();
 	}
 	
 	@Override
-	public void create () {
-		stage = new Stage(new ExtendViewport(640, 480));
-		Fighter fighter = new Fighter(controllers[0], "core/assets/sprites/default_franchise_icon.png",
-				new Vector2(0, 300));
-		float[] testVertices = {-300, 0, -100, -10, 100, -10, 300, 0, 100, 10, -100, 10};
-		StageElement surface = new SolidSurface(new Polygon(testVertices),
-				"core/assets/sprites/default_franchise_icon.png");
-		StageElement platform1 = new Platform(new Vector2(-300, 200), new Vector2(-200, 200),
-				4.0f, "core/assets/sprites/default_franchise_icon.png");
-		StageElement platform2 = new Platform(new Vector2(200, 200), new Vector2(300, 200),
-				4.0f, "core/assets/sprites/default_franchise_icon.png");
-		StageElement leftLedge = new Ledge(new Rectangle(-320, -20, 20, 20), 1);
-		StageElement rightLedge = new Ledge(new Rectangle(300, -20, 20, 20), -1);
-		StageElement target = new BreakableTarget(new Vector2(), new Vector2(0, 100), 40,
-				"core/assets/sprites/default_franchise_icon.png");
-		stage.addActor(fighter);
-		stage.addActor(surface);
-		stage.addActor(platform1);
-		stage.addActor(platform2);
-		stage.addActor(leftLedge);
-		stage.addActor(rightLedge);
-		stage.addActor(target);
-		stage.setDebugAll(true);
-		fighter.onSpawn();
-		fighter.addStatusEffect(new PersistentHitboxStatusEffect(0, 0, 30, 0, 10));
-		Gdx.input.setInputProcessor(inputs);
+	public void create ()
+	{
+		engine = new TussleEngine();
+
+		ball = engine.createEntity();
+		ball.add(engine.createComponent(PositionComponent.class));
+		ball.add(engine.createComponent(VelocityComponent.class));
+		ball.add(engine.createComponent(ECBComponent.class));
+		ball.add(engine.createComponent(ElasticityComponent.class));
+		ball.add(engine.createComponent(SpriteComponent.class));
+		ball.getComponent(PositionComponent.class).setPosition(320, 240);
+		ball.getComponent(VelocityComponent.class).xVel = 1;
+		ball.getComponent(VelocityComponent.class).yVel = 1;
+		ball.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 16));
+		ball.getComponent(ElasticityComponent.class).wallElasticity = 0.9;
+		ball.getComponent(ElasticityComponent.class).groundElasticity = 0.9;
+		ball.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
+
+		cage = engine.createEntity();
+		cage.add(engine.createComponent(PositionComponent.class));
+		cage.add(engine.createComponent(StageElementComponent.class));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 0, 0, 480));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 480, 640, 480));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, 640, 0));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 0, 0, 0));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 480, 0, 0));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, 0, 480));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 0, 640, 480));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 0, 640, 0));
+
+		engine.addEntity(ball);
+		engine.addEntity(cage);
 	}
 
 	@Override
 	public void render ()
 	{
-		focusCamera();
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		stage.act();
-		handleClanks();
-		handleHits();
-		stage.draw();
-		for (Controller controller : controllers)
-		{
-			controller.pumpBuffer();
-		}
-		frameCount++;
-	}
-
-	//Do a first pass for collisions, eliminating impossible clanks
-	private Map<Terminable, LinkedHashSet<Terminable>> getProbableClanks()
-	{
-		LinkedHashMap<Terminable, Rectangle> boundingBoxes = new LinkedHashMap<>();
-		for (Actor actor : stage.getActors())
-		{
-			if (actor instanceof PhysicalBody)
-			{
-				for (Action action : actor.getActions())
-				{
-					if (action instanceof Terminable)
-					{
-						boundingBoxes.put((Terminable)action, ((Terminable)action).getHitboxBounds());
-					}
-				}
-			}
-		}
-		HashMap<Terminable, LinkedHashSet<Terminable>> returnMap = new HashMap<>();
-		for (Terminable first : boundingBoxes.keySet())
-			for (Terminable second : boundingBoxes.keySet())
-				if (boundingBoxes.get(first) != null && boundingBoxes.get(second) != null)
-					if (boundingBoxes.get(first).overlaps(boundingBoxes.get(second)))
-					{
-						if (!returnMap.containsKey(first))
-							returnMap.put(first, new LinkedHashSet<>());
-						returnMap.get(first).add(second);
-					}
-		return returnMap;
-	}
-
-	//Do a first pass for collisions, eliminating impossible hits
-	private Map<Terminable, LinkedHashSet<Terminable>> getProbableHits()
-	{
-		HashMap<Terminable, Rectangle> boundingBoxes = new HashMap<>();
-		LinkedHashMap<Terminable, Rectangle> hurtBounds = new LinkedHashMap<>();
-		for (Actor actor : stage.getActors())
-		{
-			if (actor instanceof PhysicalBody)
-			{
-				for (Action action : actor.getActions())
-				{
-					if (action instanceof Terminable)
-					{
-						boundingBoxes.put((Terminable)action, ((Terminable)action).getHitboxBounds());
-						hurtBounds.put((Terminable)action, ((Terminable)action).getHurtboxBounds());
-					}
-				}
-			}
-		}
-		HashMap<Terminable, LinkedHashSet<Terminable>> returnMap = new HashMap<>();
-		for (Terminable first : boundingBoxes.keySet())
-			for (Terminable second : hurtBounds.keySet())
-				if (boundingBoxes.get(first) != null && hurtBounds.get(second) != null)
-					if (boundingBoxes.get(first).overlaps(hurtBounds.get(second)))
-					{
-						if (!returnMap.containsKey(first))
-							returnMap.put(first, new LinkedHashSet<>());
-						returnMap.get(first).add(second);
-					}
-		return returnMap;
-	}
-
-	private void handleClanks()
-	{
-		Map<Terminable, LinkedHashSet<Terminable>> probableClanks = getProbableClanks();
-		Map<PhysicalBody, LinkedHashSet<HitboxLock>> lockPairs = new HashMap<>();
-		Map<Hitbox, LinkedList<Hitbox>> doClankMap = new LinkedHashMap<>();
-		for (Terminable ourAction : probableClanks.keySet())
-		{
-			for (Terminable otherAction : probableClanks.get(ourAction))
-			{
-				for (HitboxLock ourLock : ourAction.getHitboxLocks())
-				{
-					if (!otherAction.getBody().hitboxLocked(ourLock))
-					{
-						for (HitboxLock otherLock : otherAction.getHitboxLocks())
-						{
-							ClankPair pair = ourLock.getClanks(otherLock);
-							if (pair != null && pair.second.doesClank(pair.first))
-							{
-								if (!lockPairs.containsKey(otherAction.getBody()))
-									lockPairs.put(otherAction.getBody(), new LinkedHashSet<>());
-								if (!doClankMap.containsKey(pair.first))
-									doClankMap.put(pair.first, new LinkedList<>());
-								lockPairs.get(otherAction.getBody()).add(otherLock);
-								doClankMap.get(pair.first).add(pair.second);
-							}
-						}
-					}
-				}
-			}
-		}
-		for (PhysicalBody body : lockPairs.keySet())
-		{
-			for (HitboxLock lock : lockPairs.get(body))
-			{
-				body.addHitboxLock(lock);
-			}
-		}
-		for (Hitbox ourBox : doClankMap.keySet())
-		{
-			for (Hitbox otherBox : doClankMap.get(ourBox))
-				otherBox.getAssociated().onClank(otherBox, ourBox);
-		}
-	}
-
-	private void handleHits()
-	{
-		Map<Terminable, LinkedHashSet<Terminable>> probableHits = getProbableHits();
-		Map<PhysicalBody, LinkedHashSet<HitboxLock>> lockPairs = new HashMap<>();
-		Map<Hitbox, LinkedList<Hurtbox>> doHitMap = new LinkedHashMap<>();
-		for (Terminable ourAction : probableHits.keySet())
-		{
-			for (Terminable otherAction : probableHits.get(ourAction))
-			{
-				for (HitboxLock ourLock : ourAction.getHitboxLocks())
-				{
-					if (!otherAction.getBody().hitboxLocked(ourLock))
-					{
-						HitPair pair = ourLock.getHits(otherAction.getHurtboxes());
-						if (pair != null)
-						{
-							if (!lockPairs.containsKey(otherAction.getBody()))
-								lockPairs.put(otherAction.getBody(), new LinkedHashSet<>());
-							if (!doHitMap.containsKey(pair.hitbox))
-								doHitMap.put(pair.hitbox, new LinkedList<>());
-							lockPairs.get(otherAction.getBody()).add(ourLock);
-							doHitMap.get(pair.hitbox).add(pair.hurtbox);
-						}
-					}
-				}
-			}
-		}
-		for (PhysicalBody body : lockPairs.keySet())
-		{
-			for (HitboxLock lock : lockPairs.get(body))
-			{
-				body.addHitboxLock(lock);
-			}
-		}
-		for (Hitbox ourBox : doHitMap.keySet())
-		{
-			for (Hurtbox otherBox : doHitMap.get(ourBox))
-			{
-				otherBox.onHit(ourBox,
-						ourBox.getOtherOnHitSubactions(otherBox.getAssociated().getBody()));
-			}
-		}
-	}
-
-	private void focusCamera()
-	{
-		float xMin = Float.POSITIVE_INFINITY;
-		float xMax = Float.NEGATIVE_INFINITY;
-		float yMin = Float.POSITIVE_INFINITY;
-		float yMax = Float.NEGATIVE_INFINITY;
-		for (Actor actor : stage.getActors())
-		{
-			boolean doDie = false;
-			if (actor.getX(Align.left) < xMin && xMin >= leftBound)
-			{
-				xMin = Math.max(leftBound, actor.getX(Align.left));
-				if (actor instanceof Fighter && actor.getX(Align.right) < leftBound)
-					doDie = true;
-			}
-			if (actor.getX(Align.right) > xMax && xMax <= rightBound)
-			{
-				xMax = Math.min(rightBound, actor.getX(Align.right));
-				if (actor instanceof Fighter && actor.getX(Align.left) > rightBound)
-					doDie = true;
-			}
-			if (actor.getY(Align.bottom) < yMin && yMin >= bottomBound)
-			{
-				yMin = Math.max(bottomBound, actor.getY(Align.bottom));
-				if (actor instanceof Fighter && actor.getY(Align.bottom) < bottomBound)
-					doDie = true;
-			}
-			if (actor.getY(Align.top) > yMax && yMax <= topBound)
-			{
-				yMax = Math.min(topBound, actor.getY(Align.top));
-				if (actor instanceof Fighter && actor.getY(Align.top) > topBound)
-					doDie = true;
-			}
-			if (doDie/* || (actor instanceof Fighter && frameCount % 360 == 0)*/)
-				((Fighter)actor).onDeath();
-		}
-		float centerx = (xMin+xMax)/2;
-		float centery = (yMin+yMax)/2;
-		float width = xMax-xMin+80;
-		float height = yMax-yMin+80;
-		zoomScale = Math.max(Math.max(width/screenWidth, height/screenHeight), zoomScale*.98f);
-		stage.getCamera().position.set(centerx, centery, stage.getCamera().position.z);
-		stage.getViewport().setWorldSize(zoomScale*screenWidth, zoomScale*screenHeight);
-		stage.getViewport().apply();
+		engine.update(1);
 	}
 	
 	@Override
-	public void dispose () {
-		stage.dispose();
+	public void dispose ()
+	{
 	}
 
 	public void resize(int width, int height)
 	{
-		screenWidth = width;
-		screenHeight = height;
-		stage.getViewport().update(width, height, true);
 	}
 }

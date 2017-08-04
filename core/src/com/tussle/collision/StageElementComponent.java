@@ -15,43 +15,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.collision;
 
+import com.badlogic.ashley.core.Component;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
+import java.util.Collection;
+import java.util.LinkedList;
 
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/24/17.
+ */
+public class StageElementComponent implements Component
 {
-    private Entity owner;
+	protected Collection<StageElement> surfaces;
 
-    //Each frame
-    public abstract void act();
+	public StageElementComponent()
+	{
+		surfaces = new LinkedList<>();
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public void put(StageElement surface)
+	{
+		surfaces.add(surface);
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
-
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public Collection<StageElement> get()
+	{
+		return surfaces;
+	}
 }

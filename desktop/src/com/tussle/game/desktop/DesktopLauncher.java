@@ -19,7 +19,7 @@ package com.tussle.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.tussle.input.*;
+import com.tussle.control.*;
 import com.tussle.main.LibgdxTussleMain;
 
 import java.util.HashMap;

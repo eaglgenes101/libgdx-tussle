@@ -15,43 +15,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.control;
 
-
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+public class InputToken
 {
-    private Entity owner;
+	int intensity;
+	InputState state;
 
-    //Each frame
-    public abstract void act();
+	public InputToken(int i, InputState s)
+	{
+		intensity = i;
+		state = s;
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public int intensity()
+	{
+		return intensity;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
+	public InputState state()
+	{
+		return state;
+	}
 
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
+	public boolean equals(Object o)
+	{
+		return o instanceof InputToken && ((InputToken) o).intensity() == intensity
+				&& ((InputToken) o).state().equals(state);
+	}
 
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public int hashCode()
+	{
+		return Integer.hashCode(intensity) ^ Integer.hashCode(state.ordinal());
+	}
 }

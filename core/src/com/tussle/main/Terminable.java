@@ -15,43 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.main;
 
-
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 6/29/17.
+ */
+public interface Terminable
 {
-    private Entity owner;
-
-    //Each frame
-    public abstract void act();
-
-    public Entity getBody()
-    {
-        return owner;
-    }
-
-    public Entity getOwner()
-    {
-        return owner;
-    }
-
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
 }

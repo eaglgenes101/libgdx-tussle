@@ -15,43 +15,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.control;
 
+import com.badlogic.gdx.InputProcessor;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
+import java.util.LinkedList;
+import java.util.function.Function;
 
-public abstract class ActionState implements Terminable
+public interface Controller extends InputProcessor
 {
-    private Entity owner;
-
-    //Each frame
-    public abstract void act();
-
-    public Entity getBody()
-    {
-        return owner;
-    }
-
-    public Entity getOwner()
-    {
-        return owner;
-    }
-
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	void flushInputs();
+	void pumpBuffer();
+	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
+	int getState(InputState state);
 }

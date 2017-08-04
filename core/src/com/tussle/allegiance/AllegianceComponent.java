@@ -15,43 +15,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.allegiance;
 
+import com.badlogic.ashley.core.Component;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/21/17.
+ */
+public class AllegianceComponent implements Component
 {
-    private Entity owner;
+	private Team team;
 
-    //Each frame
-    public abstract void act();
+	public AllegianceComponent(Team startTeam, boolean isEssential)
+	{
+		team = startTeam;
+		//TODO: Add essential team checking
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public void changeTeam(Team newTeam)
+	{
+		team = newTeam;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
-
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public boolean isAllied(Team checkTeam)
+	{
+		return team.equals(checkTeam);
+	}
 }

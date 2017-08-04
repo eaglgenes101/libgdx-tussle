@@ -15,43 +15,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.dependency;
 
-
+import com.badlogic.ashley.core.Component;
 import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
 
-public abstract class ActionState implements Terminable
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Created by eaglgenes101 on 4/13/17.
+ */
+public class DependencyComponent implements Component
 {
-    private Entity owner;
+	private Set<Entity> dependentEntities;
 
-    //Each frame
-    public abstract void act();
+	public DependencyComponent()
+	{
+		dependentEntities = new HashSet<>();
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public Set<Entity> getDependents()
+	{
+		return dependentEntities;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
+	public void addDependent(Entity entity)
+	{
+		dependentEntities.add(entity);
+	}
 
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public void removeDependent(Entity entity)
+	{
+		dependentEntities.remove(entity);
+	}
 }

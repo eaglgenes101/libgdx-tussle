@@ -17,206 +17,363 @@
 
 package com.tussle.main;
 
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Vector2;
-import com.tussle.collision.HitboxLock;
-import com.tussle.collision.Hurtbox;
+import com.tussle.collision.ProjectionVector;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-public class Utility
+public strictfp class Utility
 {
-	public static final List<HitboxLock> emptyLockList =
-			Collections.unmodifiableList(new LinkedList<HitboxLock>());
 
-	public static final List<Hurtbox> emptyHurtboxList =
-			Collections.unmodifiableList(new LinkedList<Hurtbox>());
-
-	public static Vector2 getXYfromDM(double direction, double magnitude)
+	public static double[] getXYfromDM(double direction, double magnitude)
 	{
-		return new Vector2((float)(magnitude*Math.cos(direction*Math.PI/180)),
-				(float)(magnitude*Math.sin(direction*Math.PI/180)));
+		double[] returnVect = new double[2];
+		returnVect[0] = magnitude*StrictMath.cos(StrictMath.toRadians(direction));
+		returnVect[1] = magnitude*StrictMath.sin(StrictMath.toDegrees(direction));
+		return returnVect;
 	}
 
-	public static float addTowards(float value, float addend, float base)
+	public static double addTowards(double value, double addend, double base)
 	{
 		if (addend == 0) return value;
 		if (addend*(base-value-addend) > 0) return value+addend;
-		else return addend>0?Math.max(base, value):Math.min(base, value);
+		else return addend>0?StrictMath.max(base, value):StrictMath.min(base, value);
 	}
 
-	public static float addAway(float value, float addend, float base)
+	public static double addAway(double value, double addend, double base)
 	{
 		if (addend*(base-value) <= 0) return value+addend;
 		else return value;
 	}
 
-	public static float addFrom(float value, float amount, float base)
+	public static double addFrom(double value, double amount, double base)
 	{
-		if (amount < 0 && -Math.abs(value-base) > amount) return base;
-		else return amount*Math.copySign(1, value-base)+value;
+		if (amount < 0 && StrictMath.min(value-base,base-value) > amount) return base;
+		else return amount * StrictMath.copySign(1, value-base) + value;
 	}
 
-	public static Vector2 medianDifference(Polygon p1, Polygon p2)
+	public static double[] projection(double x1, double y1, double x2, double y2)
 	{
-		Vector2 center1 = p1.getBoundingRectangle().getCenter(new Vector2());
-		Vector2 center2 = p2.getBoundingRectangle().getCenter(new Vector2());
-		return center2.sub(center1);
+		double[] returnVec = new double[2];
+		double scalarProj = (x1*x2+y1*y2)/(x2*x2+y2*y2);
+		returnVec[0] = x2*scalarProj;
+		returnVec[1] = y2*scalarProj;
+		return returnVec;
 	}
 
-	public static Vector2 projection(Vector2 v1, Vector2 v2)
+	public static double[] rejection(double x1, double y1, double x2, double y2)
 	{
-		return v2.cpy().scl(v1.dot(v2)/v2.len2());
+		double[] returnVec = new double[2];
+		double scalarProj = (x1*x2+y1*y2)/(x2*x2+y2*y2);
+		returnVec[0] = x1 - x2*scalarProj;
+		returnVec[1] = y1 - y2*scalarProj;
+		return returnVec;
 	}
 
-	public static Vector2 rejection(Vector2 v1, Vector2 v2)
+	public static double angle(double x, double y)
 	{
-		return v1.cpy().sub(projection(v1, v2));
+		return StrictMath.toDegrees(StrictMath.atan2(y, x));
 	}
 
-	//Returns the time when an intersection is introduced
-	public static float[] intervalCollide(float min1, float max1, float slope, float min2, float max2)
+	public static double[][] outsidePoints(double[] xpoints, double[] ypoints)
 	{
-		float[] returnVals = new float[2];
-		if (slope == 0.0f)
+		ArrayList<Integer> vertexIndices = new ArrayList<>();
+		int leftmostIndex = 0;
+		double leftmostCoord = xpoints[0];
+		for (int i = 0; i < xpoints.length; i++)
 		{
-			if (min1 >= max2 || max1 <= min2)
+			if (xpoints[i] < leftmostCoord)
 			{
-				returnVals[0] = Float.POSITIVE_INFINITY;
-				returnVals[1] = Float.NEGATIVE_INFINITY;
-				return returnVals;
+				leftmostIndex = i;
+				leftmostCoord = xpoints[i];
+			}
+		}
+		double xvec = 0;
+		double yvec = -1;
+		int currentIndex = leftmostIndex;
+		do
+		{
+			vertexIndices.add(currentIndex);
+			int endpointIndex = 0;
+			for (int i = 0; i < xpoints.length; i++)
+			{
+				if (endpointIndex == currentIndex)
+				{
+					endpointIndex = i;
+					continue;
+				}
+				double dx = xpoints[endpointIndex]-xpoints[currentIndex];
+				double dy = ypoints[endpointIndex]-ypoints[currentIndex];
+				double crossProduct = dx*yvec - dy*xvec;
+				if (crossProduct > 0)
+					endpointIndex = i;
+			}
+			xvec = xpoints[endpointIndex] - xpoints[currentIndex];
+			yvec = ypoints[endpointIndex] - ypoints[currentIndex];
+			currentIndex = endpointIndex;
+		} while (currentIndex != leftmostIndex);
+		double[][] returnArray = new double[2][vertexIndices.size()];
+		for (int i = 0; i < vertexIndices.size(); i++)
+		{
+			returnArray[0][i] = xpoints[vertexIndices.get(i)];
+			returnArray[1][i] = ypoints[vertexIndices.get(i)];
+		}
+		return returnArray;
+	}
+
+	public static double lowestPositiveRoot (double a, double b, double c)
+	{
+		double det = b * b - 4 * a * c;
+		if (det < 0) return Double.NaN;
+
+		double sqrtD = StrictMath.sqrt(det);
+		double invA = .5 / a;
+		double r1 = (-b - sqrtD) * invA;
+		double r2 = (-b + sqrtD) * invA;
+
+		if (r1 > r2)
+		{
+			double tmp = r2;
+			r2 = r1;
+			r1 = tmp;
+		}
+
+		if (r1 >= 0) return r1;
+		if (r2 >= 0) return r2;
+		return Double.NaN;
+	}
+
+	public static boolean isPruned(Collection<ProjectionVector> vectors)
+	{
+		if (vectors.size() <= 2)
+			return true;
+		Iterator<ProjectionVector> i = vectors.iterator();
+		ProjectionVector p0 = i.next();
+		ProjectionVector p1 = i.next();
+		double cos0 = p0.xnorm;
+		double sin0 = p0.ynorm;
+		double cos1 = p1.xnorm;
+		double sin1 = p1.ynorm;
+		//zeroth on the right, first on the left
+		if (cos0 * sin1 < cos1 * sin0)
+		{
+			double tmpcos = cos1;
+			double tmpsin = sin1;
+			cos1 = cos0;
+			sin1 = sin0;
+			cos0 = tmpcos;
+			sin0 = tmpsin;
+		}
+		while (i.hasNext())
+		{
+			ProjectionVector next = i.next();
+			double nextcos = next.xnorm;
+			double nextsin = next.ynorm;
+			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
+			{
+				//Case 0: Within cross product bounds
+			}
+			else if (nextcos*sin0 >= cos0*nextsin)
+			{
+				//Case 1: Over the left, extend those bounds
+				cos1 = nextcos;
+				sin1 = nextsin;
+			}
+			else if (cos1*nextsin >= nextcos*sin1)
+			{
+				//Case 2: Over the right, extend those bounds
+				cos0 = nextcos;
+				sin0 = nextsin;
 			}
 			else
 			{
-				returnVals[0] = Float.NEGATIVE_INFINITY;
-				returnVals[1] = Float.POSITIVE_INFINITY;
-				return returnVals;
+				//Case 3: Opposite side, immediately return false
+				return false;
 			}
 		}
-		else if (slope > 0)
-		{
-			returnVals[0] = (min2-max1)/slope;
-			returnVals[1] = (max2-min1)/slope;
-			return returnVals;
-		}
-		else
-		{
-			returnVals[0] = (max2-min1)/slope;
-			returnVals[1] = (min2-max1)/slope;
-			return returnVals;
-		}
+		return true;
 	}
 
-	/*
-		Proudly pulled from the Libgdx source code,
-		licensed under the Apache License
-	 */
-	public static float pathPolygonIntersects(Vector2 movement, float[] start, float[] surface)
+	public static Collection<ProjectionVector> prunedProjections(Collection<ProjectionVector> vectors)
 	{
-		int startLen = start.length;
-		int surfaceLen = surface.length;
-		float minTime = 0.0f;
-		float maxTime = 1.0f;
-
-		// Get polygon1 axes
-		for (int i = 0; i < startLen; i += 2) {
-			float x1 = start[i];
-			float y1 = start[i + 1];
-			float x2 = start[(i + 2) % startLen];
-			float y2 = start[(i + 3) % startLen];
-
-			float axisX = y1 - y2;
-			float axisY = -(x1 - x2);
-
-			final float length = (float)Math.sqrt(axisX * axisX + axisY * axisY);
-			axisX /= length;
-			axisY /= length;
-
-			// -- Begin check for separation on this axis --//
-
-			// Project polygon1 onto this axis
-			float min1 = axisX * start[0] + axisY * start[1];
-			float max1 = min1;
-			for (int j = 0; j < startLen; j += 2) {
-				float p = axisX * start[j] + axisY * start[j + 1];
-				if (p < min1) min1 = p;
-				else if (p > max1) max1 = p;
-			}
-
-			// Project polygon2 onto this axis
-			float min2 = axisX * surface[0] + axisY * surface[1];
-			float max2 = min2;
-			for (int j = 0; j < surfaceLen; j += 2)
+		SortedSet<ProjectionVector> sortedVectors = new ConcurrentSkipListSet<>(
+		        Comparator.comparingDouble((ProjectionVector p)-> -p.magnitude));
+		sortedVectors.addAll(vectors);
+		if (isPruned(sortedVectors))
+			return sortedVectors;
+		double reduceMagnitude = 0;
+		Iterator<ProjectionVector> i = sortedVectors.iterator();
+		ProjectionVector p0 = i.next();
+		ProjectionVector p1 = i.next();
+		double cos0 = p0.xnorm;
+		double sin0 = p0.ynorm;
+		double cos1 = p1.xnorm;
+		double sin1 = p1.ynorm;
+		//zeroth on the right, first on the left
+		if (cos0 * sin1 < cos1 * sin0)
+		{
+			double tmpcos = cos1;
+			double tmpsin = sin1;
+			cos1 = cos0;
+			sin1 = sin0;
+			cos0 = tmpcos;
+			sin0 = tmpsin;
+		}
+		while (i.hasNext())
+		{
+			ProjectionVector next = i.next();
+			double nextcos = next.xnorm;
+			double nextsin = next.ynorm;
+			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
 			{
-				float p = axisX * surface[j] + axisY * surface[j + 1];
-				if (p < min2) min2 = p;
-				else if (p > max2) max2 = p;
+				//Case 0: Within cross product bounds
 			}
-			float[] times = intervalCollide(min1, max1, movement.dot(axisX, axisY), min2, max2);
-			minTime = Math.max(minTime, times[0]);
-			maxTime = Math.min(maxTime, times[1]);
-
-			// -- End check for separation on this axis --//
+			else if (nextcos*sin0 >= cos0*nextsin)
+			{
+				//Case 1: Over the left, extend those bounds
+				cos1 = nextcos;
+				sin1 = nextsin;
+			}
+			else if (cos1*nextsin >= nextcos*sin1)
+			{
+				//Case 2: Over the right, extend those bounds
+				cos0 = nextcos;
+				sin0 = nextsin;
+			}
+			else
+			{
+				//Case 3: Opposite side, immediately return false
+				reduceMagnitude = next.magnitude;
+				break;
+			}
 		}
-
-		// Get polygon2 axes
-		for (int i = 0; i < surfaceLen; i += 2) {
-			float x1 = surface[i];
-			float y1 = surface[i + 1];
-			float x2 = surface[(i + 2) % surfaceLen];
-			float y2 = surface[(i + 3) % surfaceLen];
-
-			float axisX = y1 - y2;
-			float axisY = -(x1 - x2);
-
-			final float length = (float)Math.sqrt(axisX * axisX + axisY * axisY);
-			axisX /= length;
-			axisY /= length;
-
-			// -- Begin check for separation on this axis --//
-
-			// Project polygon1 onto this axis
-			float min1 = axisX * start[0] + axisY * start[1];
-			float max1 = min1;
-			for (int j = 0; j < startLen; j += 2) {
-				float p = axisX * start[j] + axisY * start[j + 1];
-				if (p < min1) min1 = p;
-				else if (p > max1) max1 = p;
+		//Now given reduceMagnitude, remove elements with lesser magnitude and
+		//reduce the magnitude of remaining elements
+		if (Double.isFinite(reduceMagnitude))
+		{
+			for (Iterator<ProjectionVector> j = sortedVectors.iterator(); j.hasNext();)
+			{
+				ProjectionVector vec = j.next();
+				if (vec.magnitude <= reduceMagnitude)
+					j.remove();
+				else
+					vec.magnitude -= reduceMagnitude;
 			}
-
-			// Project polygon2 onto this axis
-			float min2 = axisX * surface[0] + axisY * surface[1];
-			float max2 = min2;
-			for (int j = 0; j < surfaceLen; j += 2) {
-				float p = axisX * surface[j] + axisY * surface[j + 1];
-				if (p < min2) min2 = p;
-				else if (p > max2) max2 = p;
-			}
-			float[] times = intervalCollide(min1, max1, movement.dot(axisX, axisY), min2, max2);
-			minTime = Math.max(minTime, times[0]);
-			maxTime = Math.min(maxTime, times[1]);
-			// -- End check for separation on this axis --//
 		}
-
-		if (minTime >= maxTime)
-			return Float.NaN;
-		else
-			return minTime;
+		return sortedVectors;
 	}
 
-	public static boolean intersectStadia(Vector2 start1, Vector2 end1,
-										  Vector2 start2, Vector2 end2,
-										  float sumRadius)
+	public static ProjectionVector combineProjections(Collection<ProjectionVector> vectors)
 	{
-		return Intersector.intersectSegments(start1, end1, start2, end2, null) ||
-				Intersector.distanceSegmentPoint(start1, end1, start2) <= sumRadius ||
-				Intersector.distanceSegmentPoint(start1, end1, end2) <= sumRadius ||
-				Intersector.distanceSegmentPoint(start2, end2, start1) <= sumRadius ||
-				Intersector.distanceSegmentPoint(start2, end2, end1) <= sumRadius;
+		Iterator<ProjectionVector> i = vectors.iterator();
+		if (vectors.size() == 0)
+			return null;
+		if (vectors.size() == 1)
+			return i.next();
+		ProjectionVector p0 = i.next();
+		ProjectionVector p1 = i.next();
+		//Get bordering unit vectors
+		double cos0 = p0.xnorm;
+		double sin0 = p0.ynorm;
+		double cos1 = p1.xnorm;
+		double sin1 = p1.ynorm;
+		//zeroth on the right, first on the left
+		if (cos0 * sin1 < cos1 * sin0)
+		{
+			double tmpcos = cos1;
+			double tmpsin = sin1;
+			cos1 = cos0;
+			sin1 = sin0;
+			cos0 = tmpcos;
+			sin0 = tmpsin;
+		}
+		while (i.hasNext())
+		{
+			ProjectionVector next = i.next();
+			double nextcos = next.xnorm;
+			double nextsin = next.ynorm;
+			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
+			{
+				//Case 0: Within cross product bounds
+			}
+			else if (nextcos*sin0 >= cos0*nextsin)
+			{
+				//Case 1: Over the left, extend those bounds
+				cos1 = nextcos;
+				sin1 = nextsin;
+			}
+			else if (cos1*nextsin >= nextcos*sin1)
+			{
+				//Case 2: Over the right, extend those bounds
+				cos0 = nextcos;
+				sin0 = nextsin;
+			}
+			else
+			{
+				//Case 3: something went horribly wrong
+				return null;
+			}
+		}
+		//Now... project all vectors onto the sum of the borders.
+		double sumcos = cos0+cos1;
+		double sumsin = sin0+sin1;
+		double len = StrictMath.hypot(sumcos, sumsin);
+		if (len == 0) return null;
+		sumcos /= len;
+		sumsin /= len;
+		double maxlen = Double.NEGATIVE_INFINITY;
+		for (ProjectionVector v : vectors)
+		{
+			double scalarProj = (v.xnorm*v.magnitude*sumcos+v.ynorm*v.magnitude*sumsin)
+					/(sumcos*sumcos+sumsin*sumsin);
+			if (scalarProj > maxlen)
+				maxlen = scalarProj;
+		}
+		return new ProjectionVector(sumcos, sumsin, maxlen);
 	}
+
+	//Find the point that 1-2 and 3-4 both point towards
+	public static double[] segmentsIntersectionPoint(double x1, double y1, double x2, double y2,
+													 double x3, double y3, double x4, double y4)
+	{
+		// This problem can be reduced to the following linear system:
+		// (y2-y1)x + (x1-x2)y = x1*y2 - x2*y1
+		// (y4-y3)x + (x3-x4)y = x3*y4 - x4*y3
+
+		//Yay for Julia's sympy package for doing work for me
+		double numX = x1*x3*y2 - x1*x3*y4 - x1*x4*y2 + x1*x4*y3
+				- x2*x3*y1 + x2*x3*y4 + x2*x4*y1 - x2*x4*y3;
+		double numY = x1*y2*y3 - x1*y2*y4 - x2*y1*y3 + x2*y1*y4
+				- x3*y1*y4 + x3*y2*y4 + x4*y1*y3 - x4*y2*y3;
+		double den = x1*y3 - x1*y4 - x2*y3 + x2*y4 - x3*y1 + x3*y2 + x4*y1 - x4*y2;
+		return new double[]{numX/den, numY/den};
+	}
+
+	public static double pointSegmentPosition(double sx, double sy, double ex, double ey,
+											  double x, double y)
+	{
+		double dx = x-sx;
+		double dy = y-sy;
+		double lx = ex-sx;
+		double ly = ey-sy;
+		return (dx*lx+dy*ly)/(lx*lx+ly*ly);
+	}
+
+	public static double partSegmentsIntersecting(double x1, double y1, double x2, double y2,
+												  double x3, double y3, double x4, double y4)
+	{
+		double den = x1*y3 - x1*y4 - x2*y3 + x2*y4 - x3*y1 + x3*y2 + x4*y1 - x4*y2;
+		double x = (x1*x3*y2 - x1*x3*y4 - x1*x4*y2 + x1*x4*y3
+				- x2*x3*y1 + x2*x3*y4 + x2*x4*y1 - x2*x4*y3)/den;
+		double y = (x1*y2*y3 - x1*y2*y4 - x2*y1*y3 + x2*y1*y4
+				- x3*y1*y4 + x3*y2*y4 + x4*y1*y3 - x4*y2*y3)/den;
+		double dx = x-x1;
+		double dy = y-y1;
+		double lx = x2-x1;
+		double ly = y2-y1;
+		return (dx*lx+dy*ly)/(lx*lx+ly*ly);
+	}
+
 }
 
 

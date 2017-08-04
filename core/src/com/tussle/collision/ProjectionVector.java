@@ -15,43 +15,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.collision;
 
-
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/27/17.
+ */
+public class ProjectionVector
 {
-    private Entity owner;
+	public double xnorm;
+	public double ynorm;
+	public double magnitude;
 
-    //Each frame
-    public abstract void act();
+	public ProjectionVector(double x, double y, double dist)
+	{
+		xnorm = x;
+		ynorm = y;
+		magnitude = dist;
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o instanceof ProjectionVector)
+		{
+			ProjectionVector p = (ProjectionVector)o;
+			return p.xnorm == xnorm && p.ynorm == ynorm && p.magnitude == magnitude;
+		}
+		else return false;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
-
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	@Override
+	public int hashCode()
+	{
+		return Double.hashCode(xnorm) ^ Double.hashCode(ynorm) ^ Double.hashCode(magnitude);
+	}
 }

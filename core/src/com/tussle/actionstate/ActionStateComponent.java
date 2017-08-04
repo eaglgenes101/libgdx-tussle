@@ -17,41 +17,35 @@
 
 package com.tussle.actionstate;
 
+import com.badlogic.ashley.core.Component;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/24/17.
+ */
+public class ActionStateComponent implements Component
 {
-    private Entity owner;
+	private ActionState currentState;
+	private ActionState nextState;
 
-    //Each frame
-    public abstract void act();
+	public ActionStateComponent(ActionState state)
+	{
+		currentState = state;
+		nextState = null;
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public void changeAction(ActionState newState)
+	{
+		nextState = newState;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
+	public void act()
+	{
+		currentState.act();
+	}
 
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
-
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public void postAct()
+	{
+		if (nextState != null)
+			currentState = nextState;
+	}
 }

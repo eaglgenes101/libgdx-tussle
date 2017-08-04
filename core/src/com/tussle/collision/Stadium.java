@@ -17,291 +17,125 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Rectangle;
+import com.tussle.main.Intersector;
 
 /**
  * Created by eaglgenes101 on 3/8/17.
  */
-public class Stadium implements Shape2D
+public class Stadium
 {
-	private Vector2 localStart, localEnd, worldStart, worldEnd;
+	public double startx, starty, endx, endy;
+	public double radius;
 
-	private float radius;
-
-	private float x, y;
-	private float originX, originY;
-	private float rotation;
-	private float scale = 1;
-	private boolean flipped = false;
-	private boolean startDirty = true;
-	private boolean endDirty = true;
-	private Rectangle bounds;
-
-	public Stadium(float startx, float starty, float endx, float endy, float radius)
+	public Stadium()
 	{
-		localStart = new Vector2(startx, starty);
-		localEnd = new Vector2(endx, endy);
-		worldStart = new Vector2();
-		worldEnd = new Vector2();
+		//Nothing
+	}
+
+	public Stadium(double startx, double starty, double endx, double endy, double radius)
+	{
+		this.startx = startx;
+		this.starty = starty;
+		this.endx = endx;
+		this.endy = endy;
 		this.radius = radius;
 	}
 
-	public Stadium(Vector2 start, Vector2 end, float radius)
+	public double getStartx()
 	{
-		localStart = start.cpy();
-		localEnd = end.cpy();
-		worldStart = new Vector2();
-		worldEnd = new Vector2();
-		this.radius = radius;
+		return startx;
 	}
 
-	public Vector2 getStart()
+	public double getStarty()
 	{
-		return localStart;
+		return starty;
 	}
 
-	public Vector2 getEnd()
+	public double getEndx()
 	{
-		return localEnd;
+		return endx;
 	}
 
-	public float getRadius()
+	public double getEndy()
+	{
+		return endy;
+	}
+
+	public double getRadius()
 	{
 		return radius;
 	}
 
-	public Vector2 getTransformedStart()
+	public Stadium setStartX(double startx)
 	{
-		if (!startDirty) return worldStart;
-		startDirty = false;
-
-		final float positionX = x;
-		final float positionY = y;
-		final float originX = this.originX;
-		final float originY = this.originY;
-		final float scaleFactor = this.scale;
-		final boolean scale = scaleFactor != 1;
-		final float rotation = this.rotation;
-		final float cos = MathUtils.cosDeg(rotation);
-		final float sin = MathUtils.sinDeg(rotation);
-
-		float x = localStart.x - originX;
-		float y = localStart.y - originY;
-
-		if (scale)
-		{
-			x *= scaleFactor;
-			y *= scaleFactor;
-		}
-
-		if (rotation != 0)
-		{
-			float oldX = x;
-			x = cos*x - sin*y;
-			y = sin*oldX + cos*y;
-		}
-
-		if (flipped)
-			x *= -1;
-
-		worldStart.set(x+positionX+originX, y+positionY+originY);
-
-		return worldStart;
+		this.startx = startx;
+		return this;
 	}
 
-
-	public Vector2 getTransformedEnd()
+	public Stadium setStartY(double starty)
 	{
-		if (!endDirty) return worldEnd;
-		endDirty = false;
-
-		final float positionX = x;
-		final float positionY = y;
-		final float originX = this.originX;
-		final float originY = this.originY;
-		final float scaleFactor = this.scale;
-		final boolean scale = scaleFactor != 1;
-		final float rotation = this.rotation;
-		final float cos = MathUtils.cosDeg(rotation);
-		final float sin = MathUtils.sinDeg(rotation);
-
-		float x = localEnd.x - originX;
-		float y = localEnd.y - originY;
-
-		if (scale)
-		{
-			x *= scaleFactor;
-			y *= scaleFactor;
-		}
-
-		if (rotation != 0)
-		{
-			float oldX = x;
-			x = cos*x - sin*y;
-			y = sin*oldX + cos*y;
-		}
-
-		if (flipped)
-			x *= -1;
-
-		worldEnd.set(x+positionX+originX, y+positionY+originY);
-
-		return worldEnd;
+		this.starty = starty;
+		return this;
 	}
 
-	public float getTransformedRadius()
+	public Stadium setEndX(double endx)
 	{
-		return radius*scale;
+		this.endx = endx;
+		return this;
 	}
 
-	public void setOrigin(float originX, float originY)
+	public Stadium setEndY(double endy)
 	{
-		this.originX = originX;
-		this.originY = originY;
-		startDirty = true;
-		endDirty = true;
+		this.endy = endy;
+		return this;
 	}
 
-	public void setPosition(float x, float y)
-	{
-		this.x = x;
-		this.y = y;
-		startDirty = true;
-		endDirty = true;
-	}
-
-	public void setStart(float x, float y)
-	{
-		localStart.set(x, y);
-		startDirty = true;
-	}
-
-	public void setEnd(float x, float y)
-	{
-		localEnd.set(x, y);
-		endDirty = true;
-	}
-
-	public void setRadius(float radius)
+	public Stadium setRadius(double radius)
 	{
 		this.radius = radius;
+		return this;
 	}
 
-	public void translate(float x, float y)
+	public Stadium setStart(double startx, double starty)
 	{
-		this.x += x;
-		this.y += y;
-		startDirty = true;
-		endDirty = true;
+		this.startx = startx;
+		this.starty = starty;
+		return this;
 	}
 
-	public void setRotation(float degrees)
+	public Stadium setEnd(double endx, double endy)
 	{
-		this.rotation = degrees;
-		startDirty = true;
-		endDirty = true;
+		this.endx = endx;
+		this.endy = endy;
+		return this;
 	}
 
-	public void rotate(float degrees)
+	public Stadium set(Stadium stad)
 	{
-		this.rotation += degrees;
-		startDirty = true;
-		endDirty = true;
+		this.startx = stad.startx;
+		this.starty = stad.starty;
+		this.endx = stad.endx;
+		this.endy = stad.endy;
+		this.radius = stad.radius;
+		return this;
 	}
 
-	public void setScale(float scale)
+	public double getCenterX()
 	{
-		this.scale = scale;
-		startDirty = true;
-		endDirty = true;
+		return (this.startx+this.endx)/2;
 	}
 
-	public void scale(float scale)
+	public double getCenterY()
 	{
-		this.scale *= scale;
-		startDirty = true;
-		endDirty = true;
+		return (this.starty+this.endy)/2;
 	}
 
-	public void setFlipped(boolean flipped)
+	public boolean contains(double x, double y)
 	{
-		this.flipped = flipped;
-		startDirty = true;
-		endDirty = true;
-	}
-
-	public void flip()
-	{
-		flipped = !flipped;
-		startDirty = true;
-		endDirty = true;
-	}
-
-	public void dirty()
-	{
-		startDirty = true;
-		endDirty = true;
-	}
-
-	public Rectangle getBoundingRectangle ()
-	{
-		float minX = Math.min(getTransformedStart().x, getTransformedEnd().x)-getTransformedRadius();
-		float maxX = Math.max(getTransformedStart().x, getTransformedEnd().x)+getTransformedRadius();
-		float minY = Math.min(getTransformedStart().y, getTransformedEnd().y)-getTransformedRadius();
-		float maxY = Math.max(getTransformedStart().y, getTransformedEnd().y)+getTransformedRadius();
-
-		if (bounds == null) bounds = new Rectangle();
-		bounds.x = minX;
-		bounds.y = minY;
-		bounds.width = maxX - minX;
-		bounds.height = maxY - minY;
-
-		return bounds;
-	}
-
-	public boolean contains(Vector2 point)
-	{
-		return Intersector.distanceSegmentPoint(getTransformedStart(), getTransformedEnd(),
-				point) <= getTransformedRadius();
-	}
-
-	public boolean contains(float x, float y)
-	{
-		return contains(new Vector2(x, y));
-	}
-
-	public float getX()
-	{
-		return x;
-	}
-
-	public float getY()
-	{
-		return y;
-	}
-
-	public float getOriginX ()
-	{
-		return originX;
-	}
-
-	public float getOriginY ()
-	{
-		return originY;
-	}
-
-	public float getRotation ()
-	{
-		return rotation;
-	}
-
-	public float getScale ()
-	{
-		return scale;
-	}
-
-	public boolean getFlipped()
-	{
-		return flipped;
+		if (startx == endx && starty == endy)
+			return (startx-x)*(startx-x)+(starty-y)*(starty-y) <= radius*radius;
+		return Intersector.d2SegmentPoint(startx, starty, endx, endy, x, y)
+				< radius*radius;
 	}
 }

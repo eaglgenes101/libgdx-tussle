@@ -15,43 +15,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.actionstate;
+package com.tussle.collision;
 
+import com.badlogic.ashley.core.Component;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.main.Terminable;
-
-public abstract class ActionState implements Terminable
+/**
+ * Created by eaglgenes101 on 4/24/17.
+ */
+public class ElasticityComponent implements Component
 {
-    private Entity owner;
+	public double groundElasticity;
+	public double wallElasticity;
 
-    //Each frame
-    public abstract void act();
+	public ElasticityComponent(double ground, double wall)
+	{
+		groundElasticity = ground;
+		wallElasticity = wall;
+	}
 
-    public Entity getBody()
-    {
-        return owner;
-    }
+	public ElasticityComponent()
+	{
+		groundElasticity = 0;
+		wallElasticity = 0;
+	}
 
-    public Entity getOwner()
-    {
-        return owner;
-    }
+	public double getGroundElasticity()
+	{
+		return groundElasticity;
+	}
 
-    /*
-    public void onClank(Hitbox ourBox, Hitbox otherBox)
-    {
-        //Nothing by default
-    }
+	public double getWallElasticity()
+	{
+		return wallElasticity;
+	}
 
-    public List<HitboxLock> getHitboxLocks()
-    {
-        return Utility.emptyLockList;
-    }
-
-    public List<Hurtbox> getHurtboxes()
-    {
-        return Utility.emptyHurtboxList;
-    }
-    */
+	public void setElasticity(double ground, double wall)
+	{
+		groundElasticity = ground;
+		wallElasticity = wall;
+	}
 }

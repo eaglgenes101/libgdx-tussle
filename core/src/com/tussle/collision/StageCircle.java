@@ -19,24 +19,17 @@ package com.tussle.collision;
 
 import com.tussle.main.Intersector;
 
-/**
- * Created by eaglgenes101 on 5/17/17.
- */
-public class StageCorner extends StageElement
+public class StageCircle extends StageElement
 {
-	public static final double HALF_WHOLE = 180;
-	private double localx, localy, localMinAngle, localMaxAngle;
-	private double currentx, currenty;
-	private double currentRightCos, currentRightSin, currentLeftCos, currentLeftSin;
-	private double previousx, previousy;
-	private double previousRightCos, previousRightSin, previousLeftCos, previousLeftSin;
+	private double localx = 0, localy = 0, localr = 1;
+	private double currentx, currenty, currentr;
+	private double previousx, previousy, previousr;
 
-	public StageCorner(double x, double y, double minAngle, double maxAngle)
+	public StageCircle(double x, double y, double r)
 	{
 		localx = x;
 		localy = y;
-		localMinAngle = minAngle;
-		localMaxAngle = maxAngle;
+		localr = r;
 	}
 
 	public void computeNewPositions()
@@ -46,58 +39,32 @@ public class StageCorner extends StageElement
 		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
 		double locx = localx - originX;
 		double locy = localy - originY;
-		double minAngle = localMinAngle;
-		double maxAngle = localMaxAngle;
-		if (flipped)
-		{
-			minAngle = HALF_WHOLE - minAngle;
-			maxAngle = HALF_WHOLE - maxAngle;
-		}
 		locx *= flipped ? -scale : scale;
 		locy *= scale;
 		double oldX = locx;
 		locx = locx * cos - locy * sin;
 		locy = oldX * sin + locy * cos;
-		minAngle += rotation;
-		maxAngle += rotation;
 		currentx = locx + originX + x;
 		currenty = locy + originY + y;
-		currentRightCos = StrictMath.cos(StrictMath.toRadians(minAngle));
-		currentRightSin = StrictMath.sin(StrictMath.toRadians(minAngle));
-		currentLeftCos = StrictMath.cos(StrictMath.toRadians(maxAngle));
-		currentLeftSin = StrictMath.sin(StrictMath.toRadians(maxAngle));
+		currentr = StrictMath.abs(localr*scale);
 	}
 
 	protected void setAreas()
 	{
 		previousx = currentx;
 		previousy = currenty;
-		previousRightCos = currentRightCos;
-		previousRightSin = currentRightSin;
-		previousLeftCos = currentLeftCos;
-		previousLeftSin = currentLeftSin;
+		previousr = currentr;
 	}
 
 	public void computeTransform()
 	{
-		//double rFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
-		//double rFocusY = (previousy-currenty)/(currentRightCos-previousRightCos);
-		//double lFocusX = (previousx-currentx)/(-currentLeftSin+previousLeftSin);
-		//double lFocusY = (previousy-currenty)/(currentLeftCos-previousLeftCos);
-		//No need for homographs so we don't calculate them
+		//Nothing...
 	}
 
 	public void setPoint(double x, double y)
 	{
 		localx = x;
 		localy = y;
-		coordinatesDirty = true;
-	}
-
-	public void setAngles(double min, double max)
-	{
-		localMinAngle = min;
-		localMaxAngle = max;
 		coordinatesDirty = true;
 	}
 
@@ -111,41 +78,11 @@ public class StageCorner extends StageElement
 		return (1-time)*previousy + time*currenty;
 	}
 
-	//Can the stage corner push out at the specified angle at the specified time?
-	public boolean doesCollide(double time, double cos, double sin)
-	{
-		double atTimeX = getX(time);
-		double atTimeY = getY(time);
-		double rightFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
-		double rightFocusY = (previousy-currenty)/(currentRightCos-previousRightCos);
-		double leftFocusX = (previousx-currentx)/(-currentLeftSin+previousLeftSin);
-		double leftFocusY = (previousy-currenty)/(currentLeftCos-previousLeftCos);
-		double side = Intersector.pointLineSide(leftFocusX, leftFocusY,
-				rightFocusX, rightFocusY, atTimeX, atTimeY);
-		if (side < 0)
-			return false;
-		else if (side == 0)
-		{
-			return (rightFocusX-leftFocusX)*cos + (rightFocusY-leftFocusY)*sin == 0 &&
-					(rightFocusX-leftFocusX)*sin - (rightFocusY-leftFocusY)*cos > 0;
-			//TODO: Add a small amount of tolerance
-		}
-		else
-		{
-			double leftDX = atTimeX-leftFocusX;
-			double leftDY = atTimeY-leftFocusY;
-			double rightDX = rightFocusX-atTimeX;
-			double rightDY = rightFocusY-atTimeY;
-			return leftDX*cos + leftDY*sin > 0 &&
-					rightDX*cos + rightDY*sin > 0 &&
-					leftDX*sin - leftDY*cos < 0 &&
-					rightDX*sin - rightDY*cos > 0;
-		}
-	}
+	public double getRadius(double time) { return (1-time)*previousr + time*currentr;}
 
 	public ProjectionVector depth(Stadium end, double xVel, double yVel)
 	{
-		double sumRad = end.getRadius();
+		double sumRad = end.getRadius()+this.getRadius(1);
 		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
 				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
 				xVel, yVel, 0, 0, sumRad);
@@ -160,8 +97,6 @@ public class StageCorner extends StageElement
 		double yEnd = end.getEndy()-yDistRew;
 		//Get angle of pt
 		ProjectionVector v = Intersector.dispSegmentPoint(xStart, yStart, xEnd, yEnd, currentx, currenty);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
-			return null;
 		v.magnitude += sumRad;
 		double xDisp = v.xnorm * v.magnitude - xDistRew;
 		double yDisp = v.ynorm * v.magnitude - yDistRew;
@@ -174,7 +109,7 @@ public class StageCorner extends StageElement
 	public ProjectionVector instantVelocity(Stadium start)
 	{
 		//Find contact time
-		double sumRad = start.getRadius();
+		double sumRad = start.getRadius()+this.getRadius(1);
 		double sx = start.getStartx();
 		double ex = start.getEndx();
 		double sy = start.getStarty();
@@ -182,12 +117,6 @@ public class StageCorner extends StageElement
 		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
 				0, 0,currentx-previousx, currenty-previousy, sumRad);
 		if (Double.isInfinite(time))
-			return null;
-		//We got contact time, now find velocity of contact
-		double atTimeX = (1-time)*previousx + time*currentx;
-		double atTimeY = (1-time)*previousy + time*currenty;
-		ProjectionVector v = Intersector.dispSegmentPoint(sx, sy, ex, ey, atTimeX, atTimeY);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
 			return null;
 		double segDX = currentx-previousx;
 		double segDY = currenty-previousy;
@@ -200,7 +129,7 @@ public class StageCorner extends StageElement
 	public ProjectionVector normal(Stadium start)
 	{
 		//Find contact time
-		double sumRad = start.getRadius();
+		double sumRad = start.getRadius()+this.getRadius(1);
 		double sx = start.getStartx();
 		double ex = start.getEndx();
 		double sy = start.getStarty();
@@ -213,23 +142,25 @@ public class StageCorner extends StageElement
 		double atTimeX = (1-time)*previousx + time*currentx;
 		double atTimeY = (1-time)*previousy + time*currenty;
 		ProjectionVector v = Intersector.dispSegmentPoint(sx, sy, ex, ey, atTimeX, atTimeY);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
-			return null;
 		v.magnitude += sumRad;
 		return v;
 	}
 
 	public Rectangle getStartBounds()
 	{
-		return new Rectangle(currentx, currenty, 0, 0);
+		double radius = getRadius(0);
+		return new Rectangle(getX(0)-radius, getY(0)-radius,
+				2*radius, 2*radius);
 	}
 
 	public Rectangle getTravelBounds()
 	{
-		double xMin = StrictMath.min(currentx, previousx);
-		double xMax = StrictMath.max(currentx, previousx);
-		double yMin = StrictMath.min(currenty, previousy);
-		double yMax = StrictMath.max(currenty, previousy);
-		return new Rectangle(xMin, yMin, xMax-xMin, yMax-yMin);
+		double radius = getRadius(1);
+		double xMin = StrictMath.min(getX(0), getX(1));
+		double xMax = StrictMath.max(getX(0), getX(1));
+		double yMin = StrictMath.min(getY(0), getY(1));
+		double yMax = StrictMath.max(getY(0), getY(1));
+		return new Rectangle(xMin-radius, yMin-radius,
+				xMax-xMin+2*radius, yMax-yMin+2*radius);
 	}
 }

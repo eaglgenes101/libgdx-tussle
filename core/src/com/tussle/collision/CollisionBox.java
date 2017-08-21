@@ -62,32 +62,23 @@ public strictfp class CollisionBox extends StageElement
 
 	public void computeNewPositions()
 	{
-		final boolean doScale = flipped || (scale != 1);
-		final boolean doRotate = rotation != 0;
 		double sx = localArea.startx - originX;
 		double sy = localArea.starty - originY;
 		double ex = localArea.endx - originX;
 		double ey = localArea.endy - originY;
-		double rad = localArea.radius;
-		if (doScale)
-		{
-			sx *= flipped?-scale:scale;
-			sy *= scale;
-			ex *= flipped?-scale:scale;
-			ey *= scale;
-			rad *= scale;
-		}
-		if (doRotate)
-		{
-			double cos = StrictMath.cos(StrictMath.toRadians(rotation));
-			double sin = StrictMath.sin(StrictMath.toRadians(rotation));
-			double oldSX = sx;
-			double oldEX = ex;
-			sx = sx*cos - sy*sin;
-			sy = oldSX*sin + sy*cos;
-			ex = ex*cos - ey*sin;
-			ey = oldEX*sin + ey*cos;
-		}
+		double rad = StrictMath.abs(localArea.radius*scale);
+		sx *= flipped?-scale:scale;
+		sy *= scale;
+		ex *= flipped?-scale:scale;
+		ey *= scale;
+		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
+		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
+		double oldSX = sx;
+		double oldEX = ex;
+		sx = sx*cos - sy*sin;
+		sy = oldSX*sin + sy*cos;
+		ex = ex*cos - ey*sin;
+		ey = oldEX*sin + ey*cos;
 		currentArea.setStart(sx+originX+x, sy+originY+y)
 				.setEnd(ex+originX+x, ey+originY+y).setRadius(rad);
 	}

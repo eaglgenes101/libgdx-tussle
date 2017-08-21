@@ -135,11 +135,11 @@ public class IntersectorTest
 	void pointLineSideTest()
 	{
 		assertEquals(pointLineSide(-1, -1, 1, 1, -1, 1),
-				1);
+				1, FP_TOLERANCE);
 		assertEquals(pointLineSide(-1, -1, 1, 1, 1, -1),
-				-1);
+				-1, FP_TOLERANCE);
 		assertEquals(pointLineSide(-1, -1, 1, 1, -1, -1),
-				0);
+				0, FP_TOLERANCE);
 	}
 
 	@Test

@@ -233,10 +233,10 @@ public strictfp class Intersector
 	}
 
 
-	public static int pointLineSide (double linePoint1X, double linePoint1Y, double linePoint2X,
+	public static double pointLineSide (double linePoint1X, double linePoint1Y, double linePoint2X,
 									 double linePoint2Y, double pointX, double pointY)
 	{
-		return (int)StrictMath.signum((linePoint2X - linePoint1X) * (pointY - linePoint1Y)
+		return StrictMath.signum((linePoint2X - linePoint1X) * (pointY - linePoint1Y)
 				- (linePoint2Y - linePoint1Y) * (pointX - linePoint1X));
 	}
 

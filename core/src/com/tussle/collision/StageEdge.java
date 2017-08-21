@@ -50,30 +50,22 @@ public strictfp class StageEdge extends StageElement
 	public void computeNewPositions()
 	{
 		coordinatesDirty = false;
-		final boolean doScale = flipped || scale != 1;
-		final boolean doRotate = (rotation % 360 != 0);
-		double cos = doRotate ? StrictMath.cos(StrictMath.toRadians(rotation)) : 1;
-		double sin = doRotate ? StrictMath.sin(StrictMath.toRadians(rotation)) : 0;
+		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
+		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
 		double sx = localx1 - originX;
 		double sy = localy1 - originY;
 		double ex = localx2 - originX;
 		double ey = localy2 - originY;
-		if (doScale)
-		{
-			sx *= flipped ? -scale : scale;
-			sy *= scale;
-			ex *= flipped ? -scale : scale;
-			ey *= scale;
-		}
-		if (doRotate)
-		{
-			double oldSX = sx;
-			double oldEX = ex;
-			sx = sx * cos - sy * sin;
-			sy = oldSX * sin + sy * cos;
-			ex = ex * cos - ey * sin;
-			ey = oldEX * sin + ey * cos;
-		}
+		sx *= flipped ? -scale : scale;
+		sy *= scale;
+		ex *= flipped ? -scale : scale;
+		ey *= scale;
+		double oldSX = sx;
+		double oldEX = ex;
+		sx = sx * cos - sy * sin;
+		sy = oldSX * sin + sy * cos;
+		ex = ex * cos - ey * sin;
+		ey = oldEX * sin + ey * cos;
 		currentx1 = sx + originX + x;
 		currenty1 = sy + originY + y;
 		currentx2 = ex + originX + x;

@@ -24,11 +24,11 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.tussle.motion.PositionComponent;
 
 /**
@@ -41,7 +41,7 @@ public class SpriteSystem extends IteratingSystem
 
 	private AssetManager assetManager; // Points to the communal asset manager
 	private SpriteBatch batch; // Where we draw everything
-	private ExtendViewport viewport;
+	private OrthographicCamera camera;
 
 	ComponentMapper<SpriteComponent> spriteMapper =
 			ComponentMapper.getFor(SpriteComponent.class);
@@ -59,8 +59,7 @@ public class SpriteSystem extends IteratingSystem
 		super(Family.all(SpriteComponent.class, PositionComponent.class).get(), p);
 		assetManager = manager;
 		batch = new SpriteBatch();
-		viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		viewport.apply();
+		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 
 	public void update(float delta)
@@ -69,20 +68,19 @@ public class SpriteSystem extends IteratingSystem
 		maxx += (currentx+MARGIN-maxx)*ZOOM_FACTOR;
 		miny += (currenty-MARGIN-miny)*ZOOM_FACTOR;
 		maxy += (currenty+MARGIN-maxy)*ZOOM_FACTOR;
-		viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT);
+		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		super.update(delta);
 		batch.end();
 		currentx = (minx+maxx)/2;
 		currenty = (miny+maxy)/2;
-		float zoom = Math.max((maxx-minx)/Gdx.graphics.getWidth(),
-				(maxy-miny)/Gdx.graphics.getHeight());
-		viewport.getCamera().position.set(currentx, currenty,
-				viewport.getCamera().position.z);
-		viewport.setWorldSize(zoom*Gdx.graphics.getWidth(),
-				zoom*Gdx.graphics.getHeight());
-		viewport.apply();
+		//camera.zoom = Math.max((maxx-minx)/Gdx.graphics.getWidth(),
+		//		(maxy-miny)/Gdx.graphics.getHeight());
+		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		//Nicety for when stuff gets done
+		//camera.position.set(currentx, currenty, 0);
+		camera.update();
 	}
 
 	public void processEntity(Entity entity, float delta)

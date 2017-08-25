@@ -42,7 +42,6 @@ public class StageCorner extends StageElement
 
 	public void computeNewPositions()
 	{
-		coordinatesDirty = false;
 		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
 		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
 		double locx = localx - originX;
@@ -67,25 +66,32 @@ public class StageCorner extends StageElement
 		currentRightSin = StrictMath.sin(StrictMath.toRadians(minAngle));
 		currentLeftCos = StrictMath.cos(StrictMath.toRadians(maxAngle));
 		currentLeftSin = StrictMath.sin(StrictMath.toRadians(maxAngle));
+		coordinatesDirty = false;
 	}
 
 	protected void setAreas()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		previousx = currentx;
 		previousy = currenty;
 		previousRightCos = currentRightCos;
 		previousRightSin = currentRightSin;
 		previousLeftCos = currentLeftCos;
 		previousLeftSin = currentLeftSin;
+		transformDirty = true;
 	}
 
 	public void computeTransform()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		//double rFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
 		//double rFocusY = (previousy-currenty)/(currentRightCos-previousRightCos);
 		//double lFocusX = (previousx-currentx)/(-currentLeftSin+previousLeftSin);
 		//double lFocusY = (previousy-currenty)/(currentLeftCos-previousLeftCos);
 		//No need for homographs so we don't calculate them
+		transformDirty = false;
 	}
 
 	public void setPoint(double x, double y)
@@ -93,6 +99,7 @@ public class StageCorner extends StageElement
 		localx = x;
 		localy = y;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public void setAngles(double min, double max)
@@ -100,21 +107,30 @@ public class StageCorner extends StageElement
 		localMinAngle = min;
 		localMaxAngle = max;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public double getX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousx + time*currentx;
 	}
 
 	public double getY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousy + time*currenty;
 	}
 
 	//Can the stage corner push out at the specified angle at the specified time?
 	public boolean doesCollide(double time, double cos, double sin)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		double atTimeX = getX(time);
 		double atTimeY = getY(time);
 		double rightFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
@@ -146,6 +162,10 @@ public class StageCorner extends StageElement
 
 	public ProjectionVector depth(Stadium end, double xVel, double yVel)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		double sumRad = end.getRadius();
 		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
 				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
@@ -200,6 +220,10 @@ public class StageCorner extends StageElement
 
 	public ProjectionVector normal(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact time
 		double sumRad = start.getRadius();
 		double sx = start.getStartx();
@@ -222,11 +246,15 @@ public class StageCorner extends StageElement
 
 	public Rectangle getStartBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return new Rectangle(currentx, currenty, 0, 0);
 	}
 
 	public Rectangle getTravelBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double xMin = StrictMath.min(currentx, previousx);
 		double xMax = StrictMath.max(currentx, previousx);
 		double yMin = StrictMath.min(currenty, previousy);
@@ -236,6 +264,8 @@ public class StageCorner extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		drawer.circle((float)getX(0), (float)getY(0), 2);
 		drawer.line((float)getX(0), (float)getY(0),
 				(float)(getX(0)-currentLeftCos*4), (float)(getY(0)-currentLeftSin*4));

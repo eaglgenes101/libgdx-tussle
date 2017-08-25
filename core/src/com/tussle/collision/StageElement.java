@@ -30,6 +30,7 @@ public abstract class StageElement
 	protected double scale = 1;
 	protected boolean flipped = false;
 	protected boolean coordinatesDirty = true;
+	protected boolean transformDirty = true;
 	protected boolean start = true;
 
 	public void step()
@@ -37,12 +38,6 @@ public abstract class StageElement
 		if (start)
 			computeNewPositions();
 		setAreas();
-		if (coordinatesDirty)
-		{
-			coordinatesDirty = false;
-			computeNewPositions();
-		}
-		computeTransform();
 	}
 
 	protected abstract void setAreas();
@@ -56,6 +51,7 @@ public abstract class StageElement
 		this.originX = originX;
 		this.originY = originY;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public void setPosition(double x, double y)
@@ -63,24 +59,28 @@ public abstract class StageElement
 		this.x = x;
 		this.y = y;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public void setRotation(double degrees)
 	{
 		this.rotation = degrees;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public void setScale(double scale)
 	{
 		this.scale = scale;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public void setFlipped(boolean flipped)
 	{
 		this.flipped = flipped;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public double getRotation()
@@ -94,6 +94,8 @@ public abstract class StageElement
 	public void cutTrail()
 	{
 		start = true;
+		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	//Minimal displacement needed to prevent intersection

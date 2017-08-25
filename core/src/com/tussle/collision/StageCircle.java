@@ -35,7 +35,6 @@ public class StageCircle extends StageElement
 
 	public void computeNewPositions()
 	{
-		coordinatesDirty = false;
 		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
 		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
 		double locx = localx - originX;
@@ -48,18 +47,25 @@ public class StageCircle extends StageElement
 		currentx = locx + originX + x;
 		currenty = locy + originY + y;
 		currentr = StrictMath.abs(localr*scale);
+		coordinatesDirty = false;
 	}
 
 	protected void setAreas()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		previousx = currentx;
 		previousy = currenty;
 		previousr = currentr;
+		transformDirty = true;
 	}
 
 	public void computeTransform()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		//Nothing...
+		transformDirty = false;
 	}
 
 	public void setPoint(double x, double y)
@@ -67,22 +73,36 @@ public class StageCircle extends StageElement
 		localx = x;
 		localy = y;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public double getX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousx + time*currentx;
 	}
 
 	public double getY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousy + time*currenty;
 	}
 
-	public double getRadius(double time) { return (1-time)*previousr + time*currentr;}
+	public double getRadius(double time)
+	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		return (1-time)*previousr + time*currentr;
+	}
 
 	public ProjectionVector depth(Stadium end, double xVel, double yVel)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		double sumRad = end.getRadius()+this.getRadius(1);
 		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
 				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
@@ -111,6 +131,10 @@ public class StageCircle extends StageElement
 
 	public ProjectionVector instantVelocity(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact time
 		double sumRad = start.getRadius()+this.getRadius(1);
 		double sx = start.getStartx();
@@ -131,6 +155,10 @@ public class StageCircle extends StageElement
 
 	public ProjectionVector normal(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact time
 		double sumRad = start.getRadius()+this.getRadius(1);
 		double sx = start.getStartx();
@@ -151,6 +179,8 @@ public class StageCircle extends StageElement
 
 	public Rectangle getStartBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double radius = getRadius(0);
 		return new Rectangle(getX(0)-radius, getY(0)-radius,
 				2*radius, 2*radius);
@@ -158,6 +188,8 @@ public class StageCircle extends StageElement
 
 	public Rectangle getTravelBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double radius = getRadius(1);
 		double xMin = StrictMath.min(getX(0), getX(1));
 		double xMax = StrictMath.max(getX(0), getX(1));
@@ -169,6 +201,8 @@ public class StageCircle extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		drawer.circle((float)getX(0), (float)getY(0), (float)getRadius(0));
 	}
 

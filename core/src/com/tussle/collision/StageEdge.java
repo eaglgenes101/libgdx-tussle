@@ -50,7 +50,6 @@ public strictfp class StageEdge extends StageElement
 
 	public void computeNewPositions()
 	{
-		coordinatesDirty = false;
 		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
 		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
 		double sx = localx1 - originX;
@@ -71,24 +70,31 @@ public strictfp class StageEdge extends StageElement
 		currenty1 = sy + originY + y;
 		currentx2 = ex + originX + x;
 		currenty2 = ey + originY + y;
+		coordinatesDirty = false;
 	}
 
 	protected void setAreas()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		previousx1 = currentx1;
 		previousx2 = currentx2;
 		previousy1 = currenty1;
 		previousy2 = currenty2;
+		transformDirty = true;
 	}
 
 	public void computeTransform()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		vanishPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
 				getStartX(1), getStartY(1), getEndX(0), getEndY(0),
 				getEndX(1), getEndY(1));
 		focusPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
 				getEndX(0), getEndY(0), getStartX(1), getStartY(1),
 				getEndX(1), getEndY(1));
+		transformDirty = false;
 	}
 
 	public void setSegment(double x1, double y1, double x2, double y2)
@@ -98,30 +104,43 @@ public strictfp class StageEdge extends StageElement
 		this.localx2 = x2;
 		this.localy2 = y2;
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public double getStartX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousx1 + time*currentx1;
 	}
 
 	public double getEndX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousx2 + time*currentx2;
 	}
 
 	public double getStartY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousy1 + time*currenty1;
 	}
 
 	public double getEndY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return (1-time)*previousy2 + time*currenty2;
 	}
 
 	public ProjectionVector depth(Stadium end, double xVel, double yVel)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		double sumRad = end.getRadius();
 		double time = 1;
 		double time0 = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
@@ -167,6 +186,10 @@ public strictfp class StageEdge extends StageElement
 
 	public ProjectionVector instantVelocity(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact time
 		double sumRad = start.getRadius();
 		double dx = start.getEndx()-start.getStartx();
@@ -232,6 +255,10 @@ public strictfp class StageEdge extends StageElement
 
 	public ProjectionVector normal(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact point
 		double sumRad = start.getRadius();
 		double dx = start.getEndx()-start.getStartx();
@@ -286,6 +313,8 @@ public strictfp class StageEdge extends StageElement
 
 	public Rectangle getStartBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double xMin = StrictMath.min(getStartX(0), getEndX(0));
 		double xMax = StrictMath.max(getStartX(0), getEndX(0));
 		double yMin = StrictMath.min(getStartY(0), getEndY(0));
@@ -295,6 +324,8 @@ public strictfp class StageEdge extends StageElement
 
 	public Rectangle getTravelBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double xMin = getStartX(0);
 		double xMax = getStartX(0);
 		double yMin = getStartY(0);
@@ -316,7 +347,8 @@ public strictfp class StageEdge extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
-		//Draw a line, then a second line behind it to show orientation
+		if (coordinatesDirty)
+			computeNewPositions();
 		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
 		double dx = (getStartY(0)-getEndY(0))*4/len;

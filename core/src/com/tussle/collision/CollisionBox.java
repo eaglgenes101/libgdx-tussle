@@ -48,17 +48,22 @@ public strictfp class CollisionBox extends StageElement
 
 	public Stadium getCurrentStadium()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return currentArea;
 	}
 
 	public Stadium getPreviousStadium()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return previousArea;
 	}
 
 	protected void setAreas()
 	{
 		previousArea.set(currentArea);
+		transformDirty = true;
 	}
 
 	public void computeNewPositions()
@@ -82,66 +87,91 @@ public strictfp class CollisionBox extends StageElement
 		ey = oldEX*sin + ey*cos;
 		currentArea.setStart(sx+originX+x, sy+originY+y)
 				.setEnd(ex+originX+x, ey+originY+y).setRadius(rad);
+		coordinatesDirty = false;
 	}
 
 	public void computeTransform()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		vanishPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
 				getStartX(1), getStartY(1), getEndX(0), getEndY(0),
 				getEndX(1), getEndY(1));
 		focusPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
 				getEndX(0), getEndY(0), getStartX(1), getStartY(1),
 				getEndX(1), getEndY(1));
+		transformDirty = false;
 	}
 
 	public void setStadium(Stadium newStadium)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		currentArea.set(newStadium);
 		coordinatesDirty = true;
+		transformDirty = true;
 	}
 
 	public double getStartX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return time*getPreviousStadium().getStartx() +
 				(1-time)*getCurrentStadium().getStartx();
 	}
 
 	public double getEndX(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return time*getPreviousStadium().getEndx() +
 				(1-time)*getCurrentStadium().getEndx();
 	}
 
 	public double getStartY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return time*getPreviousStadium().getStarty() +
 				(1-time)*getCurrentStadium().getStarty();
 	}
 
 	public double getEndY(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return time*getPreviousStadium().getEndy() +
 				(1-time)*getCurrentStadium().getEndy();
 	}
 
 	public double getRadius(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return time*getPreviousStadium().getRadius() +
 				(1-time)*getCurrentStadium().getRadius();
 	}
 
 	public double[] getFocus()
 	{
+		if (transformDirty)
+			computeTransform();
 		return focusPoint;
 	}
 
 	public double[] getVanish()
 	{
+		if (transformDirty)
+			computeTransform();
 		return vanishPoint;
 	}
 
 	public ProjectionVector depth(Stadium end, double xVel, double yVel)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		double sumRad = end.getRadius() + this.getRadius(1);
 		double time = 1;
 		double time0 = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
@@ -183,6 +213,10 @@ public strictfp class CollisionBox extends StageElement
 
 	public ProjectionVector instantVelocity(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact time
 		double sumRad = start.getRadius() + this.getRadius(1);
 		double dx = start.getEndx()-start.getStartx();
@@ -242,6 +276,10 @@ public strictfp class CollisionBox extends StageElement
 
 	public ProjectionVector normal(Stadium start)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		if (transformDirty)
+			computeTransform();
 		//Find contact point
 		double sumRad = start.getRadius() + this.getRadius(1);
 		double dx = start.getEndx()-start.getStartx();
@@ -289,6 +327,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public Rectangle getStartBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double radius = getRadius(0);
 		double xMin = StrictMath.min(getStartX(0), getEndX(0));
 		double xMax = StrictMath.max(getStartX(0), getEndX(0));
@@ -300,6 +340,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public Rectangle getTravelBounds()
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		double radius = getRadius(1);
 		double xMin = getStartX(0);
 		double xMax = getStartX(0);
@@ -323,6 +365,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		drawer.circle((float)getStartX(0), (float)getStartY(0), (float)getRadius(0));
 		drawer.circle((float)getEndX(0), (float)getEndX(0), (float)getRadius(0));
 		double len = StrictMath.hypot(getEndX(0)-getStartX(0),

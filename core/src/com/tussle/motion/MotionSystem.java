@@ -21,13 +21,8 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.tussle.collision.*;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static com.tussle.main.Utility.combineProjections;
-import static com.tussle.main.Utility.prunedProjections;
+import com.tussle.collision.StageElement;
+import com.tussle.collision.StageElementComponent;
 
 /**
  * Created by eaglgenes101 on 5/25/17.
@@ -43,8 +38,6 @@ public class MotionSystem extends IteratingSystem
 			ComponentMapper.getFor(PositionComponent.class);
 	ComponentMapper<VelocityComponent> velocityMapper =
 			ComponentMapper.getFor(VelocityComponent.class);
-	ComponentMapper<ECBComponent> ecbMapper =
-			ComponentMapper.getFor(ECBComponent.class);
 	ComponentMapper<StageElementComponent> surfaceMapper =
 			ComponentMapper.getFor(StageElementComponent.class);
 
@@ -57,28 +50,12 @@ public class MotionSystem extends IteratingSystem
 	{
 		positionMapper.get(entity).x += velocityMapper.get(entity).xVel;
 		positionMapper.get(entity).y += velocityMapper.get(entity).yVel;
-		if (ecbMapper.has(entity))
+		if (surfaceMapper.has(entity))
 		{
-			CollisionBox ours = ecbMapper.get(entity).getEcb();
-			double xVel = (ours.getEndX(1) + ours.getStartX(1)
-					- ours.getEndX(0) - ours.getStartX(0)) / 2;
-			double yVel = (ours.getEndY(1) + ours.getStartY(1)
-					- ours.getEndY(0) - ours.getStartY(0)) / 2;
-			Collection<ProjectionVector> vectorCollection = new ArrayList<>();
-			for (Entity surfaceHolder : getEngine().getEntitiesFor(surfaceFamily))
+			for (StageElement se : surfaceMapper.get(entity).get())
 			{
-				for (StageElement element : surfaceMapper.get(surfaceHolder).get())
-				{
-					ProjectionVector disp = element.depth(ours.getCurrentStadium(), xVel, yVel);
-					if (disp != null)
-						vectorCollection.add(disp);
-				}
-			}
-			ProjectionVector ourDisplace = combineProjections(prunedProjections(vectorCollection));
-			if (ourDisplace != null)
-			{
-				positionMapper.get(entity).x += ourDisplace.xnorm * ourDisplace.magnitude;
-				positionMapper.get(entity).y += ourDisplace.ynorm * ourDisplace.magnitude;
+				se.step();
+				se.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
 			}
 		}
 		//Collision system will handle normals and such

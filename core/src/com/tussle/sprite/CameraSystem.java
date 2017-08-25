@@ -33,7 +33,7 @@ import com.tussle.motion.PositionComponent;
 public class CameraSystem extends IteratingSystem
 {
 	public static final double ZOOM_FACTOR = .02;
-	public static final int MARGIN = 40;
+	public static final int MARGIN = 80;
 	private OrthographicCamera camera;
 
 	ComponentMapper<SpriteComponent> spriteMapper =

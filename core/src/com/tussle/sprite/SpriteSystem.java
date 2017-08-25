@@ -23,12 +23,11 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.tussle.motion.PositionComponent;
 
 /**
@@ -36,51 +35,30 @@ import com.tussle.motion.PositionComponent;
  */
 public class SpriteSystem extends IteratingSystem
 {
-	public static final double ZOOM_FACTOR = .02;
-	public static final int MARGIN = 40;
-
 	private AssetManager assetManager; // Points to the communal asset manager
+	private Camera camera; //The camera we use
 	private SpriteBatch batch; // Where we draw everything
-	private OrthographicCamera camera;
 
 	ComponentMapper<SpriteComponent> spriteMapper =
 			ComponentMapper.getFor(SpriteComponent.class);
 	ComponentMapper<PositionComponent> positionMapper =
 			ComponentMapper.getFor(PositionComponent.class);
-	private float currentx = 0;
-	private float currenty = 0;
-	private float minx = 0;
-	private float maxx = 0;
-	private float miny = 0;
-	private float maxy = 0;
 
-	public SpriteSystem(AssetManager manager, int p)
+	public SpriteSystem(AssetManager manager, Camera c, int p)
 	{
 		super(Family.all(SpriteComponent.class, PositionComponent.class).get(), p);
 		assetManager = manager;
 		batch = new SpriteBatch();
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera = c;
 	}
 
 	public void update(float delta)
 	{
-		minx += (currentx-MARGIN-minx)*ZOOM_FACTOR;
-		maxx += (currentx+MARGIN-maxx)*ZOOM_FACTOR;
-		miny += (currenty-MARGIN-miny)*ZOOM_FACTOR;
-		maxy += (currenty+MARGIN-maxy)*ZOOM_FACTOR;
 		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT);
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		super.update(delta);
 		batch.end();
-		currentx = (minx+maxx)/2;
-		currenty = (miny+maxy)/2;
-		//camera.zoom = Math.max((maxx-minx)/Gdx.graphics.getWidth(),
-		//		(maxy-miny)/Gdx.graphics.getHeight());
-		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		//Nicety for when stuff gets done
-		//camera.position.set(currentx, currenty, 0);
-		camera.update();
 	}
 
 	public void processEntity(Entity entity, float delta)
@@ -97,15 +75,6 @@ public class SpriteSystem extends IteratingSystem
 				sprite.setOriginCenter();
 				sprite.setPosition((float) positionComponent.x, (float) positionComponent.y);
 				sprite.draw(batch);
-				Rectangle rect = sprite.getBoundingRectangle();
-				if (rect.getX() < minx)
-					minx = rect.getX();
-				if (rect.getX() + rect.getWidth() > maxx)
-					maxx = rect.getX() + rect.getWidth();
-				if (rect.getY() < miny)
-					miny = rect.getY();
-				if (rect.getY() + rect.getHeight() > maxy)
-					maxy = rect.getY() + rect.getHeight();
 			}
 		}
 		//TODO: only track entities that are essential or have stage surfaces

@@ -17,6 +17,7 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
 
 public class StageCircle extends StageElement
@@ -86,8 +87,10 @@ public class StageCircle extends StageElement
 		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
 				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
 				xVel, yVel, 0, 0, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
+		else
+			System.out.println(time);
 		//Now we have the time, use this to determine facing
 		double xDistRew = xVel * (1 - time);
 		double yDistRew = yVel * (1 - time);
@@ -116,7 +119,7 @@ public class StageCircle extends StageElement
 		double ey = start.getEndy();
 		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
 				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
 		double segDX = currentx-previousx;
 		double segDY = currenty-previousy;
@@ -136,7 +139,7 @@ public class StageCircle extends StageElement
 		double ey = start.getEndy();
 		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
 				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
 		//We got contact time, now find velocity of contact
 		double atTimeX = (1-time)*previousx + time*currentx;
@@ -163,4 +166,10 @@ public class StageCircle extends StageElement
 		return new Rectangle(xMin-radius, yMin-radius,
 				xMax-xMin+2*radius, yMax-yMin+2*radius);
 	}
+
+	public void draw(ShapeRenderer drawer)
+	{
+		drawer.circle((float)getX(0), (float)getY(0), (float)getRadius(0));
+	}
+
 }

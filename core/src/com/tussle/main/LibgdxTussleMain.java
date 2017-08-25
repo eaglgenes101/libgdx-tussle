@@ -58,6 +58,12 @@ public class LibgdxTussleMain extends ApplicationAdapter
 		cage = engine.createEntity();
 		cage.add(engine.createComponent(PositionComponent.class));
 		cage.add(engine.createComponent(StageElementComponent.class));
+		cage.getComponent(StageElementComponent.class).put(new StageCircle(-320, -320, 160));
+		cage.getComponent(StageElementComponent.class).put(new StageCircle(320, -320, 160));
+		cage.getComponent(StageElementComponent.class).put(new StageCircle(320, 320, 160));
+		cage.getComponent(StageElementComponent.class).put(new StageCircle(-320, 320, 160));
+
+		/*
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 0, 0, 480));
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 480, 640, 480));
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, 640, 0));
@@ -66,6 +72,7 @@ public class LibgdxTussleMain extends ApplicationAdapter
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, 0, 480));
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 0, 640, 480));
 		cage.getComponent(StageElementComponent.class).put(new StageEdge(0, 0, 640, 0));
+		*/
 
 		engine.addEntity(ball);
 		engine.addEntity(cage);

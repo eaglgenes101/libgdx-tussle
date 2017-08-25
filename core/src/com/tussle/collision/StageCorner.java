@@ -17,6 +17,7 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
 
 /**
@@ -149,7 +150,7 @@ public class StageCorner extends StageElement
 		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
 				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
 				xVel, yVel, 0, 0, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
 		//Now we have the time, use this to determine facing
 		double xDistRew = xVel * (1 - time);
@@ -181,7 +182,7 @@ public class StageCorner extends StageElement
 		double ey = start.getEndy();
 		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
 				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
 		//We got contact time, now find velocity of contact
 		double atTimeX = (1-time)*previousx + time*currentx;
@@ -207,7 +208,7 @@ public class StageCorner extends StageElement
 		double ey = start.getEndy();
 		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
 				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (Double.isInfinite(time))
+		if (!Double.isFinite(time))
 			return null;
 		//We got contact time, now find velocity of contact
 		double atTimeX = (1-time)*previousx + time*currentx;
@@ -231,5 +232,14 @@ public class StageCorner extends StageElement
 		double yMin = StrictMath.min(currenty, previousy);
 		double yMax = StrictMath.max(currenty, previousy);
 		return new Rectangle(xMin, yMin, xMax-xMin, yMax-yMin);
+	}
+
+	public void draw(ShapeRenderer drawer)
+	{
+		drawer.circle((float)getX(0), (float)getY(0), 2);
+		drawer.line((float)getX(0), (float)getY(0),
+				(float)(getX(0)-currentLeftCos*4), (float)(getY(0)-currentLeftSin*4));
+		drawer.line((float)getX(0), (float)getY(0),
+				(float)(getX(0)-currentRightCos*4), (float)(getY(0)-currentRightSin*4));
 	}
 }

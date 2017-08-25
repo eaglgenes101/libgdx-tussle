@@ -78,7 +78,7 @@ public class MotionSystem extends IteratingSystem
 			if (ourDisplace != null)
 			{
 				positionMapper.get(entity).x += ourDisplace.xnorm * ourDisplace.magnitude;
-				positionMapper.get(entity).y += ourDisplace.xnorm * ourDisplace.magnitude;
+				positionMapper.get(entity).y += ourDisplace.ynorm * ourDisplace.magnitude;
 			}
 		}
 		//Collision system will handle normals and such

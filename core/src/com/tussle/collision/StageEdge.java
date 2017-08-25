@@ -17,6 +17,7 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
 import com.tussle.main.Utility;
 
@@ -311,5 +312,21 @@ public strictfp class StageEdge extends StageElement
 		if (getEndY(1) < yMin) yMin = getEndY(1);
 		else if (getEndY(1) > yMax) yMax = getEndY(1);
 		return new Rectangle(xMin, yMin, xMax-xMin, yMax-yMin);
+	}
+
+	public void draw(ShapeRenderer drawer)
+	{
+		//Draw a line, then a second line behind it to show orientation
+		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
+				getEndY(0)-getStartY(0));
+		double dx = (getStartY(0)-getEndY(0))*4/len;
+		double dy = (getEndX(0)-getStartX(0))*4/len;
+		drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
+				(float)(getEndX(0)), (float)(getEndY(0)));
+		drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
+				(float)(getStartX(0)-dx), (float)(getStartY(0)-dy));
+		drawer.line((float)(getEndX(0)), (float)(getEndY(0)),
+				(float)(getEndX(0)-dx), (float)(getEndY(0)-dy));
+
 	}
 }

@@ -22,6 +22,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.tussle.collision.HitboxPositionerSystem;
 import com.tussle.motion.CollisionSystem;
 import com.tussle.motion.MotionSystem;
+import com.tussle.sprite.CameraSystem;
+import com.tussle.sprite.HitboxDrawingSystem;
 import com.tussle.sprite.SpriteSystem;
 
 /**
@@ -40,7 +42,9 @@ public class TussleEngine extends PooledEngine
 		addSystem(new MotionSystem(0));
 		addSystem(new HitboxPositionerSystem(1));
 		addSystem(new CollisionSystem(2));
-		addSystem(new SpriteSystem(manager, 3));
+		addSystem(new CameraSystem(3));
+		addSystem(new SpriteSystem(manager, getSystem(CameraSystem.class).getCamera(),4));
+		addSystem(new HitboxDrawingSystem(getSystem(CameraSystem.class).getCamera(), 5));
 	}
 
 	public void update(float delta)

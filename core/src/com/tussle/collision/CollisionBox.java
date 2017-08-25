@@ -17,6 +17,7 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
 import com.tussle.main.Utility;
 
@@ -318,5 +319,19 @@ public strictfp class CollisionBox extends StageElement
 		else if (getEndY(1) > yMax) yMax = getEndY(1);
 		return new Rectangle(xMin-radius, yMin-radius,
 				xMax-xMin+2*radius, yMax-yMin+2*radius);
+	}
+
+	public void draw(ShapeRenderer drawer)
+	{
+		drawer.circle((float)getStartX(0), (float)getStartY(0), (float)getRadius(0));
+		drawer.circle((float)getEndX(0), (float)getEndX(0), (float)getRadius(0));
+		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
+				getEndY(0)-getStartY(0));
+		double dx = (getStartY(0)-getEndY(0))*getRadius(0)/len;
+		double dy = (getEndX(0)-getStartX(0))*getRadius(0)/len;
+		drawer.line((float)(getStartX(0)+dx), (float)(getStartY(0)+dy),
+				(float)(getEndX(0)+dx), (float)(getEndY(0)+dy));
+		drawer.line((float)(getStartX(0)-dx), (float)(getStartY(0)-dy),
+				(float)(getEndX(0)-dx), (float)(getEndY(0)-dy));
 	}
 }

@@ -17,6 +17,8 @@
 
 package com.tussle.collision;
 
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
 /**
  * Created by eaglgenes101 on 4/24/17.
  */
@@ -106,4 +108,6 @@ public abstract class StageElement
 	public abstract Rectangle getStartBounds();
 
 	public abstract Rectangle getTravelBounds();
+
+	public abstract void draw(ShapeRenderer drawer);
 }

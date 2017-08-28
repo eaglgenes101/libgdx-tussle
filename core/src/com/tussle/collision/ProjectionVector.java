@@ -49,4 +49,10 @@ public class ProjectionVector
 	{
 		return Double.hashCode(xnorm) ^ Double.hashCode(ynorm) ^ Double.hashCode(magnitude);
 	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("{[%f, %f], %f}", xnorm, ynorm, magnitude);
+	}
 }

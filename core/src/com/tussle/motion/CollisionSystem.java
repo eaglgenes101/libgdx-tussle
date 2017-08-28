@@ -25,7 +25,6 @@ import com.tussle.collision.*;
 import com.tussle.main.Utility;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import static com.tussle.main.Utility.combineProjections;
@@ -100,10 +99,10 @@ public class CollisionSystem extends IteratingSystem
 				}
 				if (deepNorm != null && deepVel != null)
 				{
+					System.out.printf("%s, %s", deepNorm.toString(), deepVel.toString());
 					//Now, given these projections, find the reflection angle
 					double relativeX = velocityMapper.get(entity).xVel - deepVel.magnitude * deepVel.xnorm;
 					double relativeY = velocityMapper.get(entity).yVel - deepVel.magnitude * deepVel.ynorm;
-
 					double[] proj = Utility.projection(relativeX, relativeY, deepNorm.xnorm, deepNorm.ynorm);
 					ElasticityComponent ec = elasticityMapper.get(entity);
 					double subVal;
@@ -113,7 +112,6 @@ public class CollisionSystem extends IteratingSystem
 						subVal = -1 - ec.getWallElasticity();
 					velocityMapper.get(entity).xVel += subVal * proj[0];
 					velocityMapper.get(entity).yVel += subVal * proj[1];
-					System.out.println(Arrays.toString(proj));
 				}
 			}
 		}

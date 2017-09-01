@@ -54,7 +54,7 @@ public class MotionSystem extends IteratingSystem
 		{
 			for (StageElement se : surfaceMapper.get(entity).get())
 			{
-				se.step();
+				se.setAreas();
 				se.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
 			}
 		}

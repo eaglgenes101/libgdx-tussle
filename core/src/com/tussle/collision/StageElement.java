@@ -33,14 +33,7 @@ public abstract class StageElement
 	protected boolean transformDirty = true;
 	protected boolean start = true;
 
-	public void step()
-	{
-		if (start)
-			computeNewPositions();
-		setAreas();
-	}
-
-	protected abstract void setAreas();
+	public abstract void setAreas();
 
 	protected abstract void computeNewPositions();
 

@@ -59,7 +59,7 @@ public class CollisionSystem extends IteratingSystem
 	public void processEntity(Entity entity, float delta)
 	{
 		CollisionBox ours = ecbMapper.get(entity).getEcb();
-		ours.step();
+		ours.setAreas();
 		ours.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
 		double xVel = (ours.getEndX(1) + ours.getStartX(1)
 					   - ours.getEndX(0) - ours.getStartX(0)) / 2;

@@ -47,12 +47,12 @@ public class ECBComponent implements Component
 		ecb.setRotation(angle);
 		ecb.setScale(scale);
 		ecb.setFlipped(flipped);
-		ecb.step();
+		ecb.setAreas();
 	}
 
 	public void setStadium(Stadium newStart)
 	{
 		ecb.setStadium(newStart);
-		ecb.step();
+		ecb.setAreas();
 	}
 }

@@ -47,7 +47,7 @@ public class LibgdxTussleMain extends ApplicationAdapter
 		ball.add(engine.createComponent(ECBComponent.class));
 		ball.add(engine.createComponent(ElasticityComponent.class));
 		ball.add(engine.createComponent(SpriteComponent.class));
-		ball.getComponent(PositionComponent.class).setPosition(320, 240);
+		ball.getComponent(PositionComponent.class).setPosition(0, 0);
 		ball.getComponent(VelocityComponent.class).xVel = 1;
 		ball.getComponent(VelocityComponent.class).yVel = 1;
 		ball.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 16));

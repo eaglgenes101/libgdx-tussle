@@ -71,9 +71,15 @@ public strictfp class StageEdge extends StageElement
 		currentx2 = ex + originX + x;
 		currenty2 = ey + originY + y;
 		coordinatesDirty = false;
+		if (start)
+		{
+			start = false;
+			transformDirty = true;
+			setAreas();
+		}
 	}
 
-	protected void setAreas()
+	public void setAreas()
 	{
 		if (coordinatesDirty)
 			computeNewPositions();

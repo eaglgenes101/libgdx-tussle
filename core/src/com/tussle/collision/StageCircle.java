@@ -48,12 +48,16 @@ public class StageCircle extends StageElement
 		currenty = locy + originY + y;
 		currentr = StrictMath.abs(localr*scale);
 		coordinatesDirty = false;
+		if (start)
+		{
+			start = false;
+			transformDirty = true;
+			setAreas();
+		}
 	}
 
-	protected void setAreas()
+	public void setAreas()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
 		previousx = currentx;
 		previousy = currenty;
 		previousr = currentr;
@@ -131,6 +135,7 @@ public class StageCircle extends StageElement
 
 	public ProjectionVector instantVelocity(Stadium start)
 	{
+		//???!
 		if (coordinatesDirty)
 			computeNewPositions();
 		if (transformDirty)
@@ -150,6 +155,7 @@ public class StageCircle extends StageElement
 		double segSpd = StrictMath.hypot(segDX, segDY);
 		if (segSpd == 0 || Double.isNaN(segSpd))
 			return null;
+		System.out.printf("(%f, %f), (%f, %f)\n", previousx, previousy, currentx, currenty);
 		return new ProjectionVector(segDX/segSpd, segDY/segSpd, segSpd);
 	}
 

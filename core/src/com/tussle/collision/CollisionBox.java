@@ -60,7 +60,7 @@ public strictfp class CollisionBox extends StageElement
 		return previousArea;
 	}
 
-	protected void setAreas()
+	public void setAreas()
 	{
 		previousArea.set(currentArea);
 		transformDirty = true;
@@ -88,6 +88,12 @@ public strictfp class CollisionBox extends StageElement
 		currentArea.setStart(sx+originX+x, sy+originY+y)
 				.setEnd(ex+originX+x, ey+originY+y).setRadius(rad);
 		coordinatesDirty = false;
+		if (start)
+		{
+			start = false;
+			transformDirty = true;
+			setAreas();
+		}
 	}
 
 	public void computeTransform()

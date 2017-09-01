@@ -67,9 +67,15 @@ public class StageCorner extends StageElement
 		currentLeftCos = StrictMath.cos(StrictMath.toRadians(maxAngle));
 		currentLeftSin = StrictMath.sin(StrictMath.toRadians(maxAngle));
 		coordinatesDirty = false;
+		if (start)
+		{
+			start = false;
+			transformDirty = true;
+			setAreas();
+		}
 	}
 
-	protected void setAreas()
+	public void setAreas()
 	{
 		if (coordinatesDirty)
 			computeNewPositions();

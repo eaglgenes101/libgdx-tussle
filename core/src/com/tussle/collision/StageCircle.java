@@ -113,8 +113,8 @@ public class StageCircle extends StageElement
 				xVel, yVel, 0, 0, sumRad);
 		if (!Double.isFinite(time))
 			return null;
-		else
-			System.out.println(time);
+		System.out.println(StrictMath.hypot(this.getX(1)-end.getStartx(),
+				this.getY(1)-end.getStarty())-sumRad);
 		//Now we have the time, use this to determine facing
 		double xDistRew = xVel * (1 - time);
 		double yDistRew = yVel * (1 - time);
@@ -124,9 +124,9 @@ public class StageCircle extends StageElement
 		double yEnd = end.getEndy()-yDistRew;
 		//Get angle of pt
 		ProjectionVector v = Intersector.dispSegmentPoint(xStart, yStart, xEnd, yEnd, currentx, currenty);
-		v.magnitude += sumRad;
-		double xDisp = v.xnorm * v.magnitude - xDistRew;
-		double yDisp = v.ynorm * v.magnitude - yDistRew;
+		v.magnitude -= sumRad;
+		double xDisp = -v.xnorm * v.magnitude + 1*xDistRew;
+		double yDisp = -v.ynorm * v.magnitude + 1*yDistRew;
 		double len = StrictMath.hypot(xDisp, yDisp);
 		if (len == 0 || Double.isNaN(len))
 			return null;
@@ -155,7 +155,6 @@ public class StageCircle extends StageElement
 		double segSpd = StrictMath.hypot(segDX, segDY);
 		if (segSpd == 0 || Double.isNaN(segSpd))
 			return null;
-		System.out.printf("(%f, %f), (%f, %f)\n", previousx, previousy, currentx, currenty);
 		return new ProjectionVector(segDX/segSpd, segDY/segSpd, segSpd);
 	}
 
@@ -210,6 +209,7 @@ public class StageCircle extends StageElement
 		if (coordinatesDirty)
 			computeNewPositions();
 		drawer.circle((float)getX(0), (float)getY(0), (float)getRadius(0));
+		drawer.circle((float)getX(1), (float)getY(1), (float)getRadius(1));
 	}
 
 }

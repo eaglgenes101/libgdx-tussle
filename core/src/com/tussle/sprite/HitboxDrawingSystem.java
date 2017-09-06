@@ -24,6 +24,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.tussle.collision.CollisionBox;
 import com.tussle.collision.ECBComponent;
 import com.tussle.collision.StageElement;
 import com.tussle.collision.StageElementComponent;
@@ -34,8 +35,6 @@ public class HitboxDrawingSystem extends IteratingSystem
 	private Camera camera; //The camera we use
 	ShapeRenderer drawer;
 
-	ComponentMapper<PositionComponent> positionMapper =
-			ComponentMapper.getFor(PositionComponent.class);
 	ComponentMapper<ECBComponent> ecbMapper =
 			ComponentMapper.getFor(ECBComponent.class);
 	ComponentMapper<StageElementComponent> surfaceMapper =
@@ -61,8 +60,9 @@ public class HitboxDrawingSystem extends IteratingSystem
 		if (ecbMapper.has(entity))
 		{
 			//Draw ECB
-			drawer.setColor(Color.BLUE);
-			ecbMapper.get(entity).getEcb().draw(drawer);
+			drawer.setColor(Color.GREEN);
+			CollisionBox c = ecbMapper.get(entity).getEcb();
+			c.draw(drawer);
 		}
 		if (surfaceMapper.has(entity))
 		{

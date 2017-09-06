@@ -47,10 +47,10 @@ public class LibgdxTussleMain extends ApplicationAdapter
 		ball.add(engine.createComponent(ECBComponent.class));
 		ball.add(engine.createComponent(ElasticityComponent.class));
 		ball.add(engine.createComponent(SpriteComponent.class));
-		ball.getComponent(PositionComponent.class).setPosition(0, 0);
+		ball.getComponent(PositionComponent.class).setPosition(0, 160);
 		ball.getComponent(VelocityComponent.class).xVel = 1;
 		ball.getComponent(VelocityComponent.class).yVel = 1;
-		ball.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 16));
+		ball.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 32));
 		ball.getComponent(ElasticityComponent.class).wallElasticity = 0.9;
 		ball.getComponent(ElasticityComponent.class).groundElasticity = 0.9;
 		ball.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");

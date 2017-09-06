@@ -357,14 +357,35 @@ public strictfp class StageEdge extends StageElement
 			computeNewPositions();
 		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
-		double dx = (getStartY(0)-getEndY(0))*4/len;
-		double dy = (getEndX(0)-getStartX(0))*4/len;
-		drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
-				(float)(getEndX(0)), (float)(getEndY(0)));
-		drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
-				(float)(getStartX(0)-dx), (float)(getStartY(0)-dy));
-		drawer.line((float)(getEndX(0)), (float)(getEndY(0)),
-				(float)(getEndX(0)-dx), (float)(getEndY(0)-dy));
+		if (len > 0)
+		{
+			double dx = (getStartY(0) - getEndY(0)) * 4 / len;
+			double dy = (getEndX(0) - getStartX(0)) * 4 / len;
+			drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
+					(float)(getEndX(0)), (float)(getEndY(0)));
+			drawer.line((float)(getStartX(0)), (float)(getStartY(0)),
+					(float)(getStartX(0) - dx), (float)(getStartY(0) - dy));
+			drawer.line((float)(getEndX(0)), (float)(getEndY(0)),
+					(float)(getEndX(0) - dx), (float)(getEndY(0) - dy));
+		}
+		else
+			drawer.point((float)getStartX(0), (float)getStartY(0), 0);
+
+		len = StrictMath.hypot(getEndX(1)-getStartX(1),
+				getEndY(1)-getStartY(1));
+		if (len > 0)
+		{
+			double dx = (getStartY(1) - getEndY(1)) * 4 / len;
+			double dy = (getEndX(1) - getStartX(1)) * 4 / len;
+			drawer.line((float)(getStartX(1)), (float)(getStartY(1)),
+					(float)(getEndX(1)), (float)(getEndY(1)));
+			drawer.line((float)(getStartX(1)), (float)(getStartY(1)),
+					(float)(getStartX(1) - dx), (float)(getStartY(1) - dy));
+			drawer.line((float)(getEndX(1)), (float)(getEndY(1)),
+					(float)(getEndX(1) - dx), (float)(getEndY(1) - dy));
+		}
+		else
+			drawer.point((float)getStartX(1), (float)getStartY(1), 0);
 
 	}
 }

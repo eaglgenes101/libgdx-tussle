@@ -157,6 +157,41 @@ public strictfp class Intersector
 		return new ProjectionVector(xVec, yVec, dist);
 	}
 
+
+	public static double sideSegmentPoint(double startX, double startY, double endX,
+										  double endY, double pointX, double pointY)
+	{
+		double x;
+		double y;
+		double length2 = (endX-startX)*(endX-startX)+(endY-startY)*(endY-startY);
+		if (length2 == 0)
+		{
+			x = startX;
+			y = startY;
+		}
+		else
+		{
+			double t = ((pointX - startX) * (endX - startX) +
+						(pointY - startY) * (endY - startY)) / length2;
+			if (t < 0)
+			{
+				x = startX;
+				y = startY;
+			}
+			else if (t > 1)
+			{
+				x = endX;
+				y = endY;
+			}
+			else
+			{
+				x = startX + t * (endX - startX);
+				y = startY + t * (endY - startY);
+			}
+		}
+		return pointLineSide(startX, startY, endX, endY, x, y);
+	}
+
 	public static boolean segmentsIntersect(double x1, double y1, double x2, double y2,
 											double x3, double y3, double x4, double y4)
 	{
@@ -232,6 +267,22 @@ public strictfp class Intersector
 			return dispSegmentPoint(x1, y1, x2, y2, x4, y4);
 	}
 
+	public static double sideSegments(double x1, double y1, double x2, double y2,
+												double x3, double y3, double x4, double y4)
+	{
+		double a = d2SegmentPoint(x3, y3, x4, y4, x1, y1);
+		double b = d2SegmentPoint(x3, y3, x4, y4, x2, y2);
+		double c = d2SegmentPoint(x1, y1, x2, y2, x3, y3);
+		double d = d2SegmentPoint(x1, y1, x2, y2, x4, y4);
+		if ( (a<b) && ((a<c && a<=d) || (a==c && a==d)))
+			return sideSegmentPoint(x4, y4, x3, y3, x1, y1);
+		else if ( (b<c) && ((b<d && b<=a) || (b==d && b==a)))
+			return sideSegmentPoint(x4, y4, x3, y3, x2, y2);
+		else if ( (c<d) && ((c<a && c<=b) || (c==a && c==b)))
+			return sideSegmentPoint(x1, y1, x2, y2, x3, y3);
+		else
+			return sideSegmentPoint(x1, y1, x2, y2, x4, y4);
+	}
 
 	public static double pointLineSide (double linePoint1X, double linePoint1Y, double linePoint2X,
 									 double linePoint2Y, double pointX, double pointY)

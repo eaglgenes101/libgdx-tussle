@@ -277,5 +277,10 @@ public class StageCorner extends StageElement
 				(float)(getX(0)-currentLeftCos*4), (float)(getY(0)-currentLeftSin*4));
 		drawer.line((float)getX(0), (float)getY(0),
 				(float)(getX(0)-currentRightCos*4), (float)(getY(0)-currentRightSin*4));
+		drawer.circle((float)getX(1), (float)getY(1), 2);
+		drawer.line((float)getX(1), (float)getY(1),
+				(float)(getX(1)-currentLeftCos*4), (float)(getY(1)-currentLeftSin*4));
+		drawer.line((float)getX(1), (float)getY(1),
+				(float)(getX(1)-currentRightCos*4), (float)(getY(1)-currentRightSin*4));
 	}
 }

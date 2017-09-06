@@ -122,40 +122,40 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return time*getPreviousStadium().getStartx() +
-				(1-time)*getCurrentStadium().getStartx();
+		return (1-time)*getPreviousStadium().getStartx() +
+				(time)*getCurrentStadium().getStartx();
 	}
 
 	public double getEndX(double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return time*getPreviousStadium().getEndx() +
-				(1-time)*getCurrentStadium().getEndx();
+		return (1-time)*getPreviousStadium().getEndx() +
+				(time)*getCurrentStadium().getEndx();
 	}
 
 	public double getStartY(double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return time*getPreviousStadium().getStarty() +
-				(1-time)*getCurrentStadium().getStarty();
+		return (1-time)*getPreviousStadium().getStarty() +
+				(time)*getCurrentStadium().getStarty();
 	}
 
 	public double getEndY(double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return time*getPreviousStadium().getEndy() +
-				(1-time)*getCurrentStadium().getEndy();
+		return (1-time)*getPreviousStadium().getEndy() +
+				(time)*getCurrentStadium().getEndy();
 	}
 
 	public double getRadius(double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return time*getPreviousStadium().getRadius() +
-				(1-time)*getCurrentStadium().getRadius();
+		return (1-time)*getPreviousStadium().getRadius() +
+				(time)*getCurrentStadium().getRadius();
 	}
 
 	public double[] getFocus()
@@ -377,11 +377,28 @@ public strictfp class CollisionBox extends StageElement
 		drawer.circle((float)getEndX(0), (float)getEndX(0), (float)getRadius(0));
 		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
-		double dx = (getStartY(0)-getEndY(0))*getRadius(0)/len;
-		double dy = (getEndX(0)-getStartX(0))*getRadius(0)/len;
-		drawer.line((float)(getStartX(0)+dx), (float)(getStartY(0)+dy),
-				(float)(getEndX(0)+dx), (float)(getEndY(0)+dy));
-		drawer.line((float)(getStartX(0)-dx), (float)(getStartY(0)-dy),
-				(float)(getEndX(0)-dx), (float)(getEndY(0)-dy));
+		if (len > 0)
+		{
+			double dx = (getStartY(0) - getEndY(0)) * getRadius(0) / len;
+			double dy = (getEndX(0) - getStartX(0)) * getRadius(0) / len;
+			drawer.line((float)(getStartX(0) + dx), (float)(getStartY(0) + dy),
+					(float)(getEndX(0) + dx), (float)(getEndY(0) + dy));
+			drawer.line((float)(getStartX(0) - dx), (float)(getStartY(0) - dy),
+					(float)(getEndX(0) - dx), (float)(getEndY(0) - dy));
+		}
+
+		drawer.circle((float)getStartX(1), (float)getStartY(1), (float)getRadius(1));
+		drawer.circle((float)getEndX(1), (float)getEndX(1), (float)getRadius(1));
+		len = StrictMath.hypot(getEndX(1)-getStartX(1),
+				getEndY(1)-getStartY(1));
+		if (len > 0)
+		{
+			double dx = (getStartY(1) - getEndY(1)) * getRadius(1) / len;
+			double dy = (getEndX(1) - getStartX(1)) * getRadius(1) / len;
+			drawer.line((float)(getStartX(1) + dx), (float)(getStartY(1) + dy),
+					(float)(getEndX(1) + dx), (float)(getEndY(1) + dy));
+			drawer.line((float)(getStartX(1) - dx), (float)(getStartY(1) - dy),
+					(float)(getEndX(1) - dx), (float)(getEndY(1) - dy));
+		}
 	}
 }

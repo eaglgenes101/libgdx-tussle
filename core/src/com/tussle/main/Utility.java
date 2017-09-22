@@ -18,6 +18,8 @@
 package com.tussle.main;
 
 import com.tussle.collision.ProjectionVector;
+import com.tussle.collision.Stadium;
+import com.tussle.collision.StageElement;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -372,6 +374,50 @@ public strictfp class Utility
 		double lx = x2-x1;
 		double ly = y2-y1;
 		return (dx*lx+dy*ly)/(lx*lx+ly*ly);
+	}
+
+	public static boolean projectionsClose(ProjectionVector p1, ProjectionVector p2)
+	{
+		return (p1.xnorm*p2.xnorm+p1.ynorm*p2.ynorm > .8) &&
+			   (p2.magnitude-p1.magnitude <= 8);
+	}
+
+	public static ProjectionVector velocityDifference(StageElement se,
+			Stadium startStad, Stadium endStad, double startTime, double endTime)
+	{
+		double time = endTime-startTime;
+		double startDX = (endStad.getStartx() - startStad.getStartx())/time;
+		double startDY = (endStad.getStarty() - startStad.getStarty())/time;
+		double endDX = (endStad.getEndx() - startStad.getEndx())/time;
+		double endDY = (endStad.getEndy() - startStad.getEndy())/time;
+
+		ProjectionVector stageVelocity = se.instantVelocity(endStad, time);
+		double ecbPortion = se.stadiumPortion(endStad, time);
+
+		double partDX = (1-ecbPortion)*startDX + ecbPortion*endDX;
+		double partDY = (1-ecbPortion)*startDY + ecbPortion*endDY;
+		double stageDX = stageVelocity.xnorm*stageVelocity.magnitude;
+		double stageDY = stageVelocity.ynorm*stageVelocity.magnitude;
+		double DXdiff = partDX-stageDX;
+		double DYdiff = partDY-stageDY;
+		double magDiff = StrictMath.hypot(DXdiff, DYdiff);
+		ProjectionVector workingVal = new ProjectionVector(DXdiff/magDiff, DYdiff/magDiff, magDiff);
+		if (DXdiff*stageDX + DYdiff*stageDY > 0)
+		{
+			workingVal.xnorm *= -1;
+			workingVal.ynorm *= -1;
+			workingVal.magnitude *= -1;
+		}
+		workingVal.magnitude += endStad.getRadius() - startStad.getRadius();
+		return workingVal;
+
+	}
+
+	public static Stadium middleStad(Stadium s1, Stadium s2)
+	{
+		return new Stadium((s1.getStartx()+s2.getStartx())/2, (s1.getStarty()+s2.getStarty())/2,
+				(s1.getEndx()+s2.getEndx())/2, (s1.getEndy()+s2.getEndy())/2,
+				(s1.getRadius()+s2.getRadius())/2);
 	}
 
 }

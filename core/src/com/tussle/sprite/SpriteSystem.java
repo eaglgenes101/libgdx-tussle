@@ -73,7 +73,7 @@ public class SpriteSystem extends IteratingSystem
 			if (sprite != null)
 			{
 				sprite.setOriginCenter();
-				sprite.setPosition((float) positionComponent.x, (float) positionComponent.y);
+				sprite.setCenter((float) positionComponent.x, (float) positionComponent.y);
 				sprite.draw(batch);
 			}
 		}

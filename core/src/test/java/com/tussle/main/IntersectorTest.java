@@ -143,78 +143,10 @@ public class IntersectorTest
 	}
 
 	@Test
-	void timeMovingSegmentCircleTest()
-	{
-		assertEquals(timeMovingSegmentCircle(-1, -1, 1, -1, 0, 2, .5),
-				.25, FP_TOLERANCE);
-		assertEquals(timeMovingSegmentCircle(-1, 0, 1, 0, 0, 1, .5),
-				0, FP_TOLERANCE);
-		assertEquals(timeMovingSegmentCircle(-3, 0, -1, 0, 1, 0, .5),
-				.5, FP_TOLERANCE);
-	}
-
-	@Test
 	void partCircleSegmentTest()
 	{
 		assertEquals(partCircleSegment(-2, 0, 2, 0, 0, 0, 1), .25, FP_TOLERANCE);
 		assertEquals(partCircleSegment(0, 0, 2, 0, 0, 0, 1), .5, FP_TOLERANCE);
 	}
 
-	@Test
-	void timeSegmentCircleTest1()
-	{
-		assertEquals(timeSegmentCircle(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, -1, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, .5, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, 0, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, 1, 1, .5), Double.NaN);
-		assertEquals(timeSegmentCircle(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, -1, 2, .5), Double.NaN);
-	}
-
-	@Test
-	void timeSegmentCircleTest2()
-	{
-		assertEquals(timeSegmentCircle(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, -1, 1, 1), 0, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 0, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 1, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 2, .5, 1), .75, FP_TOLERANCE);
-		assertEquals(timeSegmentCircle(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 0, 2, 1), Double.NaN);
-	}
-
-	@Test
-	void timeMovingSegmentsTest1()
-	{
-		assertEquals(timeMovingSegments(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, -2, 0, 2, 0), .5, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, -2, -1, 0, 1), .5, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, 0, .5, 1, -.5), .5, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, 0, 0, 0, -2), 0, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, -1, 1, -1, -1, 1, 0, 1,
-				ap, aq, ax, ay, 0, 0, 0, 2), .5, FP_TOLERANCE);
-	}
-
-	@Test
-	void timeMovingSegmentsTest2()
-	{
-		assertEquals(timeMovingSegments(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, -2, 0, 2, 0), 0, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 0, 0, 2, 0), .5, FP_TOLERANCE);
-		assertEquals(timeMovingSegments(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, -1, 1, 1, 2), Double.NaN);
-		assertEquals(timeMovingSegments(-1, 0, 1, -1, -1, 0, 1, 1,
-				bp, bq, bx, by, 0, 1, 2, -1), .5, FP_TOLERANCE);
-	}
 }

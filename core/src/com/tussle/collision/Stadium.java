@@ -17,7 +17,6 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.tussle.main.Intersector;
 
 /**
@@ -137,5 +136,14 @@ public class Stadium
 			return (startx-x)*(startx-x)+(starty-y)*(starty-y) <= radius*radius;
 		return Intersector.d2SegmentPoint(startx, starty, endx, endy, x, y)
 				< radius*radius;
+	}
+
+	public Stadium displace(double x, double y)
+	{
+		this.startx += x;
+		this.starty += y;
+		this.endx += x;
+		this.endy += y;
+		return this;
 	}
 }

@@ -30,21 +30,17 @@ public abstract class StageElement
 	protected double scale = 1;
 	protected boolean flipped = false;
 	protected boolean coordinatesDirty = true;
-	protected boolean transformDirty = true;
 	protected boolean start = true;
 
 	public abstract void setAreas();
 
 	protected abstract void computeNewPositions();
 
-	protected abstract void computeTransform();
-
 	public void setOrigin(double originX, double originY)
 	{
 		this.originX = originX;
 		this.originY = originY;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public void setPosition(double x, double y)
@@ -52,28 +48,24 @@ public abstract class StageElement
 		this.x = x;
 		this.y = y;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public void setRotation(double degrees)
 	{
 		this.rotation = degrees;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public void setScale(double scale)
 	{
 		this.scale = scale;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public void setFlipped(boolean flipped)
 	{
 		this.flipped = flipped;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public double getRotation()
@@ -88,21 +80,21 @@ public abstract class StageElement
 	{
 		start = true;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
-	//Minimal displacement needed to prevent intersection
-	public abstract ProjectionVector depth(Stadium end, double xVel, double yVel);
+	//Minimal displacement needed to prevent intersection given the time and stadium
+	public abstract ProjectionVector depth(Stadium end, double time);
 
 	//Instantaneous velocity at point closest to the given stadium
-	public abstract ProjectionVector instantVelocity(Stadium start);
+	public abstract ProjectionVector instantVelocity(Stadium start, double time);
 
-	//Ejection normal of the stadium
-	public abstract ProjectionVector normal(Stadium start);
+	//Portion of the stadium that the stage element is closest to
+	public abstract double stadiumPortion(Stadium start, double time);
 
-	public abstract Rectangle getStartBounds();
+	//Boolean indicating if the ECB interacts with the stage surface at this time
+	public abstract boolean collides(Stadium end, double time);
 
-	public abstract Rectangle getTravelBounds();
+	public abstract Rectangle getBounds(double start, double end);
 
 	public abstract void draw(ShapeRenderer drawer);
 }

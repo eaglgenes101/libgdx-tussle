@@ -19,7 +19,6 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
-import com.tussle.main.Utility;
 
 /**
  * Created by eaglgenes101 on 4/15/17.
@@ -29,8 +28,6 @@ public strictfp class CollisionBox extends StageElement
 	private Stadium localArea;
 	private Stadium currentArea;
 	private Stadium previousArea;
-	private double[] vanishPoint = {Double.NaN, Double.NaN};
-	private double[] focusPoint = {Double.NaN, Double.NaN};
 
 	public CollisionBox()
 	{
@@ -63,7 +60,6 @@ public strictfp class CollisionBox extends StageElement
 	public void setAreas()
 	{
 		previousArea.set(currentArea);
-		transformDirty = true;
 	}
 
 	public void computeNewPositions()
@@ -91,31 +87,16 @@ public strictfp class CollisionBox extends StageElement
 		if (start)
 		{
 			start = false;
-			transformDirty = true;
 			setAreas();
 		}
-	}
-
-	public void computeTransform()
-	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		vanishPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
-				getStartX(1), getStartY(1), getEndX(0), getEndY(0),
-				getEndX(1), getEndY(1));
-		focusPoint = Utility.segmentsIntersectionPoint(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartY(1),
-				getEndX(1), getEndY(1));
-		transformDirty = false;
 	}
 
 	public void setStadium(Stadium newStadium)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		currentArea.set(newStadium);
+		localArea.set(newStadium);
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public double getStartX(double time)
@@ -158,215 +139,101 @@ public strictfp class CollisionBox extends StageElement
 				(time)*getCurrentStadium().getRadius();
 	}
 
-	public double[] getFocus()
+	public Stadium getStadiumAt(double time)
 	{
-		if (transformDirty)
-			computeTransform();
-		return focusPoint;
+		return new Stadium(getStartX(time), getStartY(time),
+				getEndX(time), getEndY(time), getRadius(time));
 	}
 
-	public double[] getVanish()
-	{
-		if (transformDirty)
-			computeTransform();
-		return vanishPoint;
-	}
-
-	public ProjectionVector depth(Stadium end, double xVel, double yVel)
+	public ProjectionVector depth(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		double sumRad = end.getRadius() + this.getRadius(1);
-		double time = 1;
-		double time0 = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
-				end.getEndx() - xVel, end.getEndy() - yVel, getStartX(1), getStartY(1),
-				xVel, yVel, 0, 0, sumRad);
-		double time1 = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
-				end.getEndx() - xVel, end.getEndy() - yVel, getEndX(1), getEndY(1),
-				xVel, yVel, 0, 0, sumRad);
-		double time2 = Intersector.timeMovingSegmentCircle(getStartX(1), getStartY(1),
-				getEndX(1), getEndY(1), end.getStartx() - xVel, end.getStarty() - yVel,
-					0, 0, xVel, yVel, sumRad);
-		double time3 = Intersector.timeMovingSegmentCircle(getStartX(1), getStartY(1),
-				getEndX(1), getEndY(1), end.getEndx() - xVel, end.getEndy() - yVel,
-				0, 0, xVel, yVel, sumRad);
-		if (Double.isFinite(time0) && time0 < time) time = time0;
-		if (Double.isFinite(time1) && time1 < time) time = time1;
-		if (Double.isFinite(time2) && time2 < time) time = time2;
-		if (Double.isFinite(time3) && time3 < time) time = time3;
-		if (time >= 1)
-			return null;
-		//Now we have the time, use this to determine facing
-		double xDistRew = xVel * (1 - time);
-		double yDistRew = yVel * (1 - time);
-		double xStart = end.getStartx()-xDistRew;
-		double yStart = end.getStarty()-yDistRew;
-		double xEnd = end.getEndx()-xDistRew;
-		double yEnd = end.getEndy()-yDistRew;
-		ProjectionVector v = Intersector.displacementSegments(xStart, yStart, xEnd, yEnd,
-				getStartX(1), getStartY(1), getEndX(1), getEndY(1));
-		v.magnitude += sumRad;
-		double xDisp = v.xnorm*v.magnitude - xDistRew;
-		double yDisp = v.ynorm*v.magnitude - yDistRew;
-		double len = StrictMath.hypot(xDisp, yDisp);
-		if (len == 0 || Double.isNaN(len))
-			return null;
+		double startX = getStartX(time);
+		double startY = getStartY(time);
+		double endX = getEndX(time);
+		double endY = getEndY(time);
+		ProjectionVector disp = Intersector.displacementSegments(startX, startY, endX, endY,
+				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		disp.magnitude += getRadius(time) + stad.getRadius();
+		return disp;
+	}
+
+	public ProjectionVector instantVelocity(Stadium stad, double time)
+	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		double startX = getStartX(time);
+		double startY = getStartY(time);
+		double endX = getEndX(time);
+		double endY = getEndY(time);
+		double startDX = getStartX(1)-getStartX(0);
+		double startDY = getStartY(1)-getStartY(1);
+		double endDX = getEndX(1)-getEndX(0);
+		double endDY = getEndY(1)-getEndY(0);
+		double section = Intersector.partSegments(startX, startY, endX, endY,
+				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		double secDX = (1-section)*startDX + section*endDX;
+		double secDY = (1-section)*startDY + section*endDY;
+		if (secDX == 0 && secDY == 0)
+			return new ProjectionVector(0, 0, 0);
 		else
-			return new ProjectionVector(xDisp/len, yDisp/len, len);
+		{
+			double len = StrictMath.hypot(secDX, secDY);
+			return new ProjectionVector(secDX/len, secDY/len, len);
+		}
 	}
 
-	public ProjectionVector instantVelocity(Stadium start)
+	public boolean collides(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		//Find contact time
-		double sumRad = start.getRadius() + this.getRadius(1);
-		double dx = start.getEndx()-start.getStartx();
-		double dy = start.getEndy()-start.getStarty();
-		double len = StrictMath.hypot(dx, dy);
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double radx = start.getRadius()*dy/len;
-		double rady = -start.getRadius()*dx/len;
-		double time = Double.POSITIVE_INFINITY;
-		//Start circle contact
-		double time0 = Intersector.timeSegmentCircle(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], start.getStartx(), start.getStarty(),sumRad);
-		//End circle contact
-		double time1 = Intersector.timeSegmentCircle(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], start.getEndx(), start.getEndy(), sumRad);
-		//Segment contact 1
-		double time2 = Intersector.timeMovingSegments(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], sx+radx, sy+rady, ex+radx, ey+rady);
-		//Segment contact 2
-		double time3 = Intersector.timeMovingSegments(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], sx-radx, sy-rady, ex-radx, ey-rady);
-		if (Double.isFinite(time0) && time0 < time) time = time0;
-		if (Double.isFinite(time1) && time1 < time) time = time1;
-		if (Double.isFinite(time2) && time2 < time) time = time2;
-		if (Double.isFinite(time3) && time3 < time) time = time3;
-		if (time >= 1)
-			return null;
-		//We got contact time, now find velocity of contact
-		double part = Intersector.partSegments(
-				getStartX(0) + time*(getStartX(1)-getStartX(0)),
-				getStartY(0) + time*(getStartY(1)-getStartY(0)),
-				getEndX(0) + time*(getEndX(1)-getEndX(0)),
-				getEndY(0) + time*(getEndY(1)-getEndY(1)),
-				sx, sy, ex, ey);
-		double segPartCX = (1-part)*getStartX(1) + part*getEndX(1);
-		double segPartCY = (1-part)*getStartY(1) + part*getEndY(1);
-		double segPartPX = (1-part)*getStartX(0) + part*getEndX(0);
-		double segPartPY = (1-part)*getStartY(0) + part*getEndY(0);
-		double segDX = segPartCX-segPartPX;
-		double segDY = segPartCY-segPartPY;
-		double segSpd = StrictMath.hypot(segDX, segDY);
-		if (segSpd == 0 || Double.isNaN(segSpd))
-			return null;
-		return new ProjectionVector(segDX/segSpd, segDY/segSpd, segSpd);
+		double startX = getStartX(time);
+		double startY = getStartY(time);
+		double endX = getEndX(time);
+		double endY = getEndY(time);
+		ProjectionVector disp = Intersector.displacementSegments(startX, startY, endX, endY,
+				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		return disp.magnitude <= getRadius(time) + stad.getRadius();
 	}
 
-	public ProjectionVector normal(Stadium start)
+	public double stadiumPortion(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		//Find contact point
-		double sumRad = start.getRadius() + this.getRadius(1);
-		double dx = start.getEndx()-start.getStartx();
-		double dy = start.getEndy()-start.getStarty();
-		double len = StrictMath.hypot(dx, dy);
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double radx = start.getRadius()*dy/len;
-		double rady = -start.getRadius()*dx/len;
-		double time = Double.POSITIVE_INFINITY;
-		//Start circle contact
-		double time0 = Intersector.timeSegmentCircle(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], start.getStartx(), start.getStarty(),sumRad);
-		//End circle contact
-		double time1 = Intersector.timeSegmentCircle(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], start.getEndx(), start.getEndy(), sumRad);
-		//Segment contact 1
-		double time2 = Intersector.timeMovingSegments(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], sx+radx, sy+rady, ex+radx, ey+rady);
-		//Segment contact 2
-		double time3 = Intersector.timeMovingSegments(getStartX(0), getStartY(0),
-				getEndX(0), getEndY(0), getStartX(1), getStartX(1),
-				getEndX(1), getEndY(1), focusPoint[0], focusPoint[1],
-				vanishPoint[0], vanishPoint[1], sx-radx, sy-rady, ex-radx, ey-rady);
-		if (Double.isFinite(time0) && time0 < time) time = time0;
-		if (Double.isFinite(time1) && time1 < time) time = time1;
-		if (Double.isFinite(time2) && time2 < time) time = time2;
-		if (Double.isFinite(time3) && time3 < time) time = time3;
-		if (time >= 1)
-			return null;
-		//We got contact time, now find normal of contact
-		ProjectionVector v = Intersector.displacementSegments(start.getStartx(), start.getStarty(),
-				start.getEndx(), start.getEndy(), getStartX(time), getStartY(time),
-				getEndX(time), getEndY(time));		v.magnitude += sumRad;
-		return v;
+		double startX = getStartX(time);
+		double startY = getStartY(time);
+		double endX = getEndX(time);
+		double endY = getEndY(time);
+		return Intersector.partSegments(stad.getStartx(), stad.getStarty(),
+				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
 	}
 
-	public Rectangle getStartBounds()
+	public Rectangle getBounds(double start, double end)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double radius = getRadius(0);
-		double xMin = StrictMath.min(getStartX(0), getEndX(0));
-		double xMax = StrictMath.max(getStartX(0), getEndX(0));
-		double yMin = StrictMath.min(getStartY(0), getEndY(0));
-		double yMax = StrictMath.max(getStartY(0), getEndY(0));
-		return new Rectangle(xMin-radius, yMin-radius,
-				xMax-xMin+2*radius, yMax-yMin+2*radius);
-	}
-
-	public Rectangle getTravelBounds()
-	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		double radius = getRadius(1);
-		double xMin = getStartX(0);
-		double xMax = getStartX(0);
-		double yMin = getStartY(0);
-		double yMax = getStartY(0);
-		if (getStartX(1) < xMin) xMin = getStartX(1);
-		else if (getStartX(1) > xMax) xMax = getStartX(1);
-		if (getEndX(0) < xMin) xMin = getEndX(0);
-		else if (getEndX(0) > xMax) xMax = getEndX(0);
-		if (getEndX(1) < xMin) xMin = getEndX(1);
-		else if (getEndX(1) > xMax) xMax = getEndX(1);
-		if (getStartY(1) < yMin) yMin = getStartY(1);
-		else if (getStartY(1) > yMax) yMax = getStartY(1);
-		if (getEndY(0) < yMin) yMin = getEndY(0);
-		else if (getEndY(0) > yMax) yMax = getEndY(0);
-		if (getEndY(1) < yMin) yMin = getEndY(1);
-		else if (getEndY(1) > yMax) yMax = getEndY(1);
-		return new Rectangle(xMin-radius, yMin-radius,
-				xMax-xMin+2*radius, yMax-yMin+2*radius);
+		double startXMin = StrictMath.min(getStartX(start)-getRadius(start),
+				getStartX(end)-getRadius(end));
+		double startYMin = StrictMath.min(getStartY(start)-getRadius(start),
+				getStartY(end)-getRadius(end));
+		double startXMax = StrictMath.max(getStartX(start)+getRadius(start),
+				getStartX(end)+getRadius(end));
+		double startYMax = StrictMath.max(getStartY(start)+getRadius(start),
+				getStartY(end)+getRadius(end));
+		double endXMin = StrictMath.min(getEndX(start)-getRadius(start),
+				getEndX(end)-getRadius(end));
+		double endYMin = StrictMath.min(getEndY(start)-getRadius(start),
+				getEndY(end)-getRadius(end));
+		double endXMax = StrictMath.max(getEndX(start)+getRadius(start),
+				getEndX(end)+getRadius(end));
+		double endYMax = StrictMath.max(getEndY(start)+getRadius(start),
+				getEndY(end)+getRadius(end));
+		double minX = StrictMath.min(startXMin, endXMin);
+		double maxX = StrictMath.max(startXMax, endXMax);
+		double minY = StrictMath.min(startYMin, endYMin);
+		double maxY = StrictMath.max(startYMax, endYMax);
+		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 
 	public void draw(ShapeRenderer drawer)
@@ -374,7 +241,7 @@ public strictfp class CollisionBox extends StageElement
 		if (coordinatesDirty)
 			computeNewPositions();
 		drawer.circle((float)getStartX(0), (float)getStartY(0), (float)getRadius(0));
-		drawer.circle((float)getEndX(0), (float)getEndX(0), (float)getRadius(0));
+		drawer.circle((float)getEndX(0), (float)getEndY(0), (float)getRadius(0));
 		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
 		if (len > 0)
@@ -388,7 +255,7 @@ public strictfp class CollisionBox extends StageElement
 		}
 
 		drawer.circle((float)getStartX(1), (float)getStartY(1), (float)getRadius(1));
-		drawer.circle((float)getEndX(1), (float)getEndX(1), (float)getRadius(1));
+		drawer.circle((float)getEndX(1), (float)getEndY(1), (float)getRadius(1));
 		len = StrictMath.hypot(getEndX(1)-getStartX(1),
 				getEndY(1)-getStartY(1));
 		if (len > 0)

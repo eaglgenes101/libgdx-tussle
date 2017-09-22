@@ -51,7 +51,6 @@ public class StageCircle extends StageElement
 		if (start)
 		{
 			start = false;
-			transformDirty = true;
 			setAreas();
 		}
 	}
@@ -61,15 +60,6 @@ public class StageCircle extends StageElement
 		previousx = currentx;
 		previousy = currenty;
 		previousr = currentr;
-		transformDirty = true;
-	}
-
-	public void computeTransform()
-	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		//Nothing...
-		transformDirty = false;
 	}
 
 	public void setPoint(double x, double y)
@@ -77,7 +67,6 @@ public class StageCircle extends StageElement
 		localx = x;
 		localy = y;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public double getX(double time)
@@ -101,107 +90,65 @@ public class StageCircle extends StageElement
 		return (1-time)*previousr + time*currentr;
 	}
 
-	public ProjectionVector depth(Stadium end, double xVel, double yVel)
+	public ProjectionVector depth(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		double sumRad = end.getRadius()+this.getRadius(1);
-		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
-				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
-				xVel, yVel, 0, 0, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		System.out.println(StrictMath.hypot(this.getX(1)-end.getStartx(),
-				this.getY(1)-end.getStarty())-sumRad);
-		//Now we have the time, use this to determine facing
-		double xDistRew = xVel * (1 - time);
-		double yDistRew = yVel * (1 - time);
-		double xStart = end.getStartx()-xDistRew;
-		double yStart = end.getStarty()-yDistRew;
-		double xEnd = end.getEndx()-xDistRew;
-		double yEnd = end.getEndy()-yDistRew;
-		//Get angle of pt
-		ProjectionVector v = Intersector.dispSegmentPoint(xStart, yStart, xEnd, yEnd, currentx, currenty);
-		v.magnitude -= sumRad;
-		double xDisp = -v.xnorm * v.magnitude + 1*xDistRew;
-		double yDisp = -v.ynorm * v.magnitude + 1*yDistRew;
-		double len = StrictMath.hypot(xDisp, yDisp);
-		if (len == 0 || Double.isNaN(len))
-			return null;
-		return new ProjectionVector(xDisp / len, yDisp / len, len);
+		double xPos = getX(time);
+		double yPos = getY(time);
+		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
+				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
+		disp.magnitude = stad.getRadius()+getRadius(time)-disp.magnitude;
+		return disp;
 	}
 
-	public ProjectionVector instantVelocity(Stadium start)
+	public ProjectionVector instantVelocity(Stadium stad, double time)
 	{
-		//???!
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		//Find contact time
-		double sumRad = start.getRadius()+this.getRadius(1);
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
-				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		double segDX = currentx-previousx;
-		double segDY = currenty-previousy;
-		double segSpd = StrictMath.hypot(segDX, segDY);
-		if (segSpd == 0 || Double.isNaN(segSpd))
-			return null;
-		return new ProjectionVector(segDX/segSpd, segDY/segSpd, segSpd);
+		double secDX = getX(1)-getX(0);
+		double secDY = getY(1)-getY(0);
+		if (secDX == 0 && secDY == 0)
+			return new ProjectionVector(0, 0, 0);
+		else
+		{
+			double len = StrictMath.hypot(secDX, secDY);
+			return new ProjectionVector(secDX/len, secDY/len, len);
+		}
 	}
 
-	public ProjectionVector normal(Stadium start)
+	public boolean collides(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		//Find contact time
-		double sumRad = start.getRadius()+this.getRadius(1);
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
-				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		//We got contact time, now find velocity of contact
-		double atTimeX = (1-time)*previousx + time*currentx;
-		double atTimeY = (1-time)*previousy + time*currenty;
-		ProjectionVector v = Intersector.dispSegmentPoint(sx, sy, ex, ey, atTimeX, atTimeY);
-		v.magnitude += sumRad;
-		return v;
+		double xPos = getX(time);
+		double yPos = getY(time);
+		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
+				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
+		return disp.magnitude <= getRadius(time) + stad.getRadius();
 	}
 
-	public Rectangle getStartBounds()
+	public double stadiumPortion(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double radius = getRadius(0);
-		return new Rectangle(getX(0)-radius, getY(0)-radius,
-				2*radius, 2*radius);
+		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),
+				stad.getEndx(), stad.getEndy(), getX(time), getY(time));
 	}
 
-	public Rectangle getTravelBounds()
+	public Rectangle getBounds(double start, double end)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double radius = getRadius(1);
-		double xMin = StrictMath.min(getX(0), getX(1));
-		double xMax = StrictMath.max(getX(0), getX(1));
-		double yMin = StrictMath.min(getY(0), getY(1));
-		double yMax = StrictMath.max(getY(0), getY(1));
-		return new Rectangle(xMin-radius, yMin-radius,
-				xMax-xMin+2*radius, yMax-yMin+2*radius);
+		double minX = StrictMath.min(getX(start)-getRadius(start),
+				getX(end)-getRadius(end));
+		double maxX = StrictMath.max(getX(start)+getRadius(start),
+				getX(end)+getRadius(end));
+		double minY = StrictMath.min(getY(start)-getRadius(start),
+				getY(end)+getRadius(end));
+		double maxY = StrictMath.max(getY(start)+getRadius(start),
+				getY(end)+getRadius(end));
+		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 
 	public void draw(ShapeRenderer drawer)

@@ -33,8 +33,8 @@ public class DesktopLauncher {
 		config.title = "Libgdx-Tussle";
 		config.width = 640;
 		config.height = 480;
-		config.foregroundFPS = 60;
-		config.backgroundFPS = 60;
+		config.foregroundFPS = 10;
+		config.backgroundFPS = 10;
 		Map<Integer, InputToken> inputMap = new HashMap<>();
 		Map<Integer, InputToken> releaseMap = new HashMap<>();
 		inputMap.put(RIGHT, new InputToken(1, InputState.HOR_MOVEMENT));

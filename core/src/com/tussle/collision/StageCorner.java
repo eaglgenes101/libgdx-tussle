@@ -23,14 +23,16 @@ import com.tussle.main.Intersector;
 /**
  * Created by eaglgenes101 on 5/17/17.
  */
-public class StageCorner extends StageElement
+public strictfp class StageCorner extends StageElement
 {
 	public static final double HALF_WHOLE = 180;
 	private double localx, localy, localMinAngle, localMaxAngle;
 	private double currentx, currenty;
+	private double currentMinAngle, currentMaxAngle;
 	private double currentRightCos, currentRightSin, currentLeftCos, currentLeftSin;
 	private double previousx, previousy;
 	private double previousRightCos, previousRightSin, previousLeftCos, previousLeftSin;
+	private double previousMinAngle, previousMaxAngle;
 
 	public StageCorner(double x, double y, double minAngle, double maxAngle)
 	{
@@ -62,6 +64,8 @@ public class StageCorner extends StageElement
 		maxAngle += rotation;
 		currentx = locx + originX + x;
 		currenty = locy + originY + y;
+		currentMinAngle = minAngle;
+		currentMaxAngle = maxAngle;
 		currentRightCos = StrictMath.cos(StrictMath.toRadians(minAngle));
 		currentRightSin = StrictMath.sin(StrictMath.toRadians(minAngle));
 		currentLeftCos = StrictMath.cos(StrictMath.toRadians(maxAngle));
@@ -70,7 +74,6 @@ public class StageCorner extends StageElement
 		if (start)
 		{
 			start = false;
-			transformDirty = true;
 			setAreas();
 		}
 	}
@@ -85,19 +88,8 @@ public class StageCorner extends StageElement
 		previousRightSin = currentRightSin;
 		previousLeftCos = currentLeftCos;
 		previousLeftSin = currentLeftSin;
-		transformDirty = true;
-	}
-
-	public void computeTransform()
-	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		//double rFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
-		//double rFocusY = (previousy-currenty)/(currentRightCos-previousRightCos);
-		//double lFocusX = (previousx-currentx)/(-currentLeftSin+previousLeftSin);
-		//double lFocusY = (previousy-currenty)/(currentLeftCos-previousLeftCos);
-		//No need for homographs so we don't calculate them
-		transformDirty = false;
+		previousMinAngle = currentMinAngle;
+		previousMaxAngle = currentMaxAngle;
 	}
 
 	public void setPoint(double x, double y)
@@ -105,7 +97,6 @@ public class StageCorner extends StageElement
 		localx = x;
 		localy = y;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public void setAngles(double min, double max)
@@ -113,7 +104,6 @@ public class StageCorner extends StageElement
 		localMinAngle = min;
 		localMaxAngle = max;
 		coordinatesDirty = true;
-		transformDirty = true;
 	}
 
 	public double getX(double time)
@@ -130,157 +120,135 @@ public class StageCorner extends StageElement
 		return (1-time)*previousy + time*currenty;
 	}
 
-	//Can the stage corner push out at the specified angle at the specified time?
-	public boolean doesCollide(double time, double cos, double sin)
+	public ProjectionVector getRightNormal(double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		double atTimeX = getX(time);
-		double atTimeY = getY(time);
-		double rightFocusX = (previousx-currentx)/(-currentRightSin+previousRightSin);
-		double rightFocusY = (previousy-currenty)/(currentRightCos-previousRightCos);
-		double leftFocusX = (previousx-currentx)/(-currentLeftSin+previousLeftSin);
-		double leftFocusY = (previousy-currenty)/(currentLeftCos-previousLeftCos);
-		double side = Intersector.pointLineSide(leftFocusX, leftFocusY,
-				rightFocusX, rightFocusY, atTimeX, atTimeY);
-		if (side < 0)
-			return false;
-		else if (side == 0)
+		//Not as simple as interpolating angle unfortunately
+		double interpCos = (1-time)*previousRightCos + time*currentRightCos;
+		double interpSin = (1-time)*previousRightSin + time*currentRightSin;
+		if (interpCos == 0 && interpSin == 0)
 		{
-			return (rightFocusX-leftFocusX)*cos + (rightFocusY-leftFocusY)*sin == 0 &&
-					(rightFocusX-leftFocusX)*sin - (rightFocusY-leftFocusY)*cos > 0;
-			//TODO: Add a small amount of tolerance
+			if (previousRightCos*currentRightCos + previousRightSin*currentRightSin > 0)
+			{
+				return new ProjectionVector(currentRightCos, currentRightSin, 1);
+			}
+			else
+			{
+				return new ProjectionVector(currentRightSin, -currentRightCos, 1);
+			}
 		}
+		double magn = StrictMath.hypot(interpSin, interpCos);
+		return new ProjectionVector(interpCos/magn, interpSin/magn, 1);
+	}
+
+	public ProjectionVector getLeftNormal(double time)
+	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		//Not as simple as interpolating angle unfortunately
+		double interpCos = (1-time)*previousLeftCos + time*currentLeftCos;
+		double interpSin = (1-time)*previousLeftSin + time*currentLeftSin;
+		if (interpCos == 0 && interpSin == 0)
+		{
+			if (previousLeftCos*currentLeftCos + previousLeftSin*currentLeftSin > 0)
+			{
+				return new ProjectionVector(currentLeftCos, currentLeftSin, 1);
+			}
+			else
+			{
+				return new ProjectionVector(currentLeftSin, -currentLeftCos, 1);
+			}
+		}
+		double magn = StrictMath.hypot(interpSin, interpCos);
+		return new ProjectionVector(interpCos/magn, interpSin/magn, 1);
+	}
+
+	public ProjectionVector depth(Stadium stad, double time)
+	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		double xPos = getX(time);
+		double yPos = getY(time);
+		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
+				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
+		disp.magnitude = stad.getRadius()-disp.magnitude;
+		return disp;
+	}
+
+	public ProjectionVector instantVelocity(Stadium stad, double time)
+	{
+		if (coordinatesDirty)
+			computeNewPositions();
+		double secDX = getX(1)-getX(0);
+		double secDY = getY(1)-getY(0);
+		if (secDX == 0 && secDY == 0)
+			return new ProjectionVector(0, 0, 0);
 		else
 		{
-			double leftDX = atTimeX-leftFocusX;
-			double leftDY = atTimeY-leftFocusY;
-			double rightDX = rightFocusX-atTimeX;
-			double rightDY = rightFocusY-atTimeY;
-			return leftDX*cos + leftDY*sin > 0 &&
-					rightDX*cos + rightDY*sin > 0 &&
-					leftDX*sin - leftDY*cos < 0 &&
-					rightDX*sin - rightDY*cos > 0;
+			double len = StrictMath.hypot(secDX, secDY);
+			return new ProjectionVector(secDX/len, secDY/len, len);
 		}
 	}
 
-	public ProjectionVector depth(Stadium end, double xVel, double yVel)
+	public boolean collides(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		double sumRad = end.getRadius();
-		double time = Intersector.timeMovingSegmentCircle(end.getStartx() - xVel, end.getStarty() - yVel,
-				end.getEndx() - xVel, end.getEndy() - yVel, currentx, currenty,
-				xVel, yVel, 0, 0, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		//Now we have the time, use this to determine facing
-		double xDistRew = xVel * (1 - time);
-		double yDistRew = yVel * (1 - time);
-		double xStart = end.getStartx()-xDistRew;
-		double yStart = end.getStarty()-yDistRew;
-		double xEnd = end.getEndx()-xDistRew;
-		double yEnd = end.getEndy()-yDistRew;
-		//Get angle of pt
-		ProjectionVector v = Intersector.dispSegmentPoint(xStart, yStart, xEnd, yEnd, currentx, currenty);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
-			return null;
-		v.magnitude += sumRad;
-		double xDisp = v.xnorm * v.magnitude - xDistRew;
-		double yDisp = v.ynorm * v.magnitude - yDistRew;
-		double len = StrictMath.hypot(xDisp, yDisp);
-		if (len == 0 || Double.isNaN(len))
-			return null;
-		return new ProjectionVector(xDisp / len, yDisp / len, len);
+		double xPos = getX(time);
+		double yPos = getY(time);
+		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
+				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
+		ProjectionVector rightNormal = getRightNormal(time);
+		ProjectionVector leftNormal = getLeftNormal(time);
+		if (stad.getRadius()-disp.magnitude < 0) return false;
+		if (stad.getRadius()-disp.magnitude > 16) return false;
+		//Thanks stack overflow!
+		return (rightNormal.ynorm*disp.xnorm-rightNormal.xnorm*disp.ynorm) *
+			   (rightNormal.ynorm*leftNormal.xnorm-rightNormal.xnorm*leftNormal.ynorm) < 0;
+
 	}
 
-	public ProjectionVector instantVelocity(Stadium start)
-	{
-		//Find contact time
-		double sumRad = start.getRadius();
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
-				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		//We got contact time, now find velocity of contact
-		double atTimeX = (1-time)*previousx + time*currentx;
-		double atTimeY = (1-time)*previousy + time*currenty;
-		ProjectionVector v = Intersector.dispSegmentPoint(sx, sy, ex, ey, atTimeX, atTimeY);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
-			return null;
-		double segDX = currentx-previousx;
-		double segDY = currenty-previousy;
-		double segSpd = StrictMath.hypot(segDX, segDY);
-		if (segSpd == 0 || Double.isNaN(segSpd))
-			return null;
-		return new ProjectionVector(segDX/segSpd, segDY/segSpd, segSpd);
-	}
-
-	public ProjectionVector normal(Stadium start)
+	public double stadiumPortion(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		if (transformDirty)
-			computeTransform();
-		//Find contact time
-		double sumRad = start.getRadius();
-		double sx = start.getStartx();
-		double ex = start.getEndx();
-		double sy = start.getStarty();
-		double ey = start.getEndy();
-		double time = Intersector.timeMovingSegmentCircle(sx, sy, ex, ey, previousx, previousy,
-				0, 0,currentx-previousx, currenty-previousy, sumRad);
-		if (!Double.isFinite(time))
-			return null;
-		//We got contact time, now find velocity of contact
-		double atTimeX = (1-time)*previousx + time*currentx;
-		double atTimeY = (1-time)*previousy + time*currenty;
-		ProjectionVector v = Intersector.dispSegmentPoint(sx, sy, ex, ey, atTimeX, atTimeY);
-		if (!doesCollide(time, v.xnorm, v.ynorm))
-			return null;
-		v.magnitude += sumRad;
-		return v;
+		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),
+				stad.getEndx(), stad.getEndy(), getX(time), getY(time));
 	}
 
-	public Rectangle getStartBounds()
+	public Rectangle getBounds(double start, double end)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		return new Rectangle(currentx, currenty, 0, 0);
-	}
-
-	public Rectangle getTravelBounds()
-	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		double xMin = StrictMath.min(currentx, previousx);
-		double xMax = StrictMath.max(currentx, previousx);
-		double yMin = StrictMath.min(currenty, previousy);
-		double yMax = StrictMath.max(currenty, previousy);
-		return new Rectangle(xMin, yMin, xMax-xMin, yMax-yMin);
+		double minX = StrictMath.min(getX(start), getX(end));
+		double maxX = StrictMath.max(getX(start), getX(end));
+		double minY = StrictMath.min(getY(start), getY(end));
+		double maxY = StrictMath.max(getY(start), getY(end));
+		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 
 	public void draw(ShapeRenderer drawer)
 	{
+		ProjectionVector startRight = getRightNormal(0);
+		ProjectionVector startLeft = getLeftNormal(0);
+		ProjectionVector endRight = getRightNormal(1);
+		ProjectionVector endLeft = getLeftNormal(1);
+
 		if (coordinatesDirty)
 			computeNewPositions();
-		drawer.circle((float)getX(0), (float)getY(0), 2);
+		drawer.arc((float)getX(0), (float)getY(0), 12,
+				(float)previousMinAngle, (float)previousMaxAngle);
 		drawer.line((float)getX(0), (float)getY(0),
-				(float)(getX(0)-currentLeftCos*4), (float)(getY(0)-currentLeftSin*4));
+				(float)(getX(0)-startRight.xnorm*20), (float)(getY(0)-startRight.ynorm*20));
 		drawer.line((float)getX(0), (float)getY(0),
-				(float)(getX(0)-currentRightCos*4), (float)(getY(0)-currentRightSin*4));
-		drawer.circle((float)getX(1), (float)getY(1), 2);
+				(float)(getX(0)-startLeft.xnorm*20), (float)(getY(0)-startLeft.ynorm*20));
+
+		drawer.arc((float)getX(1), (float)getY(1), 16,
+				(float)currentMinAngle, (float)currentMaxAngle);
 		drawer.line((float)getX(1), (float)getY(1),
-				(float)(getX(1)-currentLeftCos*4), (float)(getY(1)-currentLeftSin*4));
+				(float)(getX(1)-endRight.xnorm*20), (float)(getY(1)-endRight.ynorm*20));
 		drawer.line((float)getX(1), (float)getY(1),
-				(float)(getX(1)-currentRightCos*4), (float)(getY(1)-currentRightSin*4));
+				(float)(getX(1)-endLeft.xnorm*20), (float)(getY(1)-endLeft.ynorm*20));
 	}
 }

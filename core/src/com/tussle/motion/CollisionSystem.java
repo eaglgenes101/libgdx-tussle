@@ -49,10 +49,28 @@ public strictfp class CollisionSystem extends IteratingSystem
 			ComponentMapper.getFor(StageElementComponent.class);
 	ComponentMapper<ElasticityComponent> elasticityMapper =
 			ComponentMapper.getFor(ElasticityComponent.class);
+	Map<Entity, double[]> toApplyDisplacements = new HashMap<>();
+	Map<Entity, double[]> toApplyVelocities = new HashMap<>();
 
 	public CollisionSystem(int p)
 	{
 		super(Family.all(VelocityComponent.class, ECBComponent.class).get(), p);
+	}
+
+	public void update(float delta)
+	{
+		toApplyDisplacements.clear();
+		toApplyVelocities.clear();
+		super.update(delta);
+		for (Map.Entry<Entity, double[]> entry : toApplyDisplacements.entrySet())
+		{
+
+		}
+		for (Map.Entry<Entity, double[]> entry : toApplyVelocities.entrySet())
+		{
+			velocityMapper.get(entry.getKey()).xVel += entry.getValue()[0];
+			velocityMapper.get(entry.getKey()).yVel += entry.getValue()[1];
+		}
 	}
 
 	public void processEntity(Entity entity, float delta)
@@ -64,11 +82,12 @@ public strictfp class CollisionSystem extends IteratingSystem
 		Map<StageElement, ProjectionVector> maxVectors = new HashMap<>();
 		//First, populate the highest-level hash maps
 		for (Entity ent : getEngine().getEntitiesFor(surfaceFamily))
-			for (StageElement se : surfaceMapper.get(ent).get())
-			{
-				minVectors.put(se, se.depth(ourBox.getStadiumAt(0), 0));
-				maxVectors.put(se, se.depth(ourBox.getStadiumAt(1), 1));
-			}
+			if (ent != entity)
+				for (StageElement se : surfaceMapper.get(ent).get())
+				{
+					minVectors.put(se, se.depth(ourBox.getStadiumAt(0), 0));
+					maxVectors.put(se, se.depth(ourBox.getStadiumAt(1), 1));
+				}
 		ProjectionVector disp = new ProjectionVector(0, 0, 0);
 		StageElement hit = ecbHit(0, 1, ourBox.getStadiumAt(0),
 				ourBox.getStadiumAt(1), minVectors, maxVectors, disp);
@@ -95,8 +114,8 @@ public strictfp class CollisionSystem extends IteratingSystem
 				}
 				//Get vector projection and rejection
 				double[] projection = Utility.projection(diffX, diffY, surfNorm.xnorm, surfNorm.ynorm);
-				velocityMapper.get(entity).xVel -= (1 + elasticity) * projection[0];
-				velocityMapper.get(entity).yVel -= (1 + elasticity) * projection[1];
+				double[] modProj = {(-1-elasticity)*projection[0], (-1-elasticity)*projection[1]};
+				toApplyVelocities.put(entity, modProj);
 			}
 		}
 	}
@@ -129,7 +148,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			for (StageElement se : earlySurfaces)
 			{
 				ProjectionVector foreVec = fores.get(se);
-				if (foreVec.magnitude >= tentativeDisp.magnitude)
+				if (foreVec.magnitude > tentativeDisp.magnitude)
 				{
 					returnElement = se;
 					tentativeDisp.xnorm = foreVec.xnorm;
@@ -152,7 +171,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			for (StageElement se : acceptedSurfaces)
 			{
 				ProjectionVector aftVec = afts.get(se);
-				if (aftVec.magnitude >= tentativeDisp.magnitude)
+				if (aftVec.magnitude > tentativeDisp.magnitude)
 				{
 					returnElement = se;
 					tentativeDisp.xnorm = aftVec.xnorm;

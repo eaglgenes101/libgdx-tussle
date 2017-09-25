@@ -238,17 +238,17 @@ public strictfp class StageCorner extends StageElement
 		if (coordinatesDirty)
 			computeNewPositions();
 		drawer.arc((float)getX(0), (float)getY(0), 12,
-				(float)previousMinAngle, (float)previousMaxAngle);
+				(float)previousMinAngle, (float)(previousMaxAngle-previousMinAngle));
 		drawer.line((float)getX(0), (float)getY(0),
-				(float)(getX(0)-startRight.xnorm*20), (float)(getY(0)-startRight.ynorm*20));
+				(float)(getX(0)+startRight.xnorm*20), (float)(getY(0)+startRight.ynorm*20));
 		drawer.line((float)getX(0), (float)getY(0),
-				(float)(getX(0)-startLeft.xnorm*20), (float)(getY(0)-startLeft.ynorm*20));
+				(float)(getX(0)+startLeft.xnorm*20), (float)(getY(0)+startLeft.ynorm*20));
 
 		drawer.arc((float)getX(1), (float)getY(1), 16,
-				(float)currentMinAngle, (float)currentMaxAngle);
+				(float)currentMinAngle, (float)(currentMaxAngle-currentMinAngle));
 		drawer.line((float)getX(1), (float)getY(1),
-				(float)(getX(1)-endRight.xnorm*20), (float)(getY(1)-endRight.ynorm*20));
+				(float)(getX(1)+endRight.xnorm*20), (float)(getY(1)+endRight.ynorm*20));
 		drawer.line((float)getX(1), (float)getY(1),
-				(float)(getX(1)-endLeft.xnorm*20), (float)(getY(1)-endLeft.ynorm*20));
+				(float)(getX(1)+endLeft.xnorm*20), (float)(getY(1)+endLeft.ynorm*20));
 	}
 }

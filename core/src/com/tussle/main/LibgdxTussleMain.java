@@ -28,7 +28,8 @@ import com.tussle.sprite.SpriteComponent;
 public class LibgdxTussleMain extends ApplicationAdapter
 {
 	TussleEngine engine;
-	Entity ball;
+	Entity ball0;
+	Entity ball1;
 	Entity cage;
 
 	public LibgdxTussleMain(Controller[] ctrl)
@@ -41,19 +42,38 @@ public class LibgdxTussleMain extends ApplicationAdapter
 	{
 		engine = new TussleEngine();
 
-		ball = engine.createEntity();
-		ball.add(engine.createComponent(PositionComponent.class));
-		ball.add(engine.createComponent(VelocityComponent.class));
-		ball.add(engine.createComponent(ECBComponent.class));
-		ball.add(engine.createComponent(ElasticityComponent.class));
-		ball.add(engine.createComponent(SpriteComponent.class));
-		ball.getComponent(PositionComponent.class).setPosition(0, 0);
-		ball.getComponent(VelocityComponent.class).xVel = 20;
-		ball.getComponent(VelocityComponent.class).yVel = 20;
-		ball.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 32));
-		ball.getComponent(ElasticityComponent.class).wallElasticity = 1.5;
-		ball.getComponent(ElasticityComponent.class).groundElasticity = 1.5;
-		ball.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
+		ball0 = engine.createEntity();
+		ball0.add(engine.createComponent(PositionComponent.class));
+		ball0.add(engine.createComponent(VelocityComponent.class));
+		ball0.add(engine.createComponent(StageElementComponent.class));
+		ball0.add(engine.createComponent(ECBComponent.class));
+		ball0.add(engine.createComponent(ElasticityComponent.class));
+		ball0.add(engine.createComponent(SpriteComponent.class));
+		ball0.getComponent(PositionComponent.class).setPosition(100, 0);
+		ball0.getComponent(VelocityComponent.class).xVel = 1;
+		ball0.getComponent(VelocityComponent.class).yVel = 4;
+		ball0.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 32));
+		ball0.getComponent(ElasticityComponent.class).wallElasticity = .5;
+		ball0.getComponent(ElasticityComponent.class).groundElasticity = .5;
+		ball0.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
+		ball0.getComponent(StageElementComponent.class).put(new StageCircle(0, 0, 32));
+
+
+		ball1 = engine.createEntity();
+		ball1.add(engine.createComponent(PositionComponent.class));
+		ball1.add(engine.createComponent(VelocityComponent.class));
+		ball1.add(engine.createComponent(StageElementComponent.class));
+		ball1.add(engine.createComponent(ECBComponent.class));
+		ball1.add(engine.createComponent(ElasticityComponent.class));
+		ball1.add(engine.createComponent(SpriteComponent.class));
+		ball1.getComponent(PositionComponent.class).setPosition(0, 100);
+		ball1.getComponent(VelocityComponent.class).xVel = 2;
+		ball1.getComponent(VelocityComponent.class).yVel = 1;
+		ball1.getComponent(ECBComponent.class).setStadium(new Stadium(0, 0, 0, 0, 32));
+		ball1.getComponent(ElasticityComponent.class).wallElasticity = .5;
+		ball1.getComponent(ElasticityComponent.class).groundElasticity = .5;
+		ball1.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
+		ball1.getComponent(StageElementComponent.class).put(new StageCircle(0, 0, 32));
 
 		cage = engine.createEntity();
 		cage.add(engine.createComponent(PositionComponent.class));
@@ -68,14 +88,14 @@ public class LibgdxTussleMain extends ApplicationAdapter
 		//cage.getComponent(StageElementComponent.class).put(new StageEdge(-640, 480, 640, 480));
 		//cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, 640, -480));
 		//cage.getComponent(StageElementComponent.class).put(new StageEdge(640, -480, -640, -480));
-		cage.getComponent(StageElementComponent.class).put(new StageCorner(120, 120, 30, 60));
-		cage.getComponent(StageElementComponent.class).put(new StageEdge(-640, 480, -640, -480));
-		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, 480, -640, 480));
-		cage.getComponent(StageElementComponent.class).put(new StageEdge(640, -480, 640, 480));
-		cage.getComponent(StageElementComponent.class).put(new StageEdge(-640, -480, 640, -480));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(-320, 240, -320, -240));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(320, 240, -320, 240));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(320, -240, 320, 240));
+		cage.getComponent(StageElementComponent.class).put(new StageEdge(-320, -240, 320, -240));
 
 
-		engine.addEntity(ball);
+		engine.addEntity(ball0);
+		engine.addEntity(ball1);
 		engine.addEntity(cage);
 	}
 

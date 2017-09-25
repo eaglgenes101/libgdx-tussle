@@ -99,7 +99,7 @@ public class CameraSystem extends IteratingSystem
 		{
 			if (ecbMapper.get(entity).getEcb() != null)
 			{
-				com.tussle.collision.Rectangle rect = ecbMapper.get(entity).getEcb().getBounds(0, 1);
+				com.tussle.collision.Rectangle rect = ecbMapper.get(entity).getEcb().getBounds(1, 1);
 				if (entityMinX > rect.x) entityMinX = (float)rect.x;
 				if (entityMinY > rect.y) entityMinY = (float)rect.y;
 				if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
@@ -112,8 +112,8 @@ public class CameraSystem extends IteratingSystem
 			{
 				for (StageElement s : surfaceMapper.get(entity).get())
 				{
-					com.tussle.collision.Rectangle rect = s.getBounds(0, 1);
-					if (s.getBounds(0, 1) != null)
+					com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
+					if (s.getBounds(0, 0) != null)
 					{
 						if (entityMinX > rect.x) entityMinX = (float)rect.x;
 						if (entityMinY > rect.y) entityMinY = (float)rect.y;

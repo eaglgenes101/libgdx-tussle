@@ -153,9 +153,9 @@ public strictfp class CollisionBox extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		ProjectionVector disp = Intersector.displacementSegments(startX, startY, endX, endY,
-				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
-		disp.magnitude += getRadius(time) + stad.getRadius();
+		ProjectionVector disp = Intersector.displacementSegments(stad.getStartx(), stad.getStarty(),
+				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
+		disp.magnitude = stad.getRadius()+getRadius(time)-disp.magnitude;
 		return disp;
 	}
 
@@ -192,8 +192,8 @@ public strictfp class CollisionBox extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		ProjectionVector disp = Intersector.displacementSegments(startX, startY, endX, endY,
-				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		ProjectionVector disp = Intersector.displacementSegments(stad.getStartx(), stad.getStarty(),
+				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
 		return disp.magnitude <= getRadius(time) + stad.getRadius();
 	}
 

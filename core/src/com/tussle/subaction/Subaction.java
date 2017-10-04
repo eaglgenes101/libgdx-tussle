@@ -15,12 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: "java"
+package com.tussle.subaction;
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
-sourceSets.main.java.srcDirs = [ "src/" ]
-
-eclipse.project {
-    name = appName + "-core"
+public class Subaction
+{
 }

@@ -15,12 +15,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: "java"
+package com.tussle.main;
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+import com.badlogic.gdx.utils.JsonValue;
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+import java.util.Deque;
+import java.util.LinkedList;
 
-eclipse.project {
-    name = appName + "-core"
+public class JsonPipe implements JsonSource, JsonSink
+{
+	Deque<JsonValue> values;
+
+	public JsonPipe()
+	{
+		values = new LinkedList<>();
+	}
+
+
 }

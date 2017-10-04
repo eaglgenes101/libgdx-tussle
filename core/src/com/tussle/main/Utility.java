@@ -17,16 +17,18 @@
 
 package com.tussle.main;
 
+import com.badlogic.gdx.utils.JsonValue;
 import com.tussle.collision.ProjectionVector;
 import com.tussle.collision.Stadium;
 import com.tussle.collision.StageElement;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public strictfp class Utility
 {
-
 	public static double[] getXYfromDM(double direction, double magnitude)
 	{
 		double[] returnVect = new double[2];
@@ -420,6 +422,35 @@ public strictfp class Utility
 				(s1.getRadius()+s2.getRadius())/2);
 	}
 
+	public static JsonValue exceptionToJson(Throwable ex)
+	{
+		JsonValue exceptionClass = new JsonValue(ex.getClass().toString());
+		JsonValue exceptionMessage = new JsonValue(ex.getLocalizedMessage());
+		JsonValue exceptionCause = new JsonValue(ex.getCause().toString());
+		JsonValue stackTrace = new JsonValue(JsonValue.ValueType.array);
+		for (StackTraceElement element : ex.getStackTrace())
+			stackTrace.addChild(new JsonValue(element.toString()));
+		JsonValue topValue = new JsonValue(JsonValue.ValueType.object);
+		topValue.addChild("Exception Class", exceptionClass);
+		if (!exceptionMessage.isNull())
+			topValue.addChild("Exception Message", exceptionMessage);
+		if (!exceptionCause.isNull())
+			topValue.addChild("Exception Cause", exceptionCause);
+		topValue.addChild("Stack Trace", stackTrace);
+		return topValue;
+	}
+
+	public static String readAll(Reader reader) throws IOException
+	{
+		StringBuilder toReturn = new StringBuilder();
+		while (reader.ready())
+		{
+			char[] holder = new char[1024];
+			reader.read(holder);
+			toReturn.append(holder);
+		}
+		return toReturn.toString();
+	}
 }
 
 

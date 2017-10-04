@@ -34,10 +34,8 @@ allprojects {
     ext {
         appName = "libgdx-tussle"
         gdxVersion = '1.9.5'
-        roboVMVersion = '2.3.0'
-        box2DLightsVersion = '1.4'
-        ashleyVersion = '1.7.0'
-        aiVersion = '1.8.0'
+        ashleyVersion = '1.7.3'
+        aiVersion = '1.8.1'
     }
 
     repositories {
@@ -50,7 +48,6 @@ allprojects {
 
 project(":desktop") {
     apply plugin: "java"
-
 
     dependencies {
         compile project(":core")
@@ -66,7 +63,6 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java"
-    apply plugin: "org.junit.platform.gradle.plugin"
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
@@ -75,6 +71,8 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-controllers:$gdxVersion"
         compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+        compile "commons-io:commons-io:2.5"
+        testCompile "org.junit.jupiter:junit-jupiter-api:5.0.0"
     }
 }
 

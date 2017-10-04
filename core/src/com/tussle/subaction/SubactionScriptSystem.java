@@ -15,12 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: "java"
+package com.tussle.subaction;
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+import com.badlogic.ashley.core.EntitySystem;
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+public class SubactionScriptSystem extends EntitySystem
+{
+	EntityStreamMaintainer streamMaintainer;
 
-eclipse.project {
-    name = appName + "-core"
+	public SubactionScriptSystem(int i)
+	{
+		super(i);
+		streamMaintainer = new EntityStreamMaintainer(this);
+
+	}
 }

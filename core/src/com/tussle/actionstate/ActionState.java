@@ -17,13 +17,21 @@
 
 package com.tussle.actionstate;
 
-
 import com.badlogic.ashley.core.Entity;
 import com.tussle.main.Terminable;
+
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
 
 public abstract class ActionState implements Terminable
 {
     private Entity owner;
+    Bindings variables;
+
+    public ActionState()
+    {
+        variables = new SimpleBindings();
+    }
 
     //Each frame
     public abstract void act();

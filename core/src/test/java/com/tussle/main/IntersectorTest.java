@@ -31,16 +31,6 @@ public class IntersectorTest
 {
 	public static final double FP_TOLERANCE = .0001;
 
-	double ap = Double.NaN;
-	double aq = Double.NaN;
-	double ax = -1;
-	double ay = 3;
-
-	double bp = -1;
-	double bq = 0;
-	double bx = Double.NaN;
-	double by = Double.NaN;
-
 	@Test
 	@DisplayName("Squared distance between a line segment and a point")
 	void d2SegmentPointTest()
@@ -57,15 +47,6 @@ public class IntersectorTest
 		assertEquals(partSegmentPoint(-1, 0, 1, 0, 0, 0), .5, FP_TOLERANCE);
 		assertEquals(partSegmentPoint(-1, 1, 1, -1, 1, 1), .5, FP_TOLERANCE);
 		assertEquals(partSegmentPoint(-1, -1, 1, 1, 2, 0), 1, FP_TOLERANCE);
-	}
-
-	@Test
-	@DisplayName("The position of a point along a line segment")
-	void isPerpSegPointTest()
-	{
-		assertEquals(isPerpSegPoint(-1, 0, 1, 0, 0, 0), .5, FP_TOLERANCE);
-		assertEquals(isPerpSegPoint(-1, 1, 1, -1, 1, 1), .5, FP_TOLERANCE);
-		assertEquals(isPerpSegPoint(-1, -1, 1, 1, 3, 0), Double.NaN);
 	}
 
 	@Test
@@ -87,6 +68,7 @@ public class IntersectorTest
 	}
 
 	@Test
+	@DisplayName("Whether two different segments intersect")
 	void segmentsIntersectTest()
 	{
 		assertTrue(segmentsIntersect(-1, -1,1, 1, 1, -1, -1, 1));
@@ -96,6 +78,7 @@ public class IntersectorTest
 	}
 
 	@Test
+	@DisplayName("The point along a segment where it intersects with another segment")
 	void partIntersectingSegmentsTest()
 	{
 		assertEquals(partIntersectingSegments(-1, -1, 1, 1, 0, 1, 1, 0),
@@ -104,6 +87,7 @@ public class IntersectorTest
 
 
 	@Test
+	@DisplayName("The point along a segment closest to another segment")
 	void partSegmentsTest()
 	{
 		assertEquals(partSegments(-1, -1, 1, 1, 0, 1, 1, 0),
@@ -115,6 +99,7 @@ public class IntersectorTest
 	}
 
 	@Test
+	@DisplayName("The displacement needed to have two segments just touching")
 	void displacementSegmentsTest()
 	{
 		ProjectionVector p1 = displacementSegments(-1, -1, 1, 1, -1, 0, 0, 1);
@@ -129,24 +114,6 @@ public class IntersectorTest
 		assertEquals(p3.xnorm, .7071, FP_TOLERANCE);
 		assertEquals(p3.ynorm, .7071, FP_TOLERANCE);
 		assertEquals(p3.magnitude, .7071, FP_TOLERANCE);
-	}
-
-	@Test
-	void pointLineSideTest()
-	{
-		assertEquals(pointLineSide(-1, -1, 1, 1, -1, 1),
-				1, FP_TOLERANCE);
-		assertEquals(pointLineSide(-1, -1, 1, 1, 1, -1),
-				-1, FP_TOLERANCE);
-		assertEquals(pointLineSide(-1, -1, 1, 1, -1, -1),
-				0, FP_TOLERANCE);
-	}
-
-	@Test
-	void partCircleSegmentTest()
-	{
-		assertEquals(partCircleSegment(-2, 0, 2, 0, 0, 0, 1), .25, FP_TOLERANCE);
-		assertEquals(partCircleSegment(0, 0, 2, 0, 0, 0, 1), .5, FP_TOLERANCE);
 	}
 
 }

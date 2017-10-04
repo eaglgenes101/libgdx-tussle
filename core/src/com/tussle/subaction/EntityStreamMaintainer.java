@@ -15,12 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: "java"
+package com.tussle.subaction;
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.EntityListener;
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
 
-eclipse.project {
-    name = appName + "-core"
+public class EntityStreamMaintainer implements EntityListener
+{
+	Map<Entity, Reader> inputReaders;
+	Map<Entity, Writer> outputWriters;
+	Map<Entity, Writer> errorWriters;
+	Writer collectedOutput;
+	Writer collectedErrors;
+
+	public EntityStreamMaintainer(Reader inputReader, Writer outputWriter, Writer errorWriter)
+	{
+		toDistributeReader = inputReader;
+	}
 }

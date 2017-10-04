@@ -15,12 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-apply plugin: "java"
+package com.tussle.main;
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+import com.badlogic.gdx.utils.JsonValue;
 
-sourceSets.main.java.srcDirs = [ "src/" ]
-
-eclipse.project {
-    name = appName + "-core"
+public interface JsonSink
+{
+	public void write(JsonValue value);
 }

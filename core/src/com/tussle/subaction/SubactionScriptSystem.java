@@ -26,7 +26,7 @@ public class SubactionScriptSystem extends EntitySystem
 	public SubactionScriptSystem(int i)
 	{
 		super(i);
-		streamMaintainer = new EntityStreamMaintainer(this);
+		streamMaintainer = new EntityStreamMaintainer();
 
 	}
 }

@@ -17,23 +17,80 @@
 
 package com.tussle.subaction;
 
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntityListener;
+import com.tussle.main.JsonParsingWriter;
+import com.tussle.main.PipeBufferReader;
+import com.tussle.main.PipeBufferWriter;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
+import java.io.IOException;
 
 public class EntityStreamMaintainer implements EntityListener
 {
-	Map<Entity, Reader> inputReaders;
-	Map<Entity, Writer> outputWriters;
-	Map<Entity, Writer> errorWriters;
-	Writer collectedOutput;
-	Writer collectedErrors;
+	JsonDistributingWriter stdIn;
+	JsonCollectingWriter stdOut;
+	JsonCollectingWriter stdErr;
+	PipeBufferWriter errStream;
 
-	public EntityStreamMaintainer(Reader inputReader, Writer outputWriter, Writer errorWriter)
+	JsonParsingWriter stdinInterpreter;
+
+	ComponentMapper<StreamComponent> streamMapper =
+			ComponentMapper.getFor(StreamComponent.class);
+
+	public EntityStreamMaintainer()
 	{
-		toDistributeReader = inputReader;
+		PipeBufferWriter warnStream = new PipeBufferWriter();
+		errStream = new PipeBufferWriter();
+		stdIn = new JsonDistributingWriter(warnStream);
+		stdOut = new JsonCollectingWriter(warnStream.getNewReader());
+		stdErr = new JsonCollectingWriter(errStream.getNewReader());
+
+		stdinInterpreter = new JsonParsingWriter(errStream);
+	}
+
+	public void entityAdded(Entity entity)
+	{
+		//Attach stdin
+		PipeBufferReader readIn = stdIn.openReaderFor(entity);
+		streamMapper.get(entity).setStdin(readIn);
+		//Attach stdout
+		PipeBufferWriter writeOut = stdOut.openWriterFor(entity);
+		streamMapper.get(entity).setStdout(writeOut);
+		//Attach stderr
+		PipeBufferWriter writeErr = stdErr.openWriterFor(entity);
+		streamMapper.get(entity).setStderr(writeErr);
+	}
+
+	public void entityRemoved(Entity entity)
+	{
+		stdIn.removeEntity(entity);
+		stdOut.removeEntity(entity);
+		stdErr.removeEntity(entity);
+	}
+
+	public void writeStdIn(String in) throws IOException
+	{
+		stdinInterpreter.write(in);
+		if (stdinInterpreter.ready())
+		{
+			stdIn.write(stdinInterpreter.read());
+		}
+	}
+
+	public String readStdOut()
+	{
+		StringBuilder buffer = new StringBuilder();
+		while (stdOut.ready())
+			buffer.append(stdOut.read().toString());
+		return buffer.toString();
+	}
+
+	public String readStdErr()
+	{
+		StringBuilder buffer = new StringBuilder();
+		while (stdErr.ready())
+			buffer.append(stdErr.read().toString());
+		return buffer.toString();
 	}
 }

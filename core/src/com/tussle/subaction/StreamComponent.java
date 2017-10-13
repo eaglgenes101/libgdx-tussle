@@ -15,34 +15,50 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.main;
+package com.tussle.subaction;
 
-import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.ashley.core.Component;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.io.Reader;
+import java.io.Writer;
 
-public class JsonPipe implements JsonSource, JsonSink
+public class StreamComponent implements Component
 {
-	Deque<JsonValue> values;
+	Reader stdin;
+	Writer stdout;
+	Writer stderr;
 
-	public JsonPipe()
+	public StreamComponent()
 	{
-		values = new LinkedList<>();
 	}
 
-	public void write(JsonValue value)
+	public void setStdin(Reader in)
 	{
-		values.add(value);
+		stdin = in;
 	}
 
-	public boolean ready()
+	public void setStdout(Writer out)
 	{
-		return !values.isEmpty();
+		stdout = out;
 	}
 
-	public JsonValue read()
+	public void setStderr(Writer err)
 	{
-		return values.poll();
+		stderr = err;
+	}
+
+	public Reader getStdin()
+	{
+		return stdin;
+	}
+
+	public Writer getStdout()
+	{
+		return stdout;
+	}
+
+	public Writer getStderr()
+	{
+		return stderr;
 	}
 }

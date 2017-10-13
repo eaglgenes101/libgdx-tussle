@@ -29,10 +29,10 @@ import java.util.Map;
 public class GameScriptContext implements ScriptContext
 {
 	// To prevent scripts from messing with the game, scopes > 0 are readonly
-	public static int API_SCOPE = 50; //Scope of API provided
-	public static int ENTITY_SCOPE = -10; //Scope of persistent entity bindingsMap
-	public static int LIFE_SCOPE = -20; //Scope of per-life entity bindingsMap
-	public static int ACTION_SCOPE = -30; //Scope of action bindingsMap
+	public static final int API_SCOPE = 50; //Scope of API provided
+	public static final int ENTITY_SCOPE = -10; //Scope of persistent entity bindingsMap
+	public static final int LIFE_SCOPE = -20; //Scope of per-life entity bindingsMap
+	public static final int ACTION_SCOPE = -30; //Scope of action bindingsMap
 
 	Map<Integer, Bindings> bindingsMap;
 

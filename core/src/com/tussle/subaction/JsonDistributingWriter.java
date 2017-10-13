@@ -17,13 +17,15 @@
 
 package com.tussle.subaction;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.SerializationException;
 import com.tussle.main.JsonSink;
+import com.tussle.main.PipeBufferReader;
+import com.tussle.main.PipeBufferWriter;
 import com.tussle.main.Utility;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ import java.util.Map;
 
 public class JsonDistributingWriter implements JsonSink
 {
-	Map<String, Writer> writers;
+	Map<Entity, Writer> writers;
 	Writer errorWriter;
 
 	public JsonDistributingWriter(Writer err)
@@ -40,9 +42,27 @@ public class JsonDistributingWriter implements JsonSink
 		errorWriter = err;
 	}
 
-	public void addEntity(String name, Writer writer)
+	public PipeBufferReader openReaderFor(Entity entity)
 	{
-		writers.put(name, new BufferedWriter(writer));
+		PipeBufferWriter writer = new PipeBufferWriter();
+		writers.put(entity, writer);
+		return writer.getNewReader();
+	}
+
+	public void removeEntity(Entity entity)
+	{
+		try
+		{
+			writers.get(entity).close();
+		}
+		catch (IOException ex)
+		{
+			//We're closing down anyway
+		}
+		finally
+		{
+			writers.remove(entity);
+		}
 	}
 
 	public void write(JsonValue jsonVal)
@@ -50,7 +70,7 @@ public class JsonDistributingWriter implements JsonSink
 		try
 		{
 			for (JsonValue i : jsonVal)
-			{
+			{ //Not a typo, we're iterating over the jsonValue we were handed
 				if (writers.containsKey(i.name()))
 				{
 					try

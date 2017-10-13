@@ -424,18 +424,22 @@ public strictfp class Utility
 
 	public static JsonValue exceptionToJson(Throwable ex)
 	{
+		JsonValue topValue = new JsonValue(JsonValue.ValueType.object);
 		JsonValue exceptionClass = new JsonValue(ex.getClass().toString());
-		JsonValue exceptionMessage = new JsonValue(ex.getLocalizedMessage());
-		JsonValue exceptionCause = new JsonValue(ex.getCause().toString());
+		topValue.addChild("Exception Class", exceptionClass);
+		if (ex.getLocalizedMessage() != null)
+		{
+			JsonValue exceptionMessage = new JsonValue(ex.getLocalizedMessage());
+			topValue.addChild("Exception Message", exceptionMessage);
+		}
+		if (ex.getCause() != null)
+		{
+			JsonValue exceptionCause = new JsonValue(ex.getCause().toString());
+			topValue.addChild("Exception Cause", exceptionCause);
+		}
 		JsonValue stackTrace = new JsonValue(JsonValue.ValueType.array);
 		for (StackTraceElement element : ex.getStackTrace())
 			stackTrace.addChild(new JsonValue(element.toString()));
-		JsonValue topValue = new JsonValue(JsonValue.ValueType.object);
-		topValue.addChild("Exception Class", exceptionClass);
-		if (!exceptionMessage.isNull())
-			topValue.addChild("Exception Message", exceptionMessage);
-		if (!exceptionCause.isNull())
-			topValue.addChild("Exception Cause", exceptionCause);
 		topValue.addChild("Stack Trace", stackTrace);
 		return topValue;
 	}
@@ -446,8 +450,8 @@ public strictfp class Utility
 		while (reader.ready())
 		{
 			char[] holder = new char[1024];
-			reader.read(holder);
-			toReturn.append(holder);
+			int charsRead = reader.read(holder);
+			toReturn.append(holder, 0, charsRead);
 		}
 		return toReturn.toString();
 	}

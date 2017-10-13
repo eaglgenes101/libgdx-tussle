@@ -19,8 +19,10 @@ package com.tussle.main;
 
 import com.badlogic.gdx.utils.JsonValue;
 
+import java.io.IOException;
+
 public interface JsonSource
 {
-	public JsonValue read();
-	public boolean ready();
+	public JsonValue read() throws IOException;
+	public boolean ready() throws IOException;
 }

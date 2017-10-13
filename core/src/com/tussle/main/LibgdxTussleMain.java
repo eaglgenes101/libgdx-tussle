@@ -102,7 +102,8 @@ public class LibgdxTussleMain extends ApplicationAdapter
 	@Override
 	public void render ()
 	{
-		engine.update(1);
+		if (engine != null)
+			engine.update(1);
 	}
 	
 	@Override

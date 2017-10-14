@@ -31,6 +31,7 @@ import java.util.LinkedList;
 public class JsonParsingWriter extends Writer implements JsonSource
 {
     StringBuilder data;
+    public static final boolean doDebug = true;
 
     int cs, p, top;
     int s;
@@ -94,46 +95,80 @@ public class JsonParsingWriter extends Writer implements JsonSource
             }
             action startObject {
     	        startObject(names.poll());
+    	        if (doDebug) System.out.println("Starting object");
 	    		fcall object;
 		    }
 		    action end {
             	pop();
+            	if (doDebug) System.out.println("Ending");
 	            fret;
 		    }
     	    action startArray {
         		startArray(names.poll());
+        		if (doDebug) System.out.println("Staring array");
 	    	    fcall array;
     	    }
 			action start { s = p; }
-	        action name { addName(data.substring(s+1, p-1)); }
-	    	action string { addString(data.substring(s+1, p-1)); }
-		    action null { addNull(); }
-		    action true { addTrue(); }
-	    	action false { addFalse(); }
+	        action name
+	        {
+	            addName(data.substring(s+1, p-1));
+	            if (doDebug) System.out.printf("Name from %s\n", data.substring(s, p));
+	        }
+	    	action string
+	    	{
+	    	    addString(data.substring(s+1, p-1));
+	            if (doDebug) System.out.printf("String from %s\n", data.substring(s, p));
+	    	}
+		    action null
+		    {
+		        addNull();
+	            if (doDebug) System.out.println("Null");
+		    }
+		    action true
+		    {
+		        addTrue();
+		        if (doDebug) System.out.println("True");
+		    }
+	    	action false
+	    	{
+	    	    addFalse();
+	    	    if (doDebug) System.out.println("False");
+	    	}
 	    	action number
 	    	{
-	    	    try { addNumber(data.substring(s, p)); }
+	    	    try
+	    	    {
+	    	        addNumber(data.substring(s, p));
+	                if (doDebug) System.out.printf("Number from %s\n", data.substring(s, p));
+	    	    }
 	    	    catch (NumberFormatException e)
 	    	    {
 		    	    //Empty the stack, output the errant string, move on
 		    	    writ.write(data.substring(0, p));
+		    	    if (doDebug) System.out.printf("Failed number from %s\n", data.substring(s, p));
 		    	    init();
 		    	    fexec 0;
 		    	    fgoto main;
 	    	    }
 	    	}
 		    action output {
-		    	completedValues.add(root);
-    	        data.delete(0, p);
-    	        fexec 0;
-	            fbreak;
+		        if (root != null)
+		        {
+		    	    completedValues.add(root);
+		    	    if (doDebug) System.out.println("Completed JSON");
+    	            data.delete(0, p);
+    	            fexec 0;
+	                fbreak;
+	            }
 		    }
 		    action exit {
+		    	if (doDebug) System.out.println("Interrupted");
 		    	fbreak;
 		    }
 		    action error {
 		    	//Append the errant string, unwind the stack, return to main
 		    	writ.write(data.substring(0, p));
+		    	if (doDebug) System.out.println("Error");
 		    	init();
 		    	fexec 0;
 		    	fgoto main;
@@ -142,28 +177,28 @@ public class JsonParsingWriter extends Writer implements JsonSource
 		        if (p > 0)
 		        {
 		            writ.write(data.substring(0, p));
+		    	    if (doDebug) System.out.printf("Slew: \"%s\"\n", data.substring(0, p));
 		            data.delete(0, p);
-		            fexec 0;
+		            p = 0;
 		        }
 		    }
 
-            comment = ("//" (any* -- "\n") '\n') | ("/*" (any* -- "*/") "*/");
-        	ws = [\r\n\t ] | comment;
-	    	escapeChar = "\\" [\"\\\/bfnrt];
-	    	escapeUnicode = "\\u" [a-fA-F0-9]{4};
-	    	strForm = '"' (escapeChar | escapeUnicode | ^[\\\"])* '"';
-    	    intForm = ('+'|'-')? ('0'..'9')+;
-            outside = strForm | comment | ^[{[];
+        	ws = [\r\n\t ];
+	    	escapeChar = "\\" [\"\\bfnrt];
+	    	escapeUnicode = "\\u" xdigit{4};
+	    	strForm = '"' (escapeChar | escapeUnicode | ^[\\\"])** '"';
+    	    intForm = ('+'|'-')? ('0'..'9') ('0'..'9')**;
+            outside = strForm | (any - zlen - [\"[{]);
 
     	    str = strForm >start %string;
     	    bool = "null" %null | "true" %true | "false" %false;
-    	    number = (intForm ("." ('0'..'9')*)? ([Ee] intForm)?) >start %number;
+    	    number = (intForm ("." ('0'..'9')**)? ([Ee] intForm)?) >start %number;
 
 		    value = '{' @startObject | '[' @startArray | str | bool | number;
 	        nameValue = strForm >start %name ws* ':' ws* value;
     	    object := ws* nameValue? ws* <: (',' ws* nameValue ws*)** :>> (','? ws* '}' @end) $/exit $!error;
             array := ws* value? ws* <: (',' ws* value ws*)** :>> (','? ws* ']' @end) $/exit $!error;
-    	    main := ((outside**) %slew ('{' @startObject | '[' @startArray) %output )* $/exit $!error;
+    	    main := ((outside**) %slew :> ('{' @startObject | '[' @startArray) %output )* $/exit $!error;
 
         	write exec;
     	}%%

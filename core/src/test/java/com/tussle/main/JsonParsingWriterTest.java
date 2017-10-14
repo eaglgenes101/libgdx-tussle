@@ -104,8 +104,7 @@ class JsonParsingWriterTest
 	void parseRobustTest() throws IOException
 	{
 		writer.write("{ture, flase} [1, \"B\", {\"C\":2}]");
-		JsonValue value;
-		value = writer.read();
+		JsonValue value = writer.read();
 		assertTrue(read.ready());
 		char[] buf = new char[14];
 		assertTrue(read.read(buf) == 14);

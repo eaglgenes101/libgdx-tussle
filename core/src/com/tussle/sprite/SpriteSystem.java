@@ -77,6 +77,5 @@ public class SpriteSystem extends IteratingSystem
 				sprite.draw(batch);
 			}
 		}
-		//TODO: only track entities that are essential or have stage surfaces
 	}
 }

@@ -38,6 +38,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
     int cs, p, top;
     int s;
 	int[] stack;
+	int reentryPoint;
 
     Deque<JsonValue> completedValues;
 	Deque<String> names;
@@ -83,7 +84,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	    if (!completedValues.isEmpty()) return;
 	    if (p >= data.length()) return;
         
-// line 87 "JsonParsingWriter.java"
+// line 88 "JsonParsingWriter.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -153,7 +154,6 @@ case 1:
 	}
 	} while (false);
 
-	_trans = _json_indicies[_trans];
 	cs = _json_trans_targs[_trans];
 
 	if ( _json_trans_actions[_trans] != 0 ) {
@@ -164,9 +164,10 @@ case 1:
 			switch ( _json_actions[_acts++] )
 			{
 	case 0:
-// line 96 "JsonParsingWriter.rl"
+// line 97 "JsonParsingWriter.rl"
 	{
     	        startObject(names.poll());
+				reentryPoint = 8;
     	        if (doDebug) System.out.println("Starting object");
 	    		{
         		if (top == stack.length) {
@@ -178,17 +179,18 @@ case 1:
 		    }
 	break;
 	case 1:
-// line 101 "JsonParsingWriter.rl"
+// line 103 "JsonParsingWriter.rl"
 	{
-            	pop();
+            	reentryPoint = pop();
             	if (doDebug) System.out.println("Ending");
 	            {cs = stack[--top];_goto_targ = 2; if (true) continue _goto;}
 		    }
 	break;
 	case 2:
-// line 106 "JsonParsingWriter.rl"
+// line 108 "JsonParsingWriter.rl"
 	{
         		startArray(names.poll());
+				reentryPoint = 46;
         		if (doDebug) System.out.println("Staring array");
 	    	    {
         		if (top == stack.length) {
@@ -200,57 +202,57 @@ case 1:
     	    }
 	break;
 	case 3:
-// line 111 "JsonParsingWriter.rl"
+// line 114 "JsonParsingWriter.rl"
 	{ s = p; }
 	break;
 	case 4:
-// line 113 "JsonParsingWriter.rl"
+// line 116 "JsonParsingWriter.rl"
 	{
 	            addName(data.substring(s+1, p-1));
-	            if (doDebug) System.out.printf("Name from %s\n", data.substring(s, p));
+	            if (doDebug) System.out.printf("Name from %s%n", data.substring(s, p));
 	        }
 	break;
 	case 5:
-// line 118 "JsonParsingWriter.rl"
+// line 121 "JsonParsingWriter.rl"
 	{
 	    	    addString(data.substring(s+1, p-1));
-	            if (doDebug) System.out.printf("String from %s\n", data.substring(s, p));
+	            if (doDebug) System.out.printf("String from %s%n", data.substring(s, p));
 	    	}
 	break;
 	case 6:
-// line 123 "JsonParsingWriter.rl"
+// line 126 "JsonParsingWriter.rl"
 	{
 		        addNull();
 	            if (doDebug) System.out.println("Null");
 		    }
 	break;
 	case 7:
-// line 128 "JsonParsingWriter.rl"
+// line 131 "JsonParsingWriter.rl"
 	{
 		        addTrue();
 		        if (doDebug) System.out.println("True");
 		    }
 	break;
 	case 8:
-// line 133 "JsonParsingWriter.rl"
+// line 136 "JsonParsingWriter.rl"
 	{
 	    	    addFalse();
 	    	    if (doDebug) System.out.println("False");
 	    	}
 	break;
 	case 9:
-// line 138 "JsonParsingWriter.rl"
+// line 141 "JsonParsingWriter.rl"
 	{
 	    	    try
 	    	    {
 	    	        addNumber(data.substring(s, p));
-	                if (doDebug) System.out.printf("Number from %s\n", data.substring(s, p));
+	                if (doDebug) System.out.printf("Number from %s%n", data.substring(s, p));
 	    	    }
 	    	    catch (NumberFormatException e)
 	    	    {
 		    	    //Empty the stack, output the errant string, move on
 		    	    writ.write(data.substring(0, p));
-		    	    if (doDebug) System.out.printf("Failed number from %s\n", data.substring(s, p));
+		    	    if (doDebug) System.out.printf("Failed number from %s%n", data.substring(s, p));
 		    	    init();
 		    	    {p = (( 0))-1;}
 		    	    {cs = 75; _goto_targ = 2; if (true) continue _goto;}
@@ -258,42 +260,53 @@ case 1:
 	    	}
 	break;
 	case 10:
-// line 154 "JsonParsingWriter.rl"
+// line 157 "JsonParsingWriter.rl"
 	{
 		        if (root != null)
 		        {
 		    	    completedValues.add(root);
 		    	    if (doDebug) System.out.println("Completed JSON");
+		    	    reentryPoint = -1;
     	            data.delete(0, p);
-    	            {p = (( 0))-1;}
+    	            p = 0;
 	                { p += 1; _goto_targ = 5; if (true)  continue _goto;}
 	            }
 		    }
 	break;
 	case 12:
-// line 168 "JsonParsingWriter.rl"
+// line 173 "JsonParsingWriter.rl"
 	{
 		    	//Append the errant string, unwind the stack, return to main
 		    	writ.write(data.substring(0, p));
 		    	if (doDebug) System.out.println("Error");
 		    	init();
-		    	{p = (( 0))-1;}
+		    	{p = (( 1))-1;} //Magic constant? 
 		    	{cs = 75; _goto_targ = 2; if (true) continue _goto;}
 		    }
 	break;
 	case 13:
-// line 176 "JsonParsingWriter.rl"
+// line 181 "JsonParsingWriter.rl"
 	{
 		        if (p > 0)
 		        {
 		            writ.write(data.substring(0, p));
-		    	    if (doDebug) System.out.printf("Slew: \"%s\"\n", data.substring(0, p));
+		    	    if (doDebug) System.out.printf("Slew: \"%s\"%n", data.substring(0, p));
 		            data.delete(0, p);
 		            p = 0;
 		        }
 		    }
 	break;
-// line 297 "JsonParsingWriter.java"
+	case 14:
+// line 191 "JsonParsingWriter.rl"
+	{
+		        if (reentryPoint != -1)
+		        {
+		            p--;
+		            {cs = (reentryPoint); _goto_targ = 2; if (true) continue _goto;}
+		        }
+		    }
+	break;
+// line 310 "JsonParsingWriter.java"
 			}
 		}
 	}
@@ -315,37 +328,49 @@ case 4:
 	while ( __nacts-- > 0 ) {
 		switch ( _json_actions[__acts++] ) {
 	case 10:
-// line 154 "JsonParsingWriter.rl"
+// line 157 "JsonParsingWriter.rl"
 	{
 		        if (root != null)
 		        {
 		    	    completedValues.add(root);
 		    	    if (doDebug) System.out.println("Completed JSON");
+		    	    reentryPoint = -1;
     	            data.delete(0, p);
-    	            {p = (( 0))-1;}
+    	            p = 0;
 	                { p += 1; _goto_targ = 5; if (true)  continue _goto;}
 	            }
 		    }
 	break;
 	case 11:
-// line 164 "JsonParsingWriter.rl"
+// line 168 "JsonParsingWriter.rl"
 	{
 		    	if (doDebug) System.out.println("Interrupted");
+		    	p--;
 		    	{ p += 1; _goto_targ = 5; if (true)  continue _goto;}
 		    }
 	break;
 	case 12:
-// line 168 "JsonParsingWriter.rl"
+// line 173 "JsonParsingWriter.rl"
 	{
 		    	//Append the errant string, unwind the stack, return to main
 		    	writ.write(data.substring(0, p));
 		    	if (doDebug) System.out.println("Error");
 		    	init();
-		    	{p = (( 0))-1;}
+		    	{p = (( 1))-1;} //Magic constant? 
 		    	{cs = 75; _goto_targ = 2; if (true) continue _goto;}
 		    }
 	break;
-// line 349 "JsonParsingWriter.java"
+	case 14:
+// line 191 "JsonParsingWriter.rl"
+	{
+		        if (reentryPoint != -1)
+		        {
+		            p--;
+		            {cs = (reentryPoint); _goto_targ = 2; if (true) continue _goto;}
+		        }
+		    }
+	break;
+// line 374 "JsonParsingWriter.java"
 		}
 	}
 	}
@@ -355,22 +380,23 @@ case 5:
 	break; }
 	}
 
-// line 204 "JsonParsingWriter.rl"
+// line 217 "JsonParsingWriter.rl"
 
 
     }
 
 	
-// line 365 "JsonParsingWriter.java"
+// line 390 "JsonParsingWriter.java"
 private static byte[] init__json_actions_0()
 {
 	return new byte [] {
 	    0,    1,    0,    1,    1,    1,    2,    1,    3,    1,    4,    1,
 	    5,    1,    6,    1,    7,    1,    8,    1,    9,    1,   10,    1,
-	   11,    1,   12,    2,    5,    1,    2,    6,    1,    2,    7,    1,
-	    2,    8,    1,    2,    9,    1,    2,   10,   11,    2,   11,   12,
-	    2,   13,    0,    2,   13,    2,    3,   10,   13,    0,    3,   10,
-	   13,    2
+	   11,    1,   12,    1,   14,    2,    5,    1,    2,    6,    1,    2,
+	    7,    1,    2,    8,    1,    2,    9,    1,    2,   10,   11,    2,
+	   11,   12,    2,   13,    0,    2,   13,    2,    2,   14,   11,    3,
+	   10,   13,    0,    3,   10,   13,    2,    3,   14,   13,    0,    3,
+	   14,   13,    2
 	};
 }
 
@@ -380,13 +406,13 @@ private static final byte _json_actions[] = init__json_actions_0();
 private static short[] init__json_key_offsets_0()
 {
 	return new short [] {
-	    0,    0,    3,    5,   13,   19,   25,   31,   37,   44,   46,   51,
-	   56,   70,   72,   78,   84,   90,   98,  104,  110,  116,  122,  124,
-	  135,  145,  149,  151,  159,  160,  161,  162,  163,  169,  170,  171,
-	  172,  178,  179,  180,  181,  187,  195,  201,  207,  213,  219,  235,
-	  237,  243,  249,  264,  266,  277,  287,  291,  293,  301,  302,  303,
-	  304,  305,  311,  312,  313,  314,  320,  321,  322,  323,  329,  337,
-	  343,  349,  355,  361,  364,  367,  367
+	    0,    0,    5,    7,   15,   21,   27,   33,   39,   46,   48,   53,
+	   58,   72,   74,   80,   86,   92,  100,  106,  112,  118,  124,  126,
+	  137,  147,  151,  153,  161,  162,  163,  164,  165,  171,  172,  173,
+	  174,  180,  181,  182,  183,  189,  197,  203,  209,  215,  221,  237,
+	  239,  245,  251,  266,  268,  279,  289,  293,  295,  303,  304,  305,
+	  306,  307,  313,  314,  315,  316,  322,  323,  324,  325,  331,  339,
+	  345,  351,  357,  363,  368,  373,  373
 	};
 }
 
@@ -396,37 +422,38 @@ private static final short _json_key_offsets[] = init__json_key_offsets_0();
 private static char[] init__json_trans_keys_0()
 {
 	return new char [] {
-	   34,   91,  123,   34,   92,   34,   92,   98,  102,  110,  114,  116,
-	  117,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,   97,
-	  102,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,   97,
-	  102,   13,   32,   34,   44,  125,    9,   10,   34,   92,   13,   32,
-	   58,    9,   10,   13,   32,   58,    9,   10,   13,   32,   34,   43,
-	   45,   91,  102,  110,  116,  123,    9,   10,   48,   57,   34,   92,
-	   13,   32,   44,  125,    9,   10,   13,   32,   44,  125,    9,   10,
-	   13,   32,   34,  125,    9,   10,   34,   92,   98,  102,  110,  114,
-	  116,  117,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,
-	   97,  102,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,
-	   97,  102,   48,   57,   13,   32,   44,   46,   69,  101,  125,    9,
-	   10,   48,   57,   13,   32,   44,   69,  101,  125,    9,   10,   48,
-	   57,   43,   45,   48,   57,   48,   57,   13,   32,   44,  125,    9,
-	   10,   48,   57,   97,  108,  115,  101,   13,   32,   44,  125,    9,
-	   10,  117,  108,  108,   13,   32,   44,  125,    9,   10,  114,  117,
-	  101,   13,   32,   44,  125,    9,   10,   34,   92,   98,  102,  110,
+	   34,   91,   93,  123,  125,   34,   92,   34,   92,   98,  102,  110,
 	  114,  116,  117,   48,   57,   65,   70,   97,  102,   48,   57,   65,
 	   70,   97,  102,   48,   57,   65,   70,   97,  102,   48,   57,   65,
-	   70,   97,  102,   13,   32,   34,   44,   91,   93,  102,  110,  116,
-	  123,    9,   10,   43,   45,   48,   57,   34,   92,   13,   32,   44,
-	   93,    9,   10,   13,   32,   44,   93,    9,   10,   13,   32,   34,
-	   43,   45,   91,   93,  102,  110,  116,  123,    9,   10,   48,   57,
-	   48,   57,   13,   32,   44,   46,   69,   93,  101,    9,   10,   48,
-	   57,   13,   32,   44,   69,   93,  101,    9,   10,   48,   57,   43,
-	   45,   48,   57,   48,   57,   13,   32,   44,   93,    9,   10,   48,
-	   57,   97,  108,  115,  101,   13,   32,   44,   93,    9,   10,  117,
-	  108,  108,   13,   32,   44,   93,    9,   10,  114,  117,  101,   13,
-	   32,   44,   93,    9,   10,   34,   92,   98,  102,  110,  114,  116,
-	  117,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,   97,
-	  102,   48,   57,   65,   70,   97,  102,   48,   57,   65,   70,   97,
-	  102,   34,   91,  123,   34,   91,  123,    0
+	   70,   97,  102,   13,   32,   34,   44,  125,    9,   10,   34,   92,
+	   13,   32,   58,    9,   10,   13,   32,   58,    9,   10,   13,   32,
+	   34,   43,   45,   91,  102,  110,  116,  123,    9,   10,   48,   57,
+	   34,   92,   13,   32,   44,  125,    9,   10,   13,   32,   44,  125,
+	    9,   10,   13,   32,   34,  125,    9,   10,   34,   92,   98,  102,
+	  110,  114,  116,  117,   48,   57,   65,   70,   97,  102,   48,   57,
+	   65,   70,   97,  102,   48,   57,   65,   70,   97,  102,   48,   57,
+	   65,   70,   97,  102,   48,   57,   13,   32,   44,   46,   69,  101,
+	  125,    9,   10,   48,   57,   13,   32,   44,   69,  101,  125,    9,
+	   10,   48,   57,   43,   45,   48,   57,   48,   57,   13,   32,   44,
+	  125,    9,   10,   48,   57,   97,  108,  115,  101,   13,   32,   44,
+	  125,    9,   10,  117,  108,  108,   13,   32,   44,  125,    9,   10,
+	  114,  117,  101,   13,   32,   44,  125,    9,   10,   34,   92,   98,
+	  102,  110,  114,  116,  117,   48,   57,   65,   70,   97,  102,   48,
+	   57,   65,   70,   97,  102,   48,   57,   65,   70,   97,  102,   48,
+	   57,   65,   70,   97,  102,   13,   32,   34,   44,   91,   93,  102,
+	  110,  116,  123,    9,   10,   43,   45,   48,   57,   34,   92,   13,
+	   32,   44,   93,    9,   10,   13,   32,   44,   93,    9,   10,   13,
+	   32,   34,   43,   45,   91,   93,  102,  110,  116,  123,    9,   10,
+	   48,   57,   48,   57,   13,   32,   44,   46,   69,   93,  101,    9,
+	   10,   48,   57,   13,   32,   44,   69,   93,  101,    9,   10,   48,
+	   57,   43,   45,   48,   57,   48,   57,   13,   32,   44,   93,    9,
+	   10,   48,   57,   97,  108,  115,  101,   13,   32,   44,   93,    9,
+	   10,  117,  108,  108,   13,   32,   44,   93,    9,   10,  114,  117,
+	  101,   13,   32,   44,   93,    9,   10,   34,   92,   98,  102,  110,
+	  114,  116,  117,   48,   57,   65,   70,   97,  102,   48,   57,   65,
+	   70,   97,  102,   48,   57,   65,   70,   97,  102,   48,   57,   65,
+	   70,   97,  102,   34,   91,   93,  123,  125,   34,   91,   93,  123,
+	  125,    0
 	};
 }
 
@@ -436,13 +463,13 @@ private static final char _json_trans_keys[] = init__json_trans_keys_0();
 private static byte[] init__json_single_lengths_0()
 {
 	return new byte [] {
-	    0,    3,    2,    8,    0,    0,    0,    0,    5,    2,    3,    3,
+	    0,    5,    2,    8,    0,    0,    0,    0,    5,    2,    3,    3,
 	   10,    2,    4,    4,    4,    8,    0,    0,    0,    0,    0,    7,
 	    6,    2,    0,    4,    1,    1,    1,    1,    4,    1,    1,    1,
 	    4,    1,    1,    1,    4,    8,    0,    0,    0,    0,   10,    2,
 	    4,    4,   11,    0,    7,    6,    2,    0,    4,    1,    1,    1,
 	    1,    4,    1,    1,    1,    4,    1,    1,    1,    4,    8,    0,
-	    0,    0,    0,    3,    3,    0,    0
+	    0,    0,    0,    5,    5,    0,    0
 	};
 }
 
@@ -468,72 +495,53 @@ private static final byte _json_range_lengths[] = init__json_range_lengths_0();
 private static short[] init__json_index_offsets_0()
 {
 	return new short [] {
-	    0,    0,    4,    7,   16,   20,   24,   28,   32,   39,   42,   47,
-	   52,   65,   68,   74,   80,   86,   95,   99,  103,  107,  111,  113,
-	  123,  132,  136,  138,  145,  147,  149,  151,  153,  159,  161,  163,
-	  165,  171,  173,  175,  177,  183,  192,  196,  200,  204,  208,  222,
-	  225,  231,  237,  251,  253,  263,  272,  276,  278,  285,  287,  289,
-	  291,  293,  299,  301,  303,  305,  311,  313,  315,  317,  323,  332,
-	  336,  340,  344,  348,  352,  356,  357
+	    0,    0,    6,    9,   18,   22,   26,   30,   34,   41,   44,   49,
+	   54,   67,   70,   76,   82,   88,   97,  101,  105,  109,  113,  115,
+	  125,  134,  138,  140,  147,  149,  151,  153,  155,  161,  163,  165,
+	  167,  173,  175,  177,  179,  185,  194,  198,  202,  206,  210,  224,
+	  227,  233,  239,  253,  255,  265,  274,  278,  280,  287,  289,  291,
+	  293,  295,  301,  303,  305,  307,  313,  315,  317,  319,  325,  334,
+	  338,  342,  346,  350,  356,  362,  363
 	};
 }
 
 private static final short _json_index_offsets[] = init__json_index_offsets_0();
 
 
-private static byte[] init__json_indicies_0()
-{
-	return new byte [] {
-	    1,    2,    3,    0,    0,    4,    1,    1,    1,    1,    1,    1,
-	    1,    1,    6,    5,    7,    7,    7,    5,    8,    8,    8,    5,
-	    9,    9,    9,    5,    1,    1,    1,    5,   10,   10,   11,   12,
-	   13,   10,    5,   15,   16,   14,   17,   17,   19,   17,   18,   20,
-	   20,   21,   20,   18,   21,   21,   22,   23,   23,   25,   26,   27,
-	   28,   29,   21,   24,   18,   31,   32,   30,   33,   33,   34,   35,
-	   33,    5,   36,   36,   12,   13,   36,    5,   12,   12,   11,   13,
-	   12,    5,   30,   30,   30,   30,   30,   30,   30,   37,   18,   38,
-	   38,   38,   18,   39,   39,   39,   18,   40,   40,   40,   18,   30,
-	   30,   30,   18,   41,   18,   42,   42,   43,   44,   45,   45,   46,
-	   42,   41,    5,   42,   42,   43,   45,   45,   46,   42,   44,    5,
-	   47,   47,   48,   18,   48,   18,   42,   42,   43,   46,   42,   48,
-	    5,   49,   18,   50,   18,   51,   18,   52,   18,   53,   53,   54,
-	   55,   53,    5,   56,   18,   57,   18,   58,   18,   59,   59,   60,
-	   61,   59,    5,   62,   18,   63,   18,   64,   18,   65,   65,   66,
-	   67,   65,    5,   14,   14,   14,   14,   14,   14,   14,   68,   18,
-	   69,   69,   69,   18,   70,   70,   70,   18,   71,   71,   71,   18,
-	   14,   14,   14,   18,   72,   72,   73,   75,   77,   78,   79,   80,
-	   81,   82,   72,   74,   76,    5,   84,   85,   83,   86,   86,   87,
-	   88,   86,    5,   89,   89,   75,   78,   89,    5,   75,   75,   73,
-	   74,   74,   77,   78,   79,   80,   81,   82,   75,   76,    5,   90,
-	   18,   91,   91,   92,   93,   94,   95,   94,   91,   90,    5,   91,
-	   91,   92,   94,   95,   94,   91,   93,    5,   96,   96,   97,   18,
-	   97,   18,   91,   91,   92,   95,   91,   97,    5,   98,   18,   99,
-	   18,  100,   18,  101,   18,  102,  102,  103,  104,  102,    5,  105,
-	   18,  106,   18,  107,   18,  108,  108,  109,  110,  108,    5,  111,
-	   18,  112,   18,  113,   18,  114,  114,  115,  116,  114,    5,   83,
-	   83,   83,   83,   83,   83,   83,  117,   18,  118,  118,  118,   18,
-	  119,  119,  119,   18,  120,  120,  120,   18,   83,   83,   83,   18,
-	    1,    2,    3,    0,  122,  123,  124,  121,    5,    5,    0
-	};
-}
-
-private static final byte _json_indicies[] = init__json_indicies_0();
-
-
 private static byte[] init__json_trans_targs_0()
 {
 	return new byte [] {
-	    1,    2,   76,   76,    3,    0,    4,    5,    6,    7,    8,    9,
-	   16,   77,    9,   10,   41,   11,    0,   12,   11,   12,   13,   22,
-	   23,   15,   28,   33,   37,   15,   13,   14,   17,   15,   16,   77,
-	   15,   18,   19,   20,   21,   23,   15,   16,   24,   25,   77,   26,
-	   27,   29,   30,   31,   32,   15,   16,   77,   34,   35,   36,   15,
-	   16,   77,   38,   39,   40,   15,   16,   77,   42,   43,   44,   45,
-	   46,   47,   51,   50,   52,   49,   78,   57,   62,   66,   49,   47,
-	   48,   70,   49,   50,   78,   49,   52,   49,   50,   53,   54,   78,
-	   55,   56,   58,   59,   60,   61,   49,   50,   78,   63,   64,   65,
-	   49,   50,   78,   67,   68,   69,   49,   50,   78,   71,   72,   73,
-	   74,    1,    2,   76,   76
+	    2,   76,    0,   76,    0,    1,    1,    3,    2,    2,    2,    2,
+	    2,    2,    2,    2,    4,    0,    5,    5,    5,    0,    6,    6,
+	    6,    0,    7,    7,    7,    0,    2,    2,    2,    0,    8,    8,
+	    9,   16,   77,    8,    0,   10,   41,    9,   11,   11,   12,   11,
+	    0,   11,   11,   12,   11,    0,   12,   12,   13,   22,   22,   15,
+	   28,   33,   37,   15,   12,   23,    0,   14,   17,   13,   15,   15,
+	   16,   77,   15,    0,   15,   15,   16,   77,   15,    0,   16,   16,
+	    9,   77,   16,    0,   13,   13,   13,   13,   13,   13,   13,   18,
+	    0,   19,   19,   19,    0,   20,   20,   20,    0,   21,   21,   21,
+	    0,   13,   13,   13,    0,   23,    0,   15,   15,   16,   24,   25,
+	   25,   77,   15,   23,    0,   15,   15,   16,   25,   25,   77,   15,
+	   24,    0,   26,   26,   27,    0,   27,    0,   15,   15,   16,   77,
+	   15,   27,    0,   29,    0,   30,    0,   31,    0,   32,    0,   15,
+	   15,   16,   77,   15,    0,   34,    0,   35,    0,   36,    0,   15,
+	   15,   16,   77,   15,    0,   38,    0,   39,    0,   40,    0,   15,
+	   15,   16,   77,   15,    0,    9,    9,    9,    9,    9,    9,    9,
+	   42,    0,   43,   43,   43,    0,   44,   44,   44,    0,   45,   45,
+	   45,    0,    9,    9,    9,    0,   46,   46,   47,   50,   49,   78,
+	   57,   62,   66,   49,   46,   51,   52,    0,   48,   70,   47,   49,
+	   49,   50,   78,   49,    0,   49,   49,   50,   78,   49,    0,   50,
+	   50,   47,   51,   51,   49,   78,   57,   62,   66,   49,   50,   52,
+	    0,   52,    0,   49,   49,   50,   53,   54,   78,   54,   49,   52,
+	    0,   49,   49,   50,   54,   78,   54,   49,   53,    0,   55,   55,
+	   56,    0,   56,    0,   49,   49,   50,   78,   49,   56,    0,   58,
+	    0,   59,    0,   60,    0,   61,    0,   49,   49,   50,   78,   49,
+	    0,   63,    0,   64,    0,   65,    0,   49,   49,   50,   78,   49,
+	    0,   67,    0,   68,    0,   69,    0,   49,   49,   50,   78,   49,
+	    0,   47,   47,   47,   47,   47,   47,   47,   71,    0,   72,   72,
+	   72,    0,   73,   73,   73,    0,   74,   74,   74,    0,   47,   47,
+	   47,    0,    2,   76,    0,   76,    0,    1,    2,   76,    0,   76,
+	    0,    1,    0,    0,    0
 	};
 }
 
@@ -543,17 +551,37 @@ private static final byte _json_trans_targs[] = init__json_trans_targs_0();
 private static byte[] init__json_trans_actions_0()
 {
 	return new byte [] {
-	    0,    0,   51,   48,    0,   25,    0,    0,    0,    0,    0,    7,
-	    0,    3,    0,    0,    0,    9,    0,    9,    0,    0,    7,    7,
-	    7,    5,    0,    0,    0,    1,    0,    0,    0,   11,   11,   27,
-	    0,    0,    0,    0,    0,    0,   19,   19,    0,    0,   39,    0,
-	    0,    0,    0,    0,    0,   17,   17,   36,    0,    0,    0,   13,
-	   13,   30,    0,    0,    0,   15,   15,   33,    0,    0,    0,    0,
-	    0,    7,    7,    0,    7,    5,    3,    0,    0,    0,    1,    0,
-	    0,    0,   11,   11,   27,    0,    0,   19,   19,    0,    0,   39,
-	    0,    0,    0,    0,    0,    0,   17,   17,   36,    0,    0,    0,
-	   13,   13,   30,    0,    0,    0,   15,   15,   33,    0,    0,    0,
-	    0,   21,   21,   58,   54
+	    0,   53,   25,   50,   25,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,   25,    0,    0,    0,   25,    0,    0,
+	    0,   25,    0,    0,    0,   25,    0,    0,    0,   25,    0,    0,
+	    7,    0,    3,    0,   25,    0,    0,    0,    9,    9,    9,    9,
+	    0,    0,    0,    0,    0,    0,    0,    0,    7,    7,    7,    5,
+	    0,    0,    0,    1,    0,    7,    0,    0,    0,    0,   11,   11,
+	   11,   29,   11,   25,    0,    0,    0,    3,    0,   25,    0,    0,
+	    7,    3,    0,   25,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,   19,   19,   19,    0,    0,
+	    0,   41,   19,    0,   25,   19,   19,   19,    0,    0,   41,   19,
+	    0,   25,    0,    0,    0,    0,    0,    0,   19,   19,   19,   41,
+	   19,    0,   25,    0,    0,    0,    0,    0,    0,    0,    0,   17,
+	   17,   17,   38,   17,   25,    0,    0,    0,    0,    0,    0,   13,
+	   13,   13,   32,   13,   25,    0,    0,    0,    0,    0,    0,   15,
+	   15,   15,   35,   15,   25,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    7,    0,    5,    3,
+	    0,    0,    0,    1,    0,    7,    7,   25,    0,    0,    0,   11,
+	   11,   11,   29,   11,   25,    0,    0,    0,    3,    0,   25,    0,
+	    0,    7,    7,    7,    5,    3,    0,    0,    0,    1,    0,    7,
+	   25,    0,    0,   19,   19,   19,    0,    0,   41,    0,   19,    0,
+	   25,   19,   19,   19,    0,   41,    0,   19,    0,   25,    0,    0,
+	    0,    0,    0,    0,   19,   19,   19,   41,   19,    0,   25,    0,
+	    0,    0,    0,    0,    0,    0,    0,   17,   17,   17,   38,   17,
+	   25,    0,    0,    0,    0,    0,    0,   13,   13,   13,   32,   13,
+	   25,    0,    0,    0,    0,    0,    0,   15,   15,   15,   35,   15,
+	   25,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    0,   27,   71,   25,   67,   25,   27,   21,   63,   25,   59,
+	   25,   21,   25,   25,    0
 	};
 }
 
@@ -563,13 +591,13 @@ private static final byte _json_trans_actions[] = init__json_trans_actions_0();
 private static byte[] init__json_eof_actions_0()
 {
 	return new byte [] {
-	    0,   45,   45,   45,   45,   45,   45,   45,   45,    0,    0,    0,
-	    0,    0,   45,   45,   45,    0,    0,    0,    0,    0,    0,   45,
-	   45,    0,    0,   45,    0,    0,    0,    0,   45,    0,    0,    0,
-	   45,    0,    0,    0,   45,    0,    0,    0,    0,    0,   45,    0,
-	   45,   45,   45,    0,   45,   45,    0,    0,   45,    0,    0,    0,
-	    0,   45,    0,    0,    0,   45,    0,    0,    0,   45,    0,    0,
-	    0,    0,    0,   23,   42,   23,   23
+	    0,   47,   47,   47,   47,   47,   47,   47,   47,    0,    0,    0,
+	    0,    0,   47,   47,   47,    0,    0,    0,    0,    0,    0,   47,
+	   47,    0,    0,   47,    0,    0,    0,    0,   47,    0,    0,    0,
+	   47,    0,    0,    0,   47,    0,    0,    0,    0,    0,   47,    0,
+	   47,   47,   47,    0,   47,   47,    0,    0,   47,    0,    0,    0,
+	    0,   47,    0,    0,    0,   47,    0,    0,    0,   47,    0,    0,
+	    0,    0,    0,   56,   44,   23,   23
 	};
 }
 
@@ -585,7 +613,7 @@ static final int json_en_array = 46;
 static final int json_en_main = 75;
 
 
-// line 209 "JsonParsingWriter.rl"
+// line 222 "JsonParsingWriter.rl"
 
     void init()
     {
@@ -596,16 +624,17 @@ static final int json_en_main = 75;
         stack = new int[8];
     	root = null;
 		current = null;
+		reentryPoint = -1;
 		elements = new ArrayDeque<>();
 	    lastChild = new ArrayDeque<>();
         
-// line 603 "JsonParsingWriter.java"
+// line 632 "JsonParsingWriter.java"
 	{
 	cs = json_start;
 	top = 0;
 	}
 
-// line 222 "JsonParsingWriter.rl"
+// line 236 "JsonParsingWriter.rl"
 	}
 
 	private void addChild (String name, JsonValue child) {
@@ -636,7 +665,7 @@ static final int json_en_main = 75;
 		current = value;
 	}
 
-	protected void startArray (String name)
+	protected void startArray(String name)
 	{
 		JsonValue value = new JsonValue(ValueType.array);
 		if (current != null) addChild(name, value);
@@ -644,11 +673,13 @@ static final int json_en_main = 75;
 		current = value;
 	}
 
-	protected void pop ()
+	protected int pop()
 	{
 		root = elements.pop();
 		if (current.size() > 0) lastChild.pop();
 		current = elements.peek();
+		if (top == 0) return -1;
+		else return stack[top-1];
 	}
 
 	protected void addName(String name)

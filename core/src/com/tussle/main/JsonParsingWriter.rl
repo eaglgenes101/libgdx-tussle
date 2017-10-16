@@ -36,6 +36,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
     int cs, p, top;
     int s;
 	int[] stack;
+	int reentryPoint;
 
     Deque<JsonValue> completedValues;
 	Deque<String> names;
@@ -95,16 +96,18 @@ public class JsonParsingWriter extends Writer implements JsonSource
             }
             action startObject {
     	        startObject(names.poll());
+				reentryPoint = fentry(object);
     	        if (doDebug) System.out.println("Starting object");
 	    		fcall object;
 		    }
 		    action end {
-            	pop();
+            	reentryPoint = pop();
             	if (doDebug) System.out.println("Ending");
 	            fret;
 		    }
     	    action startArray {
         		startArray(names.poll());
+				reentryPoint = fentry(array);
         		if (doDebug) System.out.println("Staring array");
 	    	    fcall array;
     	    }
@@ -112,12 +115,12 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	        action name
 	        {
 	            addName(data.substring(s+1, p-1));
-	            if (doDebug) System.out.printf("Name from %s\n", data.substring(s, p));
+	            if (doDebug) System.out.printf("Name from %s%n", data.substring(s, p));
 	        }
 	    	action string
 	    	{
 	    	    addString(data.substring(s+1, p-1));
-	            if (doDebug) System.out.printf("String from %s\n", data.substring(s, p));
+	            if (doDebug) System.out.printf("String from %s%n", data.substring(s, p));
 	    	}
 		    action null
 		    {
@@ -139,13 +142,13 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	    	    try
 	    	    {
 	    	        addNumber(data.substring(s, p));
-	                if (doDebug) System.out.printf("Number from %s\n", data.substring(s, p));
+	                if (doDebug) System.out.printf("Number from %s%n", data.substring(s, p));
 	    	    }
 	    	    catch (NumberFormatException e)
 	    	    {
 		    	    //Empty the stack, output the errant string, move on
 		    	    writ.write(data.substring(0, p));
-		    	    if (doDebug) System.out.printf("Failed number from %s\n", data.substring(s, p));
+		    	    if (doDebug) System.out.printf("Failed number from %s%n", data.substring(s, p));
 		    	    init();
 		    	    fexec 0;
 		    	    fgoto main;
@@ -156,13 +159,15 @@ public class JsonParsingWriter extends Writer implements JsonSource
 		        {
 		    	    completedValues.add(root);
 		    	    if (doDebug) System.out.println("Completed JSON");
+		    	    reentryPoint = -1;
     	            data.delete(0, p);
-    	            fexec 0;
+    	            p = 0;
 	                fbreak;
 	            }
 		    }
 		    action exit {
 		    	if (doDebug) System.out.println("Interrupted");
+		    	fhold;
 		    	fbreak;
 		    }
 		    action error {
@@ -170,16 +175,24 @@ public class JsonParsingWriter extends Writer implements JsonSource
 		    	writ.write(data.substring(0, p));
 		    	if (doDebug) System.out.println("Error");
 		    	init();
-		    	fexec 0;
+		    	fexec 1; //Magic constant?
 		    	fgoto main;
 		    }
 		    action slew {
 		        if (p > 0)
 		        {
 		            writ.write(data.substring(0, p));
-		    	    if (doDebug) System.out.printf("Slew: \"%s\"\n", data.substring(0, p));
+		    	    if (doDebug) System.out.printf("Slew: \"%s\"%n", data.substring(0, p));
 		            data.delete(0, p);
 		            p = 0;
+		        }
+		    }
+		    action reenter
+		    {
+		        if (reentryPoint != -1)
+		        {
+		            fhold;
+		            fgoto *reentryPoint;
 		        }
 		    }
 
@@ -188,7 +201,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	    	escapeUnicode = "\\u" xdigit{4};
 	    	strForm = '"' (escapeChar | escapeUnicode | ^[\\\"])** '"';
     	    intForm = ('+'|'-')? ('0'..'9') ('0'..'9')**;
-            outside = strForm | (any - zlen - [\"[{]);
+            outside = strForm | (any - zlen - [\"[{\]\}]);
 
     	    str = strForm >start %string;
     	    bool = "null" %null | "true" %true | "false" %false;
@@ -198,7 +211,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	        nameValue = strForm >start %name ws* ':' ws* value;
     	    object := ws* nameValue? ws* <: (',' ws* nameValue ws*)** :>> (','? ws* '}' @end) $/exit $!error;
             array := ws* value? ws* <: (',' ws* value ws*)** :>> (','? ws* ']' @end) $/exit $!error;
-    	    main := ((outside**) %slew :> ('{' @startObject | '[' @startArray) %output )* $/exit $!error;
+    	    main := ((outside**) %slew :> ('{' @startObject | '[' @startArray) %output )* >reenter $/exit $!error;
 
         	write exec;
     	}%%
@@ -216,6 +229,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
         stack = new int[8];
     	root = null;
 		current = null;
+		reentryPoint = -1;
 		elements = new ArrayDeque<>();
 	    lastChild = new ArrayDeque<>();
         %% write init;
@@ -249,7 +263,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 		current = value;
 	}
 
-	protected void startArray (String name)
+	protected void startArray(String name)
 	{
 		JsonValue value = new JsonValue(ValueType.array);
 		if (current != null) addChild(name, value);
@@ -257,11 +271,13 @@ public class JsonParsingWriter extends Writer implements JsonSource
 		current = value;
 	}
 
-	protected void pop ()
+	protected int pop()
 	{
 		root = elements.pop();
 		if (current.size() > 0) lastChild.pop();
 		current = elements.peek();
+		if (top == 0) return -1;
+		else return stack[top-1];
 	}
 
 	protected void addName(String name)

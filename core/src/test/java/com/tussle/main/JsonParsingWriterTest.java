@@ -125,10 +125,6 @@ class JsonParsingWriterTest
 		assertFalse(read.ready());
 		writer.write("\"C\":2}]");
 		writer.flush();
-		char[] buf = new char[999];
-		int numChars = read.read(buf);
-		String str = new String(buf, 0, numChars);
-		System.out.println(str);
 		assertFalse(read.ready());
 		assertTrue(writer.ready());
 		JsonValue value = writer.read();

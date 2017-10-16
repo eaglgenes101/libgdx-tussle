@@ -31,7 +31,7 @@ import java.util.LinkedList;
 public class JsonParsingWriter extends Writer implements JsonSource
 {
     StringBuilder data;
-    public static final boolean doDebug = true;
+    public static final boolean doDebug = false;
 
     int cs, p, top;
     int s;
@@ -201,7 +201,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	    	escapeUnicode = "\\u" xdigit{4};
 	    	strForm = '"' (escapeChar | escapeUnicode | ^[\\\"])** '"';
     	    intForm = ('+'|'-')? ('0'..'9') ('0'..'9')**;
-            outside = strForm | (any - zlen - [\"[{\]\}]);
+            outside = strForm | (any - zlen - [\"[{]);
 
     	    str = strForm >start %string;
     	    bool = "null" %null | "true" %true | "false" %false;

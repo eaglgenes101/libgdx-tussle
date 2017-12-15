@@ -18,29 +18,66 @@
 package com.tussle.collision;
 
 import com.badlogic.ashley.core.Component;
+import com.tussle.script.ScriptIterator;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IteratorUtils;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Created by eaglgenes101 on 4/24/17.
  */
 public class StageElementComponent implements Component
 {
-	protected Collection<StageElement> surfaces;
-
+	LinkedHashMap<ScriptIterator, LinkedHashSet<StageElement>> surfaces;
+	
 	public StageElementComponent()
 	{
-		surfaces = new LinkedList<>();
+		surfaces = new LinkedHashMap<>();
 	}
-
-	public void put(StageElement surface)
+	
+	public void put(ScriptIterator iterator, StageElement surface)
 	{
-		surfaces.add(surface);
+		if (!surfaces.containsKey(iterator))
+			surfaces.put(iterator, new LinkedHashSet<>());
+		surfaces.get(iterator).add(surface);
 	}
-
-	public Collection<StageElement> get()
+	
+	public void remove(ScriptIterator iterator, StageElement surface)
 	{
-		return surfaces;
+		surfaces.get(iterator).remove(surface);
+	}
+	
+	public void remove(ScriptIterator iterator)
+	{
+		surfaces.remove(iterator);
+	}
+	
+	private transient Collection<StageElement> hitboxValues;
+	
+	public Collection<StageElement> getStageElements()
+	{
+		if (hitboxValues == null)
+		{
+			hitboxValues = new AbstractCollection<StageElement>()
+			{
+				public Iterator<StageElement> iterator()
+				{
+					return IteratorUtils.chainedIterator(
+							CollectionUtils.collect(
+									surfaces.values(),
+									(LinkedHashSet<StageElement> coll) -> coll.iterator()
+							)
+					);
+				}
+				
+				public int size()
+				{
+					//WHEE JAVA FUNCTIONAL STREAMS
+					return surfaces.values().stream().mapToInt(coll->coll.size()).sum();
+				}
+			};
+		}
+		return hitboxValues;
 	}
 }

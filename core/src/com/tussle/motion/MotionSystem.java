@@ -17,30 +17,18 @@
 
 package com.tussle.motion;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.tussle.collision.StageElement;
 import com.tussle.collision.StageElementComponent;
+import com.tussle.main.Components;
 
 /**
  * Created by eaglgenes101 on 5/25/17.
  */
 public class MotionSystem extends IteratingSystem
 {
-	//Entity families
-	Family surfaceFamily = Family.all(PositionComponent.class,
-			StageElementComponent.class).get();
-
-	//Component mappers
-	ComponentMapper<PositionComponent> positionMapper =
-			ComponentMapper.getFor(PositionComponent.class);
-	ComponentMapper<VelocityComponent> velocityMapper =
-			ComponentMapper.getFor(VelocityComponent.class);
-	ComponentMapper<StageElementComponent> surfaceMapper =
-			ComponentMapper.getFor(StageElementComponent.class);
-
 	public MotionSystem(int p)
 	{
 		super(Family.all(PositionComponent.class, VelocityComponent.class).get(), p);
@@ -48,16 +36,22 @@ public class MotionSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
-		positionMapper.get(entity).x += velocityMapper.get(entity).xVel;
-		positionMapper.get(entity).y += velocityMapper.get(entity).yVel;
-		if (surfaceMapper.has(entity))
-		{
-			for (StageElement se : surfaceMapper.get(entity).get())
-			{
-				se.setAreas();
-				se.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
-			}
-		}
+		Components.postprocessMapper.get(entity).add(
+				PositionComponent.class,
+				cl->cl.displace(Components.velocityMapper.get(entity).xVel,
+				                Components.velocityMapper.get(entity).yVel)
+		);
+		Components.postprocessMapper.get(entity).add(
+				StageElementComponent.class,
+				cl -> {
+					for (StageElement se : cl.getStageElements())
+					{
+						se.setAreas();
+						se.setPosition(Components.positionMapper.get(entity).x,
+				                       Components.positionMapper.get(entity).y);
+					}
+				}
+		);
 		//Collision system will handle normals and such
 	}
 }

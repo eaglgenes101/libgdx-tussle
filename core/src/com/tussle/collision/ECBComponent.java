@@ -18,41 +18,66 @@
 package com.tussle.collision;
 
 import com.badlogic.ashley.core.Component;
+import com.tussle.script.ScriptIterator;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IteratorUtils;
+
+import java.util.*;
 
 /**
  * Created by eaglgenes101 on 4/24/17.
  */
 public class ECBComponent implements Component
 {
-	private CollisionBox ecb;
-
+	LinkedHashMap<ScriptIterator, LinkedHashSet<CollisionBox>> ecbs;
+	
 	public ECBComponent()
 	{
-		ecb = new CollisionBox();
+		ecbs = new LinkedHashMap<>();
 	}
-
-	public ECBComponent(Stadium start)
+	
+	public void put(ScriptIterator iterator, CollisionBox box)
 	{
-		ecb = new CollisionBox(start);
+		if (!ecbs.containsKey(iterator))
+			ecbs.put(iterator, new LinkedHashSet<>());
+		ecbs.get(iterator).add(box);
 	}
-
-	public CollisionBox getEcb()
+	
+	public void remove(ScriptIterator iterator, CollisionBox box)
 	{
-		return ecb;
+		ecbs.get(iterator).remove(box);
 	}
-
-	public void update(double x, double y, double angle, double scale, boolean flipped)
+	
+	public void remove(ScriptIterator iterator)
 	{
-		ecb.setPosition(x, y);
-		ecb.setRotation(angle);
-		ecb.setScale(scale);
-		ecb.setFlipped(flipped);
-		ecb.setAreas();
+		ecbs.remove(iterator);
 	}
-
-	public void setStadium(Stadium newStart)
+	
+	private transient Collection<CollisionBox> hitboxValues;
+	
+	public Collection<CollisionBox> getCollisionBoxes()
 	{
-		ecb.setStadium(newStart);
-		ecb.setAreas();
+		if (hitboxValues == null)
+		{
+			hitboxValues = new AbstractCollection<CollisionBox>()
+			{
+				public Iterator<CollisionBox> iterator()
+				{
+					return IteratorUtils.chainedIterator(
+							CollectionUtils.collect(
+									ecbs.values(),
+									(LinkedHashSet<CollisionBox> coll) -> coll.iterator()
+							)
+					);
+				}
+				
+				public int size()
+				{
+					//WHEE JAVA FUNCTIONAL STREAMS
+					return ecbs.values().stream().mapToInt(coll->coll.size()).sum();
+				}
+			};
+		}
+		return hitboxValues;
 	}
 }

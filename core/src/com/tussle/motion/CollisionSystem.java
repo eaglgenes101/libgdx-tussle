@@ -17,143 +17,169 @@
 
 package com.tussle.motion;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.tussle.collision.*;
+import com.tussle.main.Components;
 import com.tussle.main.Utility;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.map.LazyMap;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by eaglgenes101 on 6/7/17.
  */
 public strictfp class CollisionSystem extends IteratingSystem
 {
+	public static final double COLLISION_TOLERANCE = .00001;
+	
 	//Entity families
 	Family surfaceFamily = Family.all(PositionComponent.class,
 			StageElementComponent.class).get();
-
-	//Component mappers
-	ComponentMapper<PositionComponent> positionMapper =
-			ComponentMapper.getFor(PositionComponent.class);
-	ComponentMapper<VelocityComponent> velocityMapper =
-			ComponentMapper.getFor(VelocityComponent.class);
-	ComponentMapper<ECBComponent> ecbMapper =
-			ComponentMapper.getFor(ECBComponent.class);
-	ComponentMapper<StageElementComponent> surfaceMapper =
-			ComponentMapper.getFor(StageElementComponent.class);
-	ComponentMapper<ElasticityComponent> elasticityMapper =
-			ComponentMapper.getFor(ElasticityComponent.class);
-	Map<Entity, double[]> toApplyDisplacements = new HashMap<>();
-	Map<Entity, double[]> toApplyVelocities = new HashMap<>();
 
 	public CollisionSystem(int p)
 	{
 		super(Family.all(VelocityComponent.class, ECBComponent.class).get(), p);
 	}
 
-	public void update(float delta)
-	{
-		toApplyDisplacements.clear();
-		toApplyVelocities.clear();
-		super.update(delta);
-		for (Map.Entry<Entity, double[]> entry : toApplyDisplacements.entrySet())
-		{
-
-		}
-		for (Map.Entry<Entity, double[]> entry : toApplyVelocities.entrySet())
-		{
-			velocityMapper.get(entry.getKey()).xVel += entry.getValue()[0];
-			velocityMapper.get(entry.getKey()).yVel += entry.getValue()[1];
-		}
-	}
-
 	public void processEntity(Entity entity, float delta)
 	{
-		//Move the entity first
-		CollisionBox ourBox = ecbMapper.get(entity).getEcb();
-		ourBox.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
-		Map<StageElement, ProjectionVector> minVectors = new HashMap<>();
-		Map<StageElement, ProjectionVector> maxVectors = new HashMap<>();
-		//First, populate the highest-level hash maps
-		for (Entity ent : getEngine().getEntitiesFor(surfaceFamily))
-			if (ent != entity)
-				for (StageElement se : surfaceMapper.get(ent).get())
-				{
-					minVectors.put(se, se.depth(ourBox.getStadiumAt(0), 0));
-					maxVectors.put(se, se.depth(ourBox.getStadiumAt(1), 1));
+		//TODO: Filter out collision boxes that obviously won't hit
+		Components.postprocessMapper.get(entity).add(
+				ECBComponent.class,
+				(ECBComponent comp) -> {
+					for (CollisionBox c : comp.getCollisionBoxes())
+						c.setPosition(Components.positionMapper.get(entity).x,
+									  Components.positionMapper.get(entity).y);
 				}
-		ProjectionVector disp = new ProjectionVector(0, 0, 0);
-		StageElement hit = ecbHit(0, 1, ourBox.getStadiumAt(0),
-				ourBox.getStadiumAt(1), minVectors, maxVectors, disp);
-		//After all this, operate collision effects
-		positionMapper.get(entity).x += disp.xnorm*disp.magnitude;
-		positionMapper.get(entity).y += disp.ynorm*disp.magnitude;
-		ourBox.setPosition(positionMapper.get(entity).x, positionMapper.get(entity).y);
-		ourBox.setAreas();
-		//Reflect off of the hit surface
-		if (velocityMapper.has(entity) && hit != null)
+		);
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> minVectors =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> maxVectors =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
+		Map<CollisionBox, Stadium> beforeStads = new HashMap<>();
+		Map<CollisionBox, Stadium> afterStads = new HashMap<>();
+		
+		//Move a box copy first
+		for (CollisionBox box : Components.ecbMapper.get(entity).getCollisionBoxes())
 		{
-			ProjectionVector surfNorm = hit.depth(ourBox.getCurrentStadium(), 1);
-			ProjectionVector surfVel = hit.instantVelocity(ourBox.getCurrentStadium(), 1);
-			double diffX = velocityMapper.get(entity).xVel - surfVel.xnorm * surfVel.magnitude;
-			double diffY = velocityMapper.get(entity).yVel - surfVel.ynorm * surfVel.magnitude;
-			if (diffX*surfNorm.xnorm + diffY*surfNorm.ynorm < 0)
+			CollisionBox ourBox = new CollisionBox(box);
+			ourBox.setPosition(Components.positionMapper.get(entity).x,
+			                   Components.positionMapper.get(entity).y);
+			beforeStads.put(box, box.getStadiumAt(0));
+			afterStads.put(box, box.getStadiumAt(1));
+			//First, populate the highest-level hash maps
+			for (Entity ent : getEngine().getEntitiesFor(surfaceFamily))
+				if (ent != entity)
+					for (StageElement se : Components.stageElementMapper.get(ent).getStageElements())
+					{
+						minVectors.get(box).put(se, se.depth(ourBox.getStadiumAt(0), 0));
+						maxVectors.get(box).put(se, se.depth(ourBox.getStadiumAt(1), 1));
+					}
+		}
+		//Now find the hit stage element corresponding to the largest disp
+		ProjectionVector disp = new ProjectionVector(0, 0, 0);
+		CollisionPair hit = ecbHit(0, 1, beforeStads, afterStads,
+		                          minVectors, maxVectors, disp);
+		//After all this, operate collision effects
+		Components.postprocessMapper.get(entity).add(
+				PositionComponent.class,
+				(comp) -> comp.displace(disp.xnorm*disp.magnitude,
+				                        disp.ynorm*disp.magnitude)
+		);
+		Stadium finalStad = new Stadium(hit.getBox().getCurrentStadium());
+		finalStad.displace(Components.positionMapper.get(entity).x + disp.xnorm*disp.magnitude,
+		                   Components.positionMapper.get(entity).y + disp.ynorm*disp.magnitude);
+		//Reflect off of the hit surface
+		if (Components.velocityMapper.has(entity) && hit != null)
+		{
+			ProjectionVector surfNorm = hit.getSurface().depth(finalStad, 1);
+			ProjectionVector surfVel = hit.getSurface().instantVelocity(finalStad, 1);
+			double diffX = Components.velocityMapper.get(entity).xVel - surfVel.xnorm * surfVel.magnitude;
+			double diffY = Components.velocityMapper.get(entity).yVel - surfVel.ynorm * surfVel.magnitude;
+			if (diffX * surfNorm.xnorm + diffY * surfNorm.ynorm < 0)
 			{
-				double elasticity = 0;
-				if (elasticityMapper.has(entity))
+				final double elasticity;
+				if (Components.elasticityMapper.has(entity))
 				{
 					if (surfNorm.ynorm > StrictMath.abs(surfNorm.xnorm))
-						elasticity = elasticityMapper.get(entity).getGroundElasticity();
-					else elasticity = elasticityMapper.get(entity).getWallElasticity();
+						elasticity = Components.elasticityMapper.get(entity).getGroundElasticity();
+					else elasticity = Components.elasticityMapper.get(entity).getWallElasticity();
 				}
+				else
+					elasticity = 0;
 				//Get vector projection and rejection
 				double[] projection = Utility.projection(diffX, diffY, surfNorm.xnorm, surfNorm.ynorm);
-				double[] modProj = {(-1-elasticity)*projection[0], (-1-elasticity)*projection[1]};
-				toApplyVelocities.put(entity, modProj);
+				Components.postprocessMapper.get(entity).add(
+						VelocityComponent.class,
+						(comp) -> {
+							comp.xVel += (-1 - elasticity) * projection[0];
+							comp.yVel += (-1 - elasticity) * projection[1];
+						}
+				);
 			}
 		}
+		
+		Components.postprocessMapper.get(entity).add(
+				ECBComponent.class,
+				(comp) -> {
+					for (CollisionBox c : comp.getCollisionBoxes())
+					{
+						c.setPosition(Components.positionMapper.get(entity).x,
+						              Components.positionMapper.get(entity).y);
+						c.setAreas();
+					}
+				}
+		);
 	}
 
-	public StageElement ecbHit(double start, double end, Stadium before,
-			Stadium after, Map<StageElement, ProjectionVector> fores,
-			Map<StageElement, ProjectionVector> afts, ProjectionVector disp)
+	public CollisionPair ecbHit(double start, double end,
+	                            Map<CollisionBox, Stadium> beforeBoxes,
+	                            Map<CollisionBox, Stadium> afterBoxes,
+	                            Map<CollisionBox, Map<StageElement, ProjectionVector>> fores,
+	                            Map<CollisionBox, Map<StageElement, ProjectionVector>> afts,
+		                        ProjectionVector disp)
 	{
-		//If stage surface normal change too little, we can take them out of consideration
+		//Eject early if the time interval is too small
+		if (end - start < COLLISION_TOLERANCE) return null;
 		if (fores.isEmpty() || afts.isEmpty()) return null;
-		Set<StageElement> earlySurfaces = new HashSet<>();
-		Set<StageElement> acceptedSurfaces = new HashSet<>();
-		Set<StageElement> rejectedSurfaces = new HashSet<>();
-		for (Map.Entry<StageElement, ProjectionVector> entry : afts.entrySet())
+		//If stage surface normal change too little, we can take them out of consideration
+		MultiValuedMap<CollisionBox, StageElement> earlySurfaces = new HashSetValuedHashMap<>();
+		for (Map.Entry<CollisionBox, Stadium> boxEnt : beforeBoxes.entrySet())
 		{
-			if (Utility.velocityDifference(entry.getKey(), before, after, start, end).magnitude > 0)
+			for (Map.Entry<StageElement, ProjectionVector> aftEnt : afts.get(boxEnt.getKey()).entrySet())
 			{
-				if (entry.getKey().collides(before, start))
-					earlySurfaces.add(entry.getKey());
-				if (entry.getKey().collides(after, end))
-					acceptedSurfaces.add(entry.getKey());
-				if (!(Utility.projectionsClose(fores.get(entry.getKey()), entry.getValue())))
-					rejectedSurfaces.add(entry.getKey());
+				if (Utility.velocityDifference(aftEnt.getKey(), boxEnt.getValue(),
+				                               afterBoxes.get(boxEnt.getKey()),
+				                               start, end).magnitude > 0)
+				{
+					if (aftEnt.getKey().collides(boxEnt.getValue(), start))
+						earlySurfaces.put(boxEnt.getKey(), aftEnt.getKey());
+				}
 			}
 		}
 		if (!earlySurfaces.isEmpty())
 		{
 			ProjectionVector tentativeDisp = new ProjectionVector(0, 0, 0);
+			CollisionBox tentativeBox = null;
 			StageElement returnElement = null;
-			for (StageElement se : earlySurfaces)
+			for (CollisionBox box : beforeBoxes.keySet())
 			{
-				ProjectionVector foreVec = fores.get(se);
-				if (foreVec.magnitude > tentativeDisp.magnitude)
+				for (StageElement se : earlySurfaces.get(box))
 				{
-					returnElement = se;
-					tentativeDisp.xnorm = foreVec.xnorm;
-					tentativeDisp.ynorm = foreVec.ynorm;
-					tentativeDisp.magnitude = foreVec.magnitude;
+					ProjectionVector foreVec = fores.get(box).get(se);
+					if (foreVec.magnitude > tentativeDisp.magnitude)
+					{
+						returnElement = se;
+						tentativeBox = box;
+						tentativeDisp.xnorm = foreVec.xnorm;
+						tentativeDisp.ynorm = foreVec.ynorm;
+						tentativeDisp.magnitude = foreVec.magnitude;
+					}
 				}
 			}
 			if (returnElement != null)
@@ -161,22 +187,41 @@ public strictfp class CollisionSystem extends IteratingSystem
 				disp.xnorm = tentativeDisp.xnorm;
 				disp.ynorm = tentativeDisp.ynorm;
 				disp.magnitude = tentativeDisp.magnitude;
-				return returnElement;
+				return new CollisionPair(tentativeBox, returnElement);
+			}
+		}
+		MultiValuedMap<CollisionBox, StageElement> acceptedSurfaces = new HashSetValuedHashMap<>();
+		for (Map.Entry<CollisionBox, Stadium> boxEnt : afterBoxes.entrySet())
+		{
+			for (Map.Entry<StageElement, ProjectionVector> aftEnt : afts.get(boxEnt.getKey()).entrySet())
+			{
+				if (Utility.velocityDifference(aftEnt.getKey(), beforeBoxes.get(boxEnt.getKey()),
+				                               boxEnt.getValue(),
+				                               start, end).magnitude > 0)
+				{
+					if (aftEnt.getKey().collides(boxEnt.getValue(), end))
+						acceptedSurfaces.put(boxEnt.getKey(), aftEnt.getKey());
+				}
 			}
 		}
 		if (!acceptedSurfaces.isEmpty())
 		{
 			ProjectionVector tentativeDisp = new ProjectionVector(0, 0, 0);
+			CollisionBox tentativeBox = null;
 			StageElement returnElement = null;
-			for (StageElement se : acceptedSurfaces)
+			for (CollisionBox box : beforeBoxes.keySet())
 			{
-				ProjectionVector aftVec = afts.get(se);
-				if (aftVec.magnitude > tentativeDisp.magnitude)
+				for (StageElement se : acceptedSurfaces.get(box))
 				{
-					returnElement = se;
-					tentativeDisp.xnorm = aftVec.xnorm;
-					tentativeDisp.ynorm = aftVec.ynorm;
-					tentativeDisp.magnitude = aftVec.magnitude;
+					ProjectionVector aftVec = afts.get(box).get(se);
+					if (aftVec.magnitude > tentativeDisp.magnitude)
+					{
+						returnElement = se;
+						tentativeBox = box;
+						tentativeDisp.xnorm = aftVec.xnorm;
+						tentativeDisp.ynorm = aftVec.ynorm;
+						tentativeDisp.magnitude = aftVec.magnitude;
+					}
 				}
 			}
 			if (returnElement != null)
@@ -184,47 +229,81 @@ public strictfp class CollisionSystem extends IteratingSystem
 				disp.xnorm = tentativeDisp.xnorm;
 				disp.ynorm = tentativeDisp.ynorm;
 				disp.magnitude = tentativeDisp.magnitude;
-				return returnElement;
+				return new CollisionPair(tentativeBox, returnElement);
+			}
+		}
+		MultiValuedMap<CollisionBox, StageElement> rejectedSurfaces = new HashSetValuedHashMap<>();
+		for (Map.Entry<CollisionBox, Stadium> boxEnt : beforeBoxes.entrySet())
+		{
+			for (Map.Entry<StageElement, ProjectionVector> aftEnt : afts.get(boxEnt.getKey()).entrySet())
+			{
+				if (Utility.velocityDifference(aftEnt.getKey(), boxEnt.getValue(),
+				                               afterBoxes.get(boxEnt.getKey()),
+				                               start, end).magnitude > 0)
+				{
+					if (Utility.projectionsClose(fores.get(boxEnt.getKey()).get(aftEnt.getKey()),
+					                             aftEnt.getValue()))
+						rejectedSurfaces.put(boxEnt.getKey(), aftEnt.getKey());
+				}
 			}
 		}
 		if (rejectedSurfaces.isEmpty()) return null;
-		if (end - start < .000000001)
-		{
-			System.out.println("Iterating interval too small");
-			return null;
-		}
 		//Else, iterate deeper
 		double avg = (start+end)/2;
-		Stadium middle = Utility.middleStad(before, after);
-		//First move
-		Map<StageElement, ProjectionVector> firstFores = new HashMap<>();
-		Map<StageElement, ProjectionVector> firstAfts = new HashMap<>();
-		for (StageElement se : rejectedSurfaces)
+		Map<CollisionBox, Stadium> middleBoxes = new HashMap<>();
+		for (Map.Entry<CollisionBox, Stadium> ents : beforeBoxes.entrySet())
 		{
-			firstFores.put(se, fores.get(se));
-			firstAfts.put(se, se.depth(middle, avg));
+			middleBoxes.put(ents.getKey(), Utility.middleStad(ents.getValue(),
+			                                                  afterBoxes.get(ents.getKey())));
+		}
+		//First move
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstFores =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstAfts =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
+		for (CollisionBox c : beforeBoxes.keySet())
+		{
+			for (StageElement se : rejectedSurfaces.get(c))
+			{
+				firstFores.get(c).put(se, fores.get(c).get(se));
+				firstAfts.get(c).put(se, se.depth(middleBoxes.get(c), avg));
+			}
 		}
 		ProjectionVector disp1 = new ProjectionVector(0, 0, 0);
-		StageElement firstHit = ecbHit(start, avg, before, middle, firstFores, firstAfts, disp1);
+		CollisionPair firstHit = ecbHit(start, avg, beforeBoxes, middleBoxes,
+		                                firstFores, firstAfts, disp1);
 		//Now do the second move
-		Stadium ending = new Stadium().set(after);
-		Map<StageElement, ProjectionVector> secondFores = new HashMap<>();
-		Map<StageElement, ProjectionVector> secondAfts = new HashMap<>();
+		Map<CollisionBox, Stadium> endingBoxes = new HashMap<>();
+		for (Map.Entry<CollisionBox, Stadium> entry : afterBoxes.entrySet())
+		{
+			endingBoxes.put(entry.getKey(), new Stadium(entry.getValue()));
+		}
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> secondFores =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> secondAfts =
+				LazyMap.lazyMap(new HashMap<>(), ()->(new HashMap<>()));
 		if (disp1.magnitude != 0)
 		{
-			middle.displace(disp1.xnorm*disp1.magnitude, disp1.ynorm*disp1.magnitude);
-			ending.displace(disp1.xnorm*disp1.magnitude, disp1.ynorm*disp1.magnitude);
+			for (Map.Entry<CollisionBox, Stadium> entry : middleBoxes.entrySet())
+			{
+				entry.getValue().displace(disp1.xnorm*disp1.magnitude, disp1.ynorm*disp1.magnitude);
+				endingBoxes.get(entry.getKey()).displace(disp1.xnorm*disp1.magnitude,
+				                                         disp1.ynorm*disp1.magnitude);
+			}
 		}
-		for (StageElement se : rejectedSurfaces)
+		for (Map.Entry<CollisionBox, Stadium> entry : middleBoxes.entrySet())
 		{
-			secondFores.put(se, se.depth(middle, avg));
-			secondAfts.put(se, se.depth(ending, end));
+			for (StageElement se : rejectedSurfaces.get(entry.getKey()))
+			{
+				secondFores.get(entry.getKey()).put(se, se.depth(entry.getValue(), avg));
+				secondAfts.get(entry.getKey()).put(se, se.depth(endingBoxes.get(entry.getKey()), avg));
+			}
 		}
 		ProjectionVector disp2 = new ProjectionVector(0, 0, 0);
-		StageElement secondHit = ecbHit(avg, end, middle, ending, secondFores, secondAfts, disp2);
+		CollisionPair secondHit = ecbHit(avg, end, middleBoxes, endingBoxes, secondFores, secondAfts, disp2);
 		//Now interpret the two halves
-		double xSum = disp1.xnorm*disp1.magnitude + disp2.xnorm*disp2.magnitude;
-		double ySum = disp1.ynorm*disp1.magnitude + disp2.ynorm*disp2.magnitude;
+		double xSum = disp1.xnorm * disp1.magnitude + disp2.xnorm * disp2.magnitude;
+		double ySum = disp1.ynorm * disp1.magnitude + disp2.ynorm * disp2.magnitude;
 		double lSum = StrictMath.hypot(xSum, ySum);
 		if (lSum != 0)
 		{

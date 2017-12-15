@@ -17,7 +17,6 @@
 
 package com.tussle.sprite;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -25,9 +24,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
-import com.tussle.collision.ECBComponent;
 import com.tussle.collision.StageElement;
-import com.tussle.collision.StageElementComponent;
+import com.tussle.main.Components;
 import com.tussle.motion.PositionComponent;
 
 public class CameraSystem extends IteratingSystem
@@ -35,15 +33,6 @@ public class CameraSystem extends IteratingSystem
 	public static final double ZOOM_FACTOR = .02;
 	public static final int MARGIN = 80;
 	private OrthographicCamera camera;
-
-	ComponentMapper<SpriteComponent> spriteMapper =
-			ComponentMapper.getFor(SpriteComponent.class);
-	ComponentMapper<PositionComponent> positionMapper =
-			ComponentMapper.getFor(PositionComponent.class);
-	ComponentMapper<ECBComponent> ecbMapper =
-			ComponentMapper.getFor(ECBComponent.class);
-	ComponentMapper<StageElementComponent> surfaceMapper =
-			ComponentMapper.getFor(StageElementComponent.class);
 
 	private float minx = 0;
 	private float maxx = 0;
@@ -77,17 +66,17 @@ public class CameraSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
-		float entityMinX = (float)positionMapper.get(entity).x;
-		float entityMinY = (float)positionMapper.get(entity).y;
-		float entityMaxX = (float)positionMapper.get(entity).x;
-		float entityMaxY = (float)positionMapper.get(entity).y;
-		if (spriteMapper.has(entity))
+		float entityMinX = (float)Components.positionMapper.get(entity).x;
+		float entityMinY = (float)Components.positionMapper.get(entity).y;
+		float entityMaxX = (float)Components.positionMapper.get(entity).x;
+		float entityMaxY = (float)Components.positionMapper.get(entity).y;
+		if (Components.spriteMapper.has(entity))
 		{
-			if (spriteMapper.get(entity).currentSprite != null)
+			if (Components.spriteMapper.get(entity).currentSprite != null)
 			{
-				if (spriteMapper.get(entity).currentSprite.getBoundingRectangle() != null)
+				if (Components.spriteMapper.get(entity).currentSprite.getBoundingRectangle() != null)
 				{
-					Rectangle rect = spriteMapper.get(entity).currentSprite.getBoundingRectangle();
+					Rectangle rect = Components.spriteMapper.get(entity).currentSprite.getBoundingRectangle();
 					if (entityMinX > rect.x) entityMinX = rect.x;
 					if (entityMinY > rect.y) entityMinY = rect.y;
 					if (entityMaxX < rect.x + rect.width) entityMaxX = rect.x+rect.width;
@@ -95,22 +84,28 @@ public class CameraSystem extends IteratingSystem
 				}
 			}
 		}
-		if (ecbMapper.has(entity))
+		if (Components.ecbMapper.has(entity))
 		{
-			if (ecbMapper.get(entity).getEcb() != null)
+			if (Components.ecbMapper.get(entity).getCollisionBoxes() != null)
 			{
-				com.tussle.collision.Rectangle rect = ecbMapper.get(entity).getEcb().getBounds(1, 1);
-				if (entityMinX > rect.x) entityMinX = (float)rect.x;
-				if (entityMinY > rect.y) entityMinY = (float)rect.y;
-				if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
-				if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
+				for (StageElement s : Components.ecbMapper.get(entity).getCollisionBoxes())
+				{
+					com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
+					if (s.getBounds(0, 0) != null)
+					{
+						if (entityMinX > rect.x) entityMinX = (float)rect.x;
+						if (entityMinY > rect.y) entityMinY = (float)rect.y;
+						if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
+						if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
+					}
+				}
 			}
 		}
-		if (surfaceMapper.has(entity))
+		if (Components.stageElementMapper.has(entity))
 		{
-			if (surfaceMapper.get(entity).get() != null)
+			if (Components.stageElementMapper.get(entity).getStageElements() != null)
 			{
-				for (StageElement s : surfaceMapper.get(entity).get())
+				for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
 				{
 					com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
 					if (s.getBounds(0, 0) != null)

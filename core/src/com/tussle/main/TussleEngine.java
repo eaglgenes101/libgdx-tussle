@@ -17,10 +17,12 @@
 
 package com.tussle.main;
 
-import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.assets.AssetManager;
 import com.tussle.motion.CollisionSystem;
 import com.tussle.motion.MotionSystem;
+import com.tussle.postprocess.PostprocessSystem;
+import com.tussle.script.SubactionCleanerSystem;
 import com.tussle.sprite.CameraSystem;
 import com.tussle.sprite.HitboxDrawingSystem;
 import com.tussle.sprite.SpriteSystem;
@@ -28,7 +30,7 @@ import com.tussle.sprite.SpriteSystem;
 /**
  * Created by eaglgenes101 on 4/13/17.
  */
-public class TussleEngine extends PooledEngine
+public class TussleEngine extends Engine
 {
 	AssetManager manager;
 
@@ -37,16 +39,22 @@ public class TussleEngine extends PooledEngine
 	{
 		super();
 		manager = new AssetManager();
+		
 		//Add entity systems
 		addSystem(new MotionSystem(0));
 		addSystem(new CollisionSystem(1));
 		addSystem(new CameraSystem(2));
 		addSystem(new SpriteSystem(manager, getSystem(CameraSystem.class).getCamera(),3));
 		addSystem(new HitboxDrawingSystem(getSystem(CameraSystem.class).getCamera(), 4));
+		
+		//Must be the very, very last few systems
+		addSystem(new SubactionCleanerSystem(Integer.MAX_VALUE-1));
+		addSystem(new PostprocessSystem(Integer.MAX_VALUE));
 	}
 
 	public void update(float delta)
 	{
 		super.update(delta);
 	}
+	
 }

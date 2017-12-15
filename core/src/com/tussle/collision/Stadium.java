@@ -40,6 +40,11 @@ public class Stadium
 		this.endy = endy;
 		this.radius = radius;
 	}
+	
+	public Stadium(Stadium other)
+	{
+		this(other.startx, other.starty, other.endx, other.endy, other.radius);
+	}
 
 	public double getStartx()
 	{

@@ -32,4 +32,10 @@ public class PositionComponent implements Component
 		x = newX;
 		y = newY;
 	}
+	
+	public void displace(double dx, double dy)
+	{
+		x += dx;
+		y += dy;
+	}
 }

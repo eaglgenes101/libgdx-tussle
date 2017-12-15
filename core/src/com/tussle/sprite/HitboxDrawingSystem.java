@@ -17,7 +17,6 @@
 
 package com.tussle.sprite;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -25,20 +24,14 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.collision.CollisionBox;
-import com.tussle.collision.ECBComponent;
 import com.tussle.collision.StageElement;
-import com.tussle.collision.StageElementComponent;
+import com.tussle.main.Components;
 import com.tussle.motion.PositionComponent;
 
 public class HitboxDrawingSystem extends IteratingSystem
 {
 	private Camera camera; //The camera we use
 	ShapeRenderer drawer;
-
-	ComponentMapper<ECBComponent> ecbMapper =
-			ComponentMapper.getFor(ECBComponent.class);
-	ComponentMapper<StageElementComponent> surfaceMapper =
-			ComponentMapper.getFor(StageElementComponent.class);
 
 	public HitboxDrawingSystem(Camera c, int p)
 	{
@@ -57,17 +50,19 @@ public class HitboxDrawingSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
-		if (ecbMapper.has(entity))
+		if (Components.ecbMapper.has(entity))
 		{
 			//Draw ECB
 			drawer.setColor(Color.GREEN);
-			CollisionBox c = ecbMapper.get(entity).getEcb();
-			c.draw(drawer);
+			for (CollisionBox s : Components.ecbMapper.get(entity).getCollisionBoxes())
+			{
+				s.draw(drawer);
+			}
 		}
-		if (surfaceMapper.has(entity))
+		if (Components.stageElementMapper.has(entity))
 		{
 			drawer.setColor(Color.GREEN);
-			for (StageElement s : surfaceMapper.get(entity).get())
+			for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
 			{
 				s.draw(drawer);
 			}

@@ -17,6 +17,21 @@
 
 package com.tussle.subaction;
 
-public class Subaction
+import com.tussle.script.StackedBindings;
+
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.SimpleBindings;
+
+@FunctionalInterface
+public interface Subaction
 {
+	Bindings BLANK_BINDINGS = new SimpleBindings();
+	
+	/*
+	 * Upon serialization, a subaction object is constructed so that it is pre-linked to any
+	 * prerequisite subactions as defined by the subaction script, and has no need to reach
+	 * into its bindings (though some subactions do so).
+	 */
+	Object eval(ScriptContext globals, StackedBindings locals) throws RemoteJump;
 }

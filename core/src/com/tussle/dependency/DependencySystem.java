@@ -18,6 +18,7 @@
 package com.tussle.dependency;
 
 import com.badlogic.ashley.core.*;
+import com.tussle.main.Components;
 
 import java.util.Set;
 
@@ -26,9 +27,6 @@ import java.util.Set;
  */
 public class DependencySystem extends EntitySystem implements EntityListener
 {
-	ComponentMapper<DependencyComponent> dependencyMapper =
-			ComponentMapper.getFor(DependencyComponent.class);
-
 	public void addedToEngine(Engine engine)
 	{
 		engine.addEntityListener(this);
@@ -46,9 +44,9 @@ public class DependencySystem extends EntitySystem implements EntityListener
 
 	public void entityRemoved(Entity entity)
 	{
-		if (dependencyMapper.has(entity))
+		if (Components.dependencyMapper.has(entity))
 		{
-			Set<Entity> toRemoveEntities = dependencyMapper.get(entity).getDependents();
+			Set<Entity> toRemoveEntities = Components.dependencyMapper.get(entity).getDependents();
 			for (Entity e : toRemoveEntities)
 			{
 				getEngine().removeEntity(e);

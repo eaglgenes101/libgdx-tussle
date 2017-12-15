@@ -72,6 +72,8 @@ project(":core") {
         compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "commons-io:commons-io:2.5"
+        compile 'org.apache.commons:commons-collections4:4.1'
+        compile 'org.apache.commons:commons-lang3:3.7'
         testCompile "org.junit.jupiter:junit-jupiter-api:5.0.0"
     }
 }

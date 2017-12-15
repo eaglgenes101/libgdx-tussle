@@ -28,7 +28,7 @@ import java.util.Set;
  */
 public class DependencyComponent implements Component
 {
-	private Set<Entity> dependentEntities;
+	Set<Entity> dependentEntities;
 
 	public DependencyComponent()
 	{

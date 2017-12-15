@@ -17,7 +17,6 @@
 
 package com.tussle.sprite;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -28,6 +27,7 @@ import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.tussle.main.Components;
 import com.tussle.motion.PositionComponent;
 
 /**
@@ -38,11 +38,6 @@ public class SpriteSystem extends IteratingSystem
 	private AssetManager assetManager; // Points to the communal asset manager
 	private Camera camera; //The camera we use
 	private SpriteBatch batch; // Where we draw everything
-
-	ComponentMapper<SpriteComponent> spriteMapper =
-			ComponentMapper.getFor(SpriteComponent.class);
-	ComponentMapper<PositionComponent> positionMapper =
-			ComponentMapper.getFor(PositionComponent.class);
 
 	public SpriteSystem(AssetManager manager, Camera c, int p)
 	{
@@ -63,13 +58,13 @@ public class SpriteSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
-		String toGetPath = spriteMapper.get(entity).intendedSpritePath;
+		String toGetPath = Components.spriteMapper.get(entity).intendedSpritePath;
 		if (toGetPath != null)
 		{
 			assetManager.load(toGetPath, Texture.class);
 			assetManager.finishLoading();
-			Sprite sprite = spriteMapper.get(entity).loadSprite(assetManager.get(toGetPath, Texture.class));
-			PositionComponent positionComponent = positionMapper.get(entity);
+			Sprite sprite = Components.spriteMapper.get(entity).loadSprite(assetManager.get(toGetPath, Texture.class));
+			PositionComponent positionComponent = Components.positionMapper.get(entity);
 			if (sprite != null)
 			{
 				sprite.setOriginCenter();

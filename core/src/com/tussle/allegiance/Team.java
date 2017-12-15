@@ -22,4 +22,14 @@ package com.tussle.allegiance;
  */
 public class Team
 {
+	int lives;
+	int score;
+	
+	public Team()
+	{
+		lives = 0;
+		score = 0;
+	}
+	
+	
 }

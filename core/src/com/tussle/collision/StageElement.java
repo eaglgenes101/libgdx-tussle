@@ -31,6 +31,25 @@ public abstract class StageElement
 	protected boolean flipped = false;
 	protected boolean coordinatesDirty = true;
 	protected boolean start = true;
+	
+	public StageElement()
+	{
+		//Nothing, mostly exists so we don't need to do hoop jumping
+	}
+	
+	//Copy constructors!
+	public StageElement(StageElement other)
+	{
+		this.x = other.x;
+		this.y = other.y;
+		this.originX = other.originX;
+		this.originY = other.originY;
+		this.rotation = other.rotation;
+		this.scale = other.scale;
+		this.flipped = other.flipped;
+		this.coordinatesDirty = other.coordinatesDirty;
+		this.start = other.start;
+	}
 
 	public abstract void setAreas();
 

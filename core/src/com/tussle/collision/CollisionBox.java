@@ -42,6 +42,21 @@ public strictfp class CollisionBox extends StageElement
 		currentArea = new Stadium();
 		previousArea = new Stadium();
 	}
+	
+	public CollisionBox(double startx, double starty, double endx, double endy, double radius)
+	{
+		localArea = new Stadium(startx, starty, endx, endy, radius);
+		currentArea = new Stadium();
+		previousArea = new Stadium();
+	}
+	
+	public CollisionBox(CollisionBox base)
+	{
+		super(base);
+		this.localArea = new Stadium(base.localArea);
+		this.currentArea = new Stadium(base.currentArea);
+		this.previousArea = new Stadium(base.previousArea);
+	}
 
 	public Stadium getCurrentStadium()
 	{

@@ -17,6 +17,8 @@
 
 package com.tussle.main;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tussle.collision.ProjectionVector;
 import com.tussle.collision.Stadium;
@@ -123,28 +125,6 @@ public strictfp class Utility
 			returnArray[1][i] = ypoints[vertexIndices.get(i)];
 		}
 		return returnArray;
-	}
-
-	public static double lowestPositiveRoot (double a, double b, double c)
-	{
-		double det = b * b - 4 * a * c;
-		if (det < 0) return Double.NaN;
-
-		double sqrtD = StrictMath.sqrt(det);
-		double invA = .5 / a;
-		double r1 = (-b - sqrtD) * invA;
-		double r2 = (-b + sqrtD) * invA;
-
-		if (r1 > r2)
-		{
-			double tmp = r2;
-			r2 = r1;
-			r1 = tmp;
-		}
-
-		if (r1 >= 0) return r1;
-		if (r2 >= 0) return r2;
-		return Double.NaN;
 	}
 
 	public static boolean isPruned(Collection<ProjectionVector> vectors)
@@ -454,6 +434,12 @@ public strictfp class Utility
 			toReturn.append(holder, 0, charsRead);
 		}
 		return toReturn.toString();
+	}
+	
+	public static Preferences getPreferencesFor(String name)
+	{
+		Preferences top = Gdx.app.getPreferences("config");
+		return Gdx.app.getPreferences(top.getString(name));
 	}
 }
 

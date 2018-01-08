@@ -20,7 +20,6 @@ package com.tussle.script;
 import com.badlogic.ashley.signals.Listener;
 import com.badlogic.ashley.signals.Signal;
 import com.tussle.logging.LogSystem;
-import com.tussle.subaction.ProcedureDefinitionSubaction;
 import com.tussle.subaction.RemoteJump;
 import com.tussle.subaction.Subaction;
 
@@ -55,14 +54,14 @@ public class ScriptIterator implements Listener<String>
 		destructionSignal = destructSig;
 	}
 	
-	public ProcedureDefinitionSubaction putCallback(String str, Subaction call)
+	public Subaction putCallback(String str, Subaction call)
 	{
-		return (ProcedureDefinitionSubaction)eventCallbacks.put(str, call);
+		return eventCallbacks.put(str, call);
 	}
 	
-	public ProcedureDefinitionSubaction removeCallback(String str)
+	public Subaction removeCallback(String str)
 	{
-		return (ProcedureDefinitionSubaction)eventCallbacks.remove(str);
+		return eventCallbacks.remove(str);
 	}
 	
 	//Targeted callback
@@ -138,7 +137,7 @@ public class ScriptIterator implements Listener<String>
 		}
 	}
 	
-	public void finalize()
+	protected void finalize()
 	{
 		if (!destructorFired)
 		{
@@ -157,6 +156,11 @@ public class ScriptIterator implements Listener<String>
 				               "contact the developer(s) so they can fix this.");
 			}
 		}
+	}
+	
+	public ScriptContext getScriptContext()
+	{
+		return scriptContext;
 	}
 	
 }

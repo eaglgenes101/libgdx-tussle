@@ -18,9 +18,12 @@
 package com.tussle.postprocess;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
-import com.tussle.main.Components;
+import org.apache.commons.collections4.FactoryUtils;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.collections4.map.LazyMap;
 
 import java.util.Map;
 
@@ -28,21 +31,47 @@ import java.util.Map;
 // are deferred until this last system, which changes all of them at once
 public class PostprocessSystem extends EntitySystem
 {
+	Map<Class<Component>, Map<Entity, PostprocessStep>> componentListMap;
+	
 	public PostprocessSystem(int p)
 	{
 		super(p);
+		componentListMap = LazyMap.lazyMap(
+				new HashedMap<Class<Component>, Map<Entity, PostprocessStep>>(),
+				(Class<Component> c) -> LazyMap.lazyMap(
+						new HashedMap<>(),
+						FactoryUtils.constantFactory(
+								(Component comp) -> {}
+						)
+				)
+		);
 	}
 	
-	public void processEntity(Entity entity, float deltaTime)
+	@Override
+	public void update(float deltaTime)
 	{
-		Map<Class<? extends Component>, PostprocessStep<Component>> steps =
-				Components.postprocessMapper.get(entity).getSteps();
-		for (Component comp : entity.getComponents())
+		super.update(deltaTime);
+		
+		for (Map.Entry<Class<Component>, Map<Entity, PostprocessStep>> entry
+				: componentListMap.entrySet())
 		{
-			//Take the class of the component, get a lookup, then
-			//apply that class's value changes to the class itself
-			steps.get(comp.getClass()).accept(comp);
+			ComponentMapper<Component> mapper = ComponentMapper.getFor(entry.getKey());
+			for (Map.Entry<Entity, PostprocessStep> subEntry
+					: entry.getValue().entrySet())
+			{
+				subEntry.getValue().apply(mapper.get(subEntry.getKey()));
+			}
 		}
+			componentListMap.clear();
+	}
+	public <E extends Component> void add(Entity e,
+	                                      Class<E> comp,
+	                                      PostprocessStep<? super E> step)
+	{
+		componentListMap.get(comp).put(
+				e,
+				componentListMap.get(comp).get(e).andThen(step)
+		);
 	}
 	
 	

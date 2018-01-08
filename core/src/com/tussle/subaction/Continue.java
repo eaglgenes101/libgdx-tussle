@@ -29,10 +29,10 @@ public class Continue extends RemoteJump
 		target = null;
 	}
 	
-	public Continue(Subaction source, String target)
+	public Continue(Subaction source, String targ)
 	{
-		super(source, "Loop continue to "+target.toString()+" from ");
-		target = null;
+		super(source, "Loop continue to "+targ.toString()+" from ");
+		target = targ;
 	}
 	
 	public boolean hasTarget()

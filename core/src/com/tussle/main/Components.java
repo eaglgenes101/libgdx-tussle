@@ -29,10 +29,8 @@ import com.tussle.hitbox.HitboxLockComponent;
 import com.tussle.hitbox.HurtboxComponent;
 import com.tussle.motion.PositionComponent;
 import com.tussle.motion.VelocityComponent;
-import com.tussle.postprocess.PostprocessComponent;
 import com.tussle.script.ScriptContextComponent;
 import com.tussle.sprite.SpriteComponent;
-import com.tussle.stream.InputOutputComponent;
 
 public class Components
 {
@@ -60,10 +58,6 @@ public class Components
 			ComponentMapper.getFor(ScriptContextComponent.class);
 	public static final ComponentMapper<SpriteComponent> spriteMapper =
 			ComponentMapper.getFor(SpriteComponent.class);
-	public static final ComponentMapper<InputOutputComponent> inputOutputMapper =
-			ComponentMapper.getFor(InputOutputComponent.class);
-	public static final ComponentMapper<PostprocessComponent> postprocessMapper =
-			ComponentMapper.getFor(PostprocessComponent.class);
 	public static final ComponentMapper<HitboxLockComponent> hitboxLockMapper =
 			ComponentMapper.getFor(HitboxLockComponent.class);
 }

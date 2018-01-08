@@ -294,7 +294,7 @@ public class StackedBindings implements Bindings
 		for (Map.Entry<String, Object> entry : topValue.entrySet())
 		{
 			Object val = bindingMap.get(entry.getKey()).pop();
-			if (bindingMap.get(entry.getKey()).isEmpty()) bindingMap.remove(entry);
+			if (bindingMap.get(entry.getKey()).isEmpty()) bindingMap.remove(entry.getKey());
 			assert val == entry.getValue();
 		}
 		return topValue;

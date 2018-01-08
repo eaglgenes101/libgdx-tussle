@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eaglgenes101
+ * Copyright (c) 2018 eaglgenes101
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,19 @@ package com.tussle.postprocess;
 
 import com.badlogic.ashley.core.Component;
 
-import java.util.function.Consumer;
+import java.util.Objects;
 
-public interface PostprocessStep<E extends Component> extends Consumer<E>
+@FunctionalInterface
+public interface PostprocessStep<E extends Component>
 {
-	default PostprocessStep<E> andThen(PostprocessStep<? extends E> next)
+	void apply(E comp);
+	
+	default PostprocessStep<E> andThen(PostprocessStep<? super E> next)
 	{
-		//Just defer to the base interface method
-		return (PostprocessStep<E>)(this.andThen((Consumer<E>)next));
+		Objects.requireNonNull(next);
+		return (E comp) -> {
+			apply(comp);
+			next.apply(comp);
+		};
 	}
 }

@@ -19,10 +19,10 @@ package com.tussle.hitbox;
 
 import com.badlogic.ashley.core.Entity;
 import com.tussle.script.ScriptIterator;
-import com.tussle.subaction.ProcedureDefinitionSubaction;
+import com.tussle.subaction.Subaction;
 
 public interface GeneralizedInflictionSupplier
 {
 	ScriptIterator getEffect(Entity owner, Entity other, Hitbox hitbox, Hurtbox hurtbox,
-	                         ProcedureDefinitionSubaction chargeSupply);
+	                         Subaction chargeSupply);
 }

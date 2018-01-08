@@ -24,39 +24,66 @@ import com.badlogic.ashley.signals.Listener;
 import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.tussle.main.Components;
-import com.tussle.stream.EntityStreamMaintainer;
-import com.tussle.stream.InputOutputComponent;
+import com.tussle.main.Utility;
+import com.tussle.stream.*;
+import org.apache.commons.collections4.map.LazyMap;
 
 import javax.script.SimpleBindings;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SubactionScriptSystem extends IteratingSystem
 {
-	Family streamFamily = Family.all(InputOutputComponent.class).get();
 	Signal<ScriptIterator> destructionSignaller;
+	Map<Entity, EntityActionContext> entityContexts;
 	
-	EntityStreamMaintainer streamMaintainer;
 	SubactionInterpreter subactionInterpreter;
 	SubactionInterpreterFactory factory = new SubactionInterpreterFactory();
-	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-	BufferedWriter stdOut = new BufferedWriter(new OutputStreamWriter(System.out));
+	BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+	BufferedWriter stdOut = new BufferedWriter(new OutputStreamWriter(System.out, StandardCharsets.UTF_8));
+	
+	JsonDistributingWriter stdInProcessor;
+	JsonCollectingWriter stdOutProcessor;
+	JsonCollectingWriter stdErrProcessor;
+	PipeBufferWriter processingErrStream;
+	
+	JsonParsingWriter stdinInterpreter;
 
 	public SubactionScriptSystem(int i)
 	{
 		super(Family.all(ScriptContextComponent.class).get(), i);
-		streamMaintainer = new EntityStreamMaintainer();
+		PipeBufferWriter warnStream = new PipeBufferWriter();
+		processingErrStream = new PipeBufferWriter();
+		stdInProcessor = new JsonDistributingWriter(warnStream);
+		stdOutProcessor = new JsonCollectingWriter(warnStream.getNewReader());
+		stdErrProcessor = new JsonCollectingWriter(processingErrStream.getNewReader());
+		
+		stdinInterpreter = new JsonParsingWriter(processingErrStream);
 		destructionSignaller = new Signal<>();
+		entityContexts = LazyMap.lazyMap(
+				new HashMap<>(),
+				(Entity ent) -> new EntityActionContext(
+						subactionInterpreter.getContext(),
+						new SimpleBindings(), //TODO: Insert API bindings
+						new SimpleBindings(),
+						new SimpleBindings(),
+						stdInProcessor.openReaderFor(ent),
+						stdOutProcessor.openWriterFor(ent),
+						stdErrProcessor.openWriterFor(ent)
+				)
+		);
+	}
+	
+	public EntityActionContext getContextFor(Entity entity)
+	{
+		return entityContexts.get(entity);
 	}
 	
 	public void addedToEngine(Engine engine)
 	{
 		subactionInterpreter = factory.getScriptEngine();
-		engine.addEntityListener(streamFamily, streamMaintainer);
-	}
-	
-	public void removedFromEngine(Engine engine)
-	{
-		engine.removeEntityListener(streamMaintainer);
 	}
 	
 	public void update(float deltaTime)
@@ -65,17 +92,36 @@ public class SubactionScriptSystem extends IteratingSystem
 		//Using stdin and stdout for now, will probably change later
 		try
 		{
-			streamMaintainer.writeStdIn(stdIn.readLine());
+			
+			stdinInterpreter.write(Utility.readAll(stdIn));
+			if (stdinInterpreter.ready())
+			{
+				stdInProcessor.write(stdinInterpreter.read());
+			}
 		}
 		catch (IOException ex)
 		{
 			System.err.println(ex.toString());
 		}
-		super.update(deltaTime);
 		try
 		{
-			String writeString = streamMaintainer.readStdOut();
-			String errorString = streamMaintainer.readStdErr();
+			super.update(deltaTime); //FIXME: Remember to move back out of statement
+		}
+		catch (NullPointerException ex)
+		{
+			ex.printStackTrace();
+		}
+		try
+		{
+			StringBuilder outBuffer = new StringBuilder();
+			while (stdOutProcessor.ready())
+				outBuffer.append(stdOutProcessor.read().toString());
+			String writeString = outBuffer.toString();
+			
+			StringBuilder errBuffer = new StringBuilder();
+			while (stdErrProcessor.ready())
+				errBuffer.append(stdErrProcessor.read().toString());
+			String errorString = errBuffer.toString();
 			stdOut.write(writeString);
 			System.err.println(errorString);
 		}
@@ -86,23 +132,15 @@ public class SubactionScriptSystem extends IteratingSystem
 		//Fetch output, pull it up to the screen
 	}
 	
-	public EntityActionContext createContextFor(Entity entity)
-	{
-		return new EntityActionContext(
-				subactionInterpreter.getContext(),
-				new SimpleBindings(), //TODO: Insert API bindings
-				new SimpleBindings(),
-				new SimpleBindings(),
-				Components.inputOutputMapper.get(entity).getStdin(),
-				Components.inputOutputMapper.get(entity).getStdout(),
-				Components.inputOutputMapper.get(entity).getStderr()
-		);
-	}
-	
 	public void processEntity(Entity entity, float deltaTime)
 	{
 		ScriptContextComponent scriptContextComponent = Components.scriptContextMapper.get(entity);
 		scriptContextComponent.exec();
+	}
+	
+	public Signal<ScriptIterator> getDestructionSignaller()
+	{
+		return destructionSignaller;
 	}
 	
 	public void subscribeDestruction(Listener<ScriptIterator> listener)

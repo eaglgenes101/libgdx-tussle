@@ -31,23 +31,16 @@ public class ScriptContextComponent implements Component
 {
 	ScriptIterator currentAction;
 	LinkedHashSet<ScriptIterator> statusEffects;
-	EntityActionContext ourContext;
 	
-	public ScriptContextComponent(EntityActionContext context)
+	public ScriptContextComponent()
 	{
 		currentAction = null;
 		statusEffects = new LinkedHashSet<>();
-		ourContext = context;
 	}
 	
 	public ScriptIterator getCurrentAction()
 	{
 		return currentAction;
-	}
-	
-	public EntityActionContext getContext()
-	{
-		return new EntityActionContext(ourContext);
 	}
 	
 	public ScriptIterator setCurrentAction(ScriptIterator newAction)

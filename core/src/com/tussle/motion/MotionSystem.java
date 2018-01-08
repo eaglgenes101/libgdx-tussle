@@ -23,6 +23,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.tussle.collision.StageElement;
 import com.tussle.collision.StageElementComponent;
 import com.tussle.main.Components;
+import com.tussle.postprocess.PostprocessSystem;
 
 /**
  * Created by eaglgenes101 on 5/25/17.
@@ -36,19 +37,21 @@ public class MotionSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
-		Components.postprocessMapper.get(entity).add(
+		getEngine().getSystem(PostprocessSystem.class).add(
+				entity,
 				PositionComponent.class,
 				cl->cl.displace(Components.velocityMapper.get(entity).xVel,
 				                Components.velocityMapper.get(entity).yVel)
 		);
-		Components.postprocessMapper.get(entity).add(
+		getEngine().getSystem(PostprocessSystem.class).add(
+				entity,
 				StageElementComponent.class,
 				cl -> {
 					for (StageElement se : cl.getStageElements())
 					{
 						se.setAreas();
 						se.setPosition(Components.positionMapper.get(entity).x,
-				                       Components.positionMapper.get(entity).y);
+						               Components.positionMapper.get(entity).y);
 					}
 				}
 		);

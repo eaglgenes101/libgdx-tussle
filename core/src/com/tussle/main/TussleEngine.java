@@ -23,6 +23,7 @@ import com.tussle.motion.CollisionSystem;
 import com.tussle.motion.MotionSystem;
 import com.tussle.postprocess.PostprocessSystem;
 import com.tussle.script.SubactionCleanerSystem;
+import com.tussle.script.SubactionScriptSystem;
 import com.tussle.sprite.CameraSystem;
 import com.tussle.sprite.HitboxDrawingSystem;
 import com.tussle.sprite.SpriteSystem;
@@ -46,6 +47,7 @@ public class TussleEngine extends Engine
 		addSystem(new CameraSystem(2));
 		addSystem(new SpriteSystem(manager, getSystem(CameraSystem.class).getCamera(),3));
 		addSystem(new HitboxDrawingSystem(getSystem(CameraSystem.class).getCamera(), 4));
+		addSystem(new SubactionScriptSystem(5));
 		
 		//Must be the very, very last few systems
 		addSystem(new SubactionCleanerSystem(Integer.MAX_VALUE-1));

@@ -17,13 +17,12 @@
 
 package com.tussle.hitbox;
 
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.tussle.collision.CollisionBox;
-import com.tussle.main.Components;
-import com.tussle.script.EphemeralCallback;
+import com.tussle.postprocess.PostprocessSystem;
 import com.tussle.script.ScriptContextComponent;
 import com.tussle.script.ScriptIterator;
-import com.tussle.subaction.ProcedureDefinitionSubaction;
 import com.tussle.subaction.Subaction;
 
 import java.util.function.BiPredicate;
@@ -35,25 +34,28 @@ public class Hitbox
 	//Collision Box
 	CollisionBox box;
 	Entity owner;
+	ScriptIterator controller;
 	
 	//Hitbox lock
 	HitboxLock lock;
 	
-	ProcedureDefinitionSubaction chargeSupplier;
+	Subaction chargeSupplier;
 	
 	GeneralizedInflictionSupplier hitInflicts;
+	Supplier<ScriptIterator> onHit;
 	Supplier<ScriptIterator> onOutprioritized;
 	
-	BiPredicate<Hurtbox, ScriptIterator> doesHitSupplier;
+	BiPredicate<Hurtbox, Entity> doesHitSupplier;
 	Predicate<Hitbox> doesClankSupplier;
 	
-	public Hitbox(Entity e)
+	public Hitbox(Entity e, ScriptIterator s)
 	{
 		//Squeezing every single field into the constructor would be extremely unweildy,
 		//even if I've managed to reduce it to a bunch of functions
 		//so a blank constructor and numerous set methods are provided for
 		//factory methods to use
 		owner = e;
+		controller = s;
 	}
 	
 	public CollisionBox getBox()
@@ -61,27 +63,69 @@ public class Hitbox
 		return box;
 	}
 	
+	public Entity getOwner()
+	{
+		return owner;
+	}
+	
+	public ScriptIterator getController()
+	{
+		return controller;
+	}
+	
 	//Called when attempting to clank against another hitbox
 	//Put post-processing callbacks into ourselves, then
 	//Return true if we were outclanked, false otherwise
-	public boolean tryClank(Hitbox other, Entity otherOwner)
+	public boolean tryClank(Hitbox other, Engine engine)
 	{
 		//We assume the engine already checked whether we actually collide
 		//We handle our callbacks, the other will handle theirs if applicable
 		if (doesClankSupplier.test(other))
 		{
-			Components.postprocessMapper.get(owner).add(
+			engine.getSystem(PostprocessSystem.class).add(
+					owner,
 					ScriptContextComponent.class,
 					(comp) -> {
 						comp.addStatusEffect(onOutprioritized.get());
 					}
 			);
+			engine.getSystem(PostprocessSystem.class).add(
+					other.getOwner(),
+					HitboxLockComponent.class,
+					(comp) -> {
+						comp.put(controller, lock);
+					}
+			);
+			return true;
 		}
+		return false;
 	}
 	
 	
-	public boolean tryHit(Hurtbox other, Entity otherOwner)
+	public boolean tryHit(Hurtbox other, Entity otherOwner, Engine engine)
 	{
-	
+		if (doesHitSupplier.test(other, otherOwner))
+		{
+			engine.getSystem(PostprocessSystem.class).add(
+					owner,
+					ScriptContextComponent.class,
+					(comp) -> {
+						comp.addStatusEffect(onHit.get());
+					}
+			);
+			engine.getSystem(PostprocessSystem.class).add(
+					otherOwner,
+					ScriptContextComponent.class,
+					(comp) -> {
+						comp.addStatusEffect(hitInflicts.getEffect(
+								owner, otherOwner,
+								this, other,
+								chargeSupplier
+						));
+					}
+			);
+			return true;
+		}
+		return false;
 	}
 }

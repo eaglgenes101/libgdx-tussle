@@ -17,6 +17,14 @@
 
 package com.tussle.subaction;
 
+import com.tussle.script.StackedBindings;
+
+import javax.script.ScriptContext;
+
 public class TestInputSubaction implements Subaction
 {
+	public Object eval(ScriptContext globals, StackedBindings locals)
+	{
+		return null; //Stub
+	}
 }

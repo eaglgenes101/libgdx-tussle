@@ -29,33 +29,25 @@ public strictfp class CollisionBox extends StageElement
 	private Stadium currentArea;
 	private Stadium previousArea;
 
-	public CollisionBox()
-	{
-		localArea = new Stadium();
-		currentArea = new Stadium();
-		previousArea = new Stadium();
-	}
-
 	public CollisionBox(Stadium base)
 	{
-		localArea = base;
-		currentArea = new Stadium();
-		previousArea = new Stadium();
+		localArea = new Stadium(base);
+		currentArea = new Stadium(base);
+		previousArea = new Stadium(base);
 	}
 	
 	public CollisionBox(double startx, double starty, double endx, double endy, double radius)
 	{
 		localArea = new Stadium(startx, starty, endx, endy, radius);
-		currentArea = new Stadium();
-		previousArea = new Stadium();
+		currentArea = new Stadium(localArea);
+		previousArea = new Stadium(localArea);
 	}
 	
 	public CollisionBox(CollisionBox base)
 	{
-		super(base);
-		this.localArea = new Stadium(base.localArea);
-		this.currentArea = new Stadium(base.currentArea);
-		this.previousArea = new Stadium(base.previousArea);
+		localArea = new Stadium(base.localArea);
+		currentArea = new Stadium(base.currentArea);
+		previousArea = new Stadium(base.previousArea);
 	}
 
 	public Stadium getCurrentStadium()
@@ -156,6 +148,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public Stadium getStadiumAt(double time)
 	{
+		if (coordinatesDirty)
+			computeNewPositions();
 		return new Stadium(getStartX(time), getStartY(time),
 				getEndX(time), getEndY(time), getRadius(time));
 	}

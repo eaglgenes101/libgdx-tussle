@@ -29,14 +29,6 @@ public strictfp class StageEdge extends StageElement
 	private double currentx1 = 0, currenty1 = 0, currentx2 = 0, currenty2 = 0;
 	private double previousx1 = 0, previousy1 = 0, previousx2 = 0, previousy2 = 0;
 
-	public StageEdge()
-	{
-		localx1 = 0;
-		localy1 = 0;
-		localx2 = 0;
-		localy2 = 0;
-	}
-
 	public StageEdge(double x1, double y1, double x2, double y2)
 	{
 		localx1 = x1;

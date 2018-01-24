@@ -18,10 +18,13 @@
 package com.tussle.control;
 
 import com.badlogic.ashley.core.EntitySystem;
+import com.tussle.ownership.Player;
+
+import java.util.HashMap;
 
 public class ControlSystem extends EntitySystem
 {
-	HashMap<>
+	HashMap<Player, Controller> controllerMap;
 	
 	public ControlSystem(Controller[] controllers, int i)
 	{

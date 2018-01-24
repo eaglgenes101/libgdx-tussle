@@ -31,6 +31,12 @@ public class StageCircle extends StageElement
 		localx = x;
 		localy = y;
 		localr = r;
+		currentx = x;
+		currenty = y;
+		currentr = r;
+		previousx = x;
+		previousy = y;
+		previousr = r;
 	}
 
 	public void computeNewPositions()

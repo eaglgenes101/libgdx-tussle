@@ -19,7 +19,6 @@ package com.tussle.ownership;
 
 import com.badlogic.ashley.core.Entity;
 import com.tussle.control.Controller;
-import com.tussle.main.Components;
 
 //Class representing the interface to a single player,
 //wielding a single controller and controlling a single fighter
@@ -50,7 +49,7 @@ public class Player
 		{
 			//TODO: Add code
 		}
-		
-		if (Components.playerOwnershipMapper)
+		return null; //Stub
+		//if (Components.playerOwnershipMapper)
 	}
 }

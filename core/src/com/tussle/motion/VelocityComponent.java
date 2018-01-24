@@ -26,4 +26,10 @@ public class VelocityComponent implements Component
 {
 	public double xVel;
 	public double yVel;
+	
+	public void setVelocity(double x, double y)
+	{
+		xVel = x;
+		yVel = y;
+	}
 }

@@ -103,14 +103,7 @@ public class SubactionScriptSystem extends IteratingSystem
 		{
 			System.err.println(ex.toString());
 		}
-		try
-		{
-			super.update(deltaTime); //FIXME: Remember to move back out of statement
-		}
-		catch (NullPointerException ex)
-		{
-			ex.printStackTrace();
-		}
+		super.update(deltaTime); //FIXME: Remember to move back out of statement
 		try
 		{
 			StringBuilder outBuffer = new StringBuilder();

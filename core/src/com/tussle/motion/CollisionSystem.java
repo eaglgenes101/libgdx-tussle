@@ -257,7 +257,18 @@ public strictfp class CollisionSystem extends IteratingSystem
 				return new CollisionTriad(tentativeBox, returnElement, tentativeDisp);
 			}
 		}
-		MultiValuedMap<CollisionBox, StageElement> filteredSurfaces = new HashSetValuedHashMap<>();
+		//First move
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstFores =
+				LazyMap.lazyMap(new HashMap<>(), () -> (new HashMap<>()));
+		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstAfts =
+				LazyMap.lazyMap(new HashMap<>(), () -> (new HashMap<>()));
+		
+		double avg = (start + end) / 2;
+		Map<CollisionBox, Stadium> middleBoxes = LazyMap.lazyMap(
+				new HashMap<>(),
+				(CollisionBox c) -> Utility.middleStad(beforeBoxes.get(c), afterBoxes.get(c))
+		);
+		
 		for (Map.Entry<CollisionBox, Stadium> boxEnt : beforeBoxes.entrySet())
 		{
 			for (Map.Entry<StageElement, ProjectionVector> foreEnt : fores.get(boxEnt.getKey()).entrySet())
@@ -274,35 +285,18 @@ public strictfp class CollisionSystem extends IteratingSystem
 				if (Utility.projectionsClose(foreEnt.getValue(),
 				        afts.get(boxEnt.getKey()).get(foreEnt.getKey()))) continue;
 				
-				filteredSurfaces.put(boxEnt.getKey(), foreEnt.getKey());
+				firstFores.get(boxEnt.getKey()).put(foreEnt.getKey(),
+				                                    fores.get(boxEnt.getKey()).get(foreEnt.getKey()));
+				firstAfts.get(boxEnt.getKey()).put(foreEnt.getKey(),
+				                                   foreEnt.getKey().depth(middleBoxes.get(boxEnt.getKey()), avg));
 			}
 		}
-		if (filteredSurfaces.isEmpty())
+		if (firstFores.isEmpty())
 		{
 			//System.out.print("e");
 			return null;
 		}
-		//Else, iterate deeper
-		double avg = (start + end) / 2;
-		Map<CollisionBox, Stadium> middleBoxes = new HashMap<>();
-		for (Map.Entry<CollisionBox, Stadium> ents : beforeBoxes.entrySet())
-		{
-			middleBoxes.put(ents.getKey(), Utility.middleStad(ents.getValue(),
-			                                                  afterBoxes.get(ents.getKey())));
-		}
-		//First move
-		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstFores =
-				LazyMap.lazyMap(new HashMap<>(), () -> (new HashMap<>()));
-		Map<CollisionBox, Map<StageElement, ProjectionVector>> firstAfts =
-				LazyMap.lazyMap(new HashMap<>(), () -> (new HashMap<>()));
-		for (CollisionBox c : beforeBoxes.keySet())
-		{
-			for (StageElement se : filteredSurfaces.get(c))
-			{
-				firstFores.get(c).put(se, fores.get(c).get(se));
-				firstAfts.get(c).put(se, se.depth(middleBoxes.get(c), avg));
-			}
-		}
+		
 		CollisionTriad firstHit = ecbHit(start, avg, beforeBoxes, middleBoxes,
 		                                 firstFores, firstAfts);
 		
@@ -328,7 +322,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 		}
 		for (Map.Entry<CollisionBox, Stadium> entry : middleBoxes.entrySet())
 		{
-			for (StageElement se : filteredSurfaces.get(entry.getKey()))
+			for (StageElement se : firstFores.get(entry.getKey()).keySet())
 			{
 				secondFores.get(entry.getKey()).put(se, se.depth(entry.getValue(), avg));
 				secondAfts.get(entry.getKey()).put(se, se.depth(endingBoxes.get(entry.getKey()), avg));

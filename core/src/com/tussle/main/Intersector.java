@@ -99,43 +99,40 @@ public strictfp class Intersector
 	{
 		double x;
 		double y;
-		double length2 = (endX-startX)*(endX-startX)+(endY-startY)*(endY-startY);
-		if (length2 == 0)
+		if (endX-startX == 0 && endY-startY == 0)
 		{
 			x = startX;
 			y = startY;
 		}
 		else
 		{
-			double t = ((pointX - startX) * (endX - startX) +
-					(pointY - startY) * (endY - startY)) / length2;
-			if (t < 0)
+			double length2 = (endX-startX)*(endX-startX)+(endY-startY)*(endY-startY);
+			double tprime = (pointX - startX) * (endX - startX) +
+			                (pointY - startY) * (endY - startY);
+			if (tprime < 0)
 			{
 				x = startX;
 				y = startY;
 			}
-			else if (t > 1)
+			else if (tprime > length2)
 			{
 				x = endX;
 				y = endY;
 			}
 			else
 			{
-				x = startX + t * (endX - startX);
-				y = startY + t * (endY - startY);
+				x = startX + tprime * (endX - startX) / length2;
+				y = startY + tprime * (endY - startY) / length2;
 			}
 		}
 		if (x-pointX == 0 && y-pointY == 0)
 		{
-			double xNorm = endY - startY;
-			double yNorm = startX - endX;
-			double len = StrictMath.hypot(xNorm, yNorm);
-			return new ProjectionVector(xNorm/len, yNorm/len, 0);
+			double len = StrictMath.hypot(endY - startY, startX - endX);
+			return new ProjectionVector((endY - startY)/len,
+			                            (startX - endX)/len, 0);
 		}
 		double dist = StrictMath.hypot(x-pointX, y-pointY);
-		double xVec = (x-pointX)/dist;
-		double yVec = (y-pointY)/dist;
-		return new ProjectionVector(xVec, yVec, dist);
+		return new ProjectionVector((x-pointX)/dist, (y-pointY)/dist, dist);
 	}
 
 

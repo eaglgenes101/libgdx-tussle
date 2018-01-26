@@ -122,13 +122,16 @@ public strictfp class StageEdge extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		ProjectionVector disp = Intersector.displacementSegments(stad.getStartx(), stad.getStarty(),
-				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
+		ProjectionVector disp = Intersector.displacementSegments(
+		        startX, startY, endX, endY,
+		        stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		disp.xnorm = -disp.xnorm;
+		disp.ynorm = -disp.ynorm;
 		disp.magnitude = stad.getRadius() - disp.magnitude;
 		return disp;
 	}
 
-	public ProjectionVector instantVelocity(Stadium stad, double time)
+	public double[] instantVelocity(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
@@ -136,21 +139,15 @@ public strictfp class StageEdge extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		double startDX = getStartX(1)-getStartX(0);
-		double startDY = getStartY(1)-getStartY(1);
-		double endDX = getEndX(1)-getEndX(0);
-		double endDY = getEndY(1)-getEndY(0);
+		double startDX = currentx1 - previousx1;
+		double startDY = currenty1 - previousy1;
+		double endDX = currentx2 - previousx2;
+		double endDY = currenty2 - previousy2;
 		double section = Intersector.partSegments(startX, startY, endX, endY,
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
 		double secDX = (1-section)*startDX + section*endDX;
 		double secDY = (1-section)*startDY + section*endDY;
-		if (secDX == 0 && secDY == 0)
-			return new ProjectionVector(0, 0, 0);
-		else
-		{
-			double len = StrictMath.hypot(secDX, secDY);
-			return new ProjectionVector(secDX/len, secDY/len, len);
-		}
+		return new double[]{secDX, secDY};
 	}
 
 	public boolean collides(Stadium stad, double time)
@@ -161,15 +158,20 @@ public strictfp class StageEdge extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		ProjectionVector disp = Intersector.displacementSegments(stad.getStartx(), stad.getStarty(),
-				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
-		//Tolerance of 16 pixels
 		double section = Intersector.partSegments(startX, startY, endX, endY,
+		        stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		
+		if (section <= 0 || section >= 1) return false;
+		ProjectionVector disp = Intersector.displacementSegments(
+				startX, startY, endX, endY,
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
-		if (stad.getRadius()-disp.magnitude < 0) return false;
-		if (stad.getRadius()-disp.magnitude > 16) return false;
+		//Tolerance of 16 pixels
+		//First, transform to the format that depth would give
+		disp.xnorm = -disp.xnorm;
+		disp.ynorm = -disp.ynorm;
+		disp.magnitude = stad.getRadius() - disp.magnitude;
 		if (disp.xnorm*(startY-endY) + disp.ynorm*(endX-startX) <= 0) return false;
-		return section > 0 && section < 1;
+		return disp.magnitude > 0 && disp.magnitude < 16;
 
 	}
 

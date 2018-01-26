@@ -26,7 +26,7 @@ public class IterationSubaction implements Subaction
 {
 	String name = null;
 	Subaction condition;
-	Subaction[] whileTrue;
+	final Subaction[] whileTrue;
 	
 	public IterationSubaction(Subaction cond, Subaction[] doing)
 	{

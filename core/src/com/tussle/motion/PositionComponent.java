@@ -38,4 +38,9 @@ public class PositionComponent implements Component
 		x += dx;
 		y += dy;
 	}
+	
+	public String toString()
+	{
+		return "(" + x + ", " + y + ")";
+	}
 }

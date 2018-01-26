@@ -23,6 +23,10 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.SimpleBindings;
 
+//It appears that tussle subaction files format its subactions so that each
+//subaction is a lexable token
+//Then I can run a context-free parser over the result and emit
+//a parse tree
 @FunctionalInterface
 public interface Subaction
 {

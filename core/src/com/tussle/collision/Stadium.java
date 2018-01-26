@@ -24,8 +24,11 @@ import com.tussle.main.Intersector;
  */
 public class Stadium
 {
-	public double startx, starty, endx, endy;
-	public double radius;
+	public double startx = 0;
+	public double starty = 0;
+	public double endx = 0;
+	public double endy = 0;
+	public double radius = 0;
 
 	public Stadium()
 	{

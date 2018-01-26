@@ -83,6 +83,7 @@ public class SubactionScriptSystem extends IteratingSystem
 	
 	public void addedToEngine(Engine engine)
 	{
+		super.addedToEngine(engine);
 		subactionInterpreter = factory.getScriptEngine();
 	}
 	
@@ -103,7 +104,7 @@ public class SubactionScriptSystem extends IteratingSystem
 		{
 			System.err.println(ex.toString());
 		}
-		super.update(deltaTime); //FIXME: Remember to move back out of statement
+		super.update(deltaTime);
 		try
 		{
 			StringBuilder outBuffer = new StringBuilder();
@@ -116,7 +117,7 @@ public class SubactionScriptSystem extends IteratingSystem
 				errBuffer.append(stdErrProcessor.read().toString());
 			String errorString = errBuffer.toString();
 			stdOut.write(writeString);
-			System.err.println(errorString);
+			System.err.print(errorString);
 		}
 		catch (IOException ex)
 		{

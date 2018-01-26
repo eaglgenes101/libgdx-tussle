@@ -22,26 +22,27 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import org.apache.commons.collections4.FactoryUtils;
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.collections4.map.LazyMap;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 // To avoid subtle bugs resulting from system evaluation order, all state changes
 // are deferred until this last system, which changes all of them at once
 public class PostprocessSystem extends EntitySystem
 {
-	Map<Class<Component>, Map<Entity, PostprocessStep>> componentListMap;
+	Map<Class<Component>, Map<Entity, PostprocessStep>>
+			componentListMap;
 	
 	public PostprocessSystem(int p)
 	{
 		super(p);
 		componentListMap = LazyMap.lazyMap(
-				new HashedMap<Class<Component>, Map<Entity, PostprocessStep>>(),
-				(Class<Component> c) -> LazyMap.lazyMap(
-						new HashedMap<>(),
+				new LinkedHashMap<Class<Component>, Map<Entity, PostprocessStep>>(),
+				() -> LazyMap.lazyMap(
+						new LinkedHashMap<>(),
 						FactoryUtils.constantFactory(
-								(Component comp) -> {}
+								(PostprocessStep)((Component c)->{})
 						)
 				)
 		);

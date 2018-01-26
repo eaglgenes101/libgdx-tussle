@@ -137,7 +137,7 @@ public strictfp class Rectangle
 
 	public boolean overlaps (Rectangle r)
 	{
-		return x < r.x + r.width && x + width > r.x && y < r.y + r.height && y + height > r.y;
+		return x <= r.x + r.width && x + width >= r.x && y <= r.y + r.height && y + height >= r.y;
 	}
 
 	public Rectangle set (Rectangle rect)

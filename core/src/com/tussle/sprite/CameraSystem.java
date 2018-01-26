@@ -86,35 +86,29 @@ public class CameraSystem extends IteratingSystem
 		}
 		if (Components.ecbMapper.has(entity))
 		{
-			if (Components.ecbMapper.get(entity).getCollisionBoxes() != null)
+			for (StageElement s : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
-				for (StageElement s : Components.ecbMapper.get(entity).getCollisionBoxes())
+				com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
+				if (s.getBounds(0, 0) != null)
 				{
-					com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
-					if (s.getBounds(0, 0) != null)
-					{
-						if (entityMinX > rect.x) entityMinX = (float)rect.x;
-						if (entityMinY > rect.y) entityMinY = (float)rect.y;
-						if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
-						if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
-					}
+					if (entityMinX > rect.x) entityMinX = (float)rect.x;
+					if (entityMinY > rect.y) entityMinY = (float)rect.y;
+					if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
+					if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
 				}
 			}
 		}
 		if (Components.stageElementMapper.has(entity))
 		{
-			if (Components.stageElementMapper.get(entity).getStageElements() != null)
+			for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
 			{
-				for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
+				com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
+				if (s.getBounds(0, 0) != null)
 				{
-					com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
-					if (s.getBounds(0, 0) != null)
-					{
-						if (entityMinX > rect.x) entityMinX = (float)rect.x;
-						if (entityMinY > rect.y) entityMinY = (float)rect.y;
-						if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
-						if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
-					}
+					if (entityMinX > rect.x) entityMinX = (float)rect.x;
+					if (entityMinY > rect.y) entityMinY = (float)rect.y;
+					if (entityMaxX < rect.x + rect.width) entityMaxX = (float)(rect.x+rect.width);
+					if (entityMaxY < rect.y + rect.height) entityMaxY = (float)(rect.y+rect.height);
 				}
 			}
 		}

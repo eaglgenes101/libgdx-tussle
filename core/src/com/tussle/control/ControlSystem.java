@@ -24,11 +24,11 @@ import java.util.HashMap;
 
 public class ControlSystem extends EntitySystem
 {
-	HashMap<Player, Controller> controllerMap;
+	HashMap<Player, Controller> controlMap;
 	
 	public ControlSystem(Controller[] controllers, int i)
 	{
 		super(i);
-		
+		//TODO: Fill in
 	}
 }

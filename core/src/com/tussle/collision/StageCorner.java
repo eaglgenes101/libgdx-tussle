@@ -172,23 +172,20 @@ public strictfp class StageCorner extends StageElement
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
 				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
-		disp.magnitude = stad.getRadius()-disp.magnitude;
+		//disp.xnorm = -disp.xnorm;
+		//disp.ynorm = -disp.ynorm;
+		//disp.magnitude = stad.getRadius()-disp.magnitude;
+		disp.magnitude -= stad.getRadius();
 		return disp;
 	}
 
-	public ProjectionVector instantVelocity(Stadium stad, double time)
+	public double[] instantVelocity(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
 		double secDX = getX(1)-getX(0);
 		double secDY = getY(1)-getY(0);
-		if (secDX == 0 && secDY == 0)
-			return new ProjectionVector(0, 0, 0);
-		else
-		{
-			double len = StrictMath.hypot(secDX, secDY);
-			return new ProjectionVector(secDX/len, secDY/len, len);
-		}
+		return new double[]{secDX, secDY};
 	}
 
 	public boolean collides(Stadium stad, double time)
@@ -201,8 +198,10 @@ public strictfp class StageCorner extends StageElement
 				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
 		ProjectionVector rightNormal = getRightNormal(time);
 		ProjectionVector leftNormal = getLeftNormal(time);
-		if (stad.getRadius()-disp.magnitude < 0) return false;
-		if (stad.getRadius()-disp.magnitude > 16) return false;
+		//if (stad.getRadius()-disp.magnitude < 0) return false;
+		//if (stad.getRadius()-disp.magnitude > 16) return false;
+		if (disp.magnitude - stad.getRadius() < 0) return false;
+		if (disp.magnitude - stad.getRadius() > 16) return false;
 		//Thanks stack overflow!
 		return (rightNormal.ynorm*disp.xnorm-rightNormal.xnorm*disp.ynorm) *
 			   (rightNormal.ynorm*leftNormal.xnorm-rightNormal.xnorm*leftNormal.ynorm) < 0;

@@ -26,8 +26,8 @@ public class ConditionalSubaction implements Subaction
 {
 	String name = null;
 	Subaction basedOn;
-	Subaction[] ifTrue;
-	Subaction[] ifFalse;
+	final Subaction[] ifTrue;
+	final Subaction[] ifFalse;
 	
 	public ConditionalSubaction(Subaction based, Subaction[] pos, Subaction[] neg)
 	{

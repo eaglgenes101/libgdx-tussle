@@ -107,12 +107,15 @@ public class ScriptContextComponent implements Component
 	public Collection<ScriptIterator> exec()
 	{
 		Collection<ScriptIterator> toReturn = new HashSet<>();
-		Object replacingCurrentAction = currentAction.exec();
-		if (replacingCurrentAction != null)
+		if (currentAction != null)
 		{
-			if (replacingCurrentAction != currentAction &&
-		            replacingCurrentAction instanceof ScriptIterator)
-				toReturn.add(setCurrentAction((ScriptIterator)replacingCurrentAction));
+			Object replacingCurrentAction = currentAction.exec();
+			if (replacingCurrentAction != null)
+			{
+				if (replacingCurrentAction != currentAction &&
+				    replacingCurrentAction instanceof ScriptIterator)
+					toReturn.add(setCurrentAction((ScriptIterator)replacingCurrentAction));
+			}
 		}
 		Set<ScriptIterator> toAdd = new HashSet<>();
 		for (Iterator<ScriptIterator> i = statusEffects.iterator(); i.hasNext();)

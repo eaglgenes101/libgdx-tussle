@@ -32,4 +32,15 @@ public class VelocityComponent implements Component
 		xVel = x;
 		yVel = y;
 	}
+	
+	public void accelerate(double dx, double dy)
+	{
+		xVel += dx;
+		yVel += dy;
+	}
+	
+	public String toString()
+	{
+		return "(" + xVel + ", " + yVel + ")";
+	}
 }

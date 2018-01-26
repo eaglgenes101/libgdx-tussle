@@ -31,9 +31,9 @@ public strictfp class CollisionBox extends StageElement
 
 	public CollisionBox(Stadium base)
 	{
-		localArea = new Stadium(base);
-		currentArea = new Stadium(base);
-		previousArea = new Stadium(base);
+		localArea = base;
+		currentArea = base;
+		previousArea = base;
 	}
 	
 	public CollisionBox(double startx, double starty, double endx, double endy, double radius)
@@ -45,9 +45,9 @@ public strictfp class CollisionBox extends StageElement
 	
 	public CollisionBox(CollisionBox base)
 	{
-		localArea = new Stadium(base.localArea);
-		currentArea = new Stadium(base.currentArea);
-		previousArea = new Stadium(base.previousArea);
+		this.localArea = new Stadium(base.localArea);
+		this.currentArea = new Stadium(base.currentArea);
+		this.previousArea = new Stadium(base.previousArea);
 	}
 
 	public Stadium getCurrentStadium()
@@ -148,8 +148,6 @@ public strictfp class CollisionBox extends StageElement
 
 	public Stadium getStadiumAt(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
 		return new Stadium(getStartX(time), getStartY(time),
 				getEndX(time), getEndY(time), getRadius(time));
 	}
@@ -164,11 +162,13 @@ public strictfp class CollisionBox extends StageElement
 		double endY = getEndY(time);
 		ProjectionVector disp = Intersector.displacementSegments(stad.getStartx(), stad.getStarty(),
 				stad.getEndx(), stad.getEndy(), startX, startY, endX, endY);
+		disp.xnorm = -disp.xnorm;
+		disp.ynorm = -disp.ynorm;
 		disp.magnitude = stad.getRadius()+getRadius(time)-disp.magnitude;
 		return disp;
 	}
 
-	public ProjectionVector instantVelocity(Stadium stad, double time)
+	public double[] instantVelocity(Stadium stad, double time)
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
@@ -176,21 +176,15 @@ public strictfp class CollisionBox extends StageElement
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		double startDX = getStartX(1)-getStartX(0);
-		double startDY = getStartY(1)-getStartY(1);
-		double endDX = getEndX(1)-getEndX(0);
-		double endDY = getEndY(1)-getEndY(0);
+		double startDX = getCurrentStadium().getStartx() - getPreviousStadium().getStartx();
+		double startDY = getCurrentStadium().getStarty() - getPreviousStadium().getStarty();
+		double endDX = getCurrentStadium().getEndx() - getPreviousStadium().getEndx();
+		double endDY = getCurrentStadium().getEndy() - getPreviousStadium().getEndy();
 		double section = Intersector.partSegments(startX, startY, endX, endY,
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
 		double secDX = (1-section)*startDX + section*endDX;
 		double secDY = (1-section)*startDY + section*endDY;
-		if (secDX == 0 && secDY == 0)
-			return new ProjectionVector(0, 0, 0);
-		else
-		{
-			double len = StrictMath.hypot(secDX, secDY);
-			return new ProjectionVector(secDX/len, secDY/len, len);
-		}
+		return new double[]{secDX, secDY};
 	}
 
 	public boolean collides(Stadium stad, double time)

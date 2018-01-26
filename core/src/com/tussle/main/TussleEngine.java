@@ -42,8 +42,8 @@ public class TussleEngine extends Engine
 		manager = new AssetManager();
 		
 		//Add entity systems
-		addSystem(new MotionSystem(0));
-		addSystem(new CollisionSystem(1));
+		addSystem(new CollisionSystem(0));
+		addSystem(new MotionSystem(1));
 		addSystem(new CameraSystem(2));
 		addSystem(new SpriteSystem(manager, getSystem(CameraSystem.class).getCamera(),3));
 		addSystem(new HitboxDrawingSystem(getSystem(CameraSystem.class).getCamera(), 4));

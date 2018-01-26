@@ -39,7 +39,7 @@ public class EntityActionContext implements ScriptContext
 	Bindings entityMutables;
 	Bindings actionMutables;
 	
-	public static final List<Integer> scopeList = Arrays.asList(
+	static final List<Integer> scopeList = Arrays.asList(
 			ACTION_SCOPE,
 			ENTITY_SCOPE,
 			API_SCOPE,

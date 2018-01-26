@@ -32,6 +32,13 @@ public class ProjectionVector
 		ynorm = y;
 		magnitude = dist;
 	}
+	
+	public ProjectionVector(ProjectionVector base)
+	{
+		xnorm = base.xnorm;
+		ynorm = base.ynorm;
+		magnitude = base.magnitude;
+	}
 
 	@Override
 	public boolean equals(Object o)

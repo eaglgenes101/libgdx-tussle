@@ -31,7 +31,7 @@ public class Continue extends RemoteJump
 	
 	public Continue(Subaction source, String targ)
 	{
-		super(source, "Loop continue to "+targ.toString()+" from ");
+		super(source, "Loop continue to "+targ+" from ");
 		target = targ;
 	}
 	

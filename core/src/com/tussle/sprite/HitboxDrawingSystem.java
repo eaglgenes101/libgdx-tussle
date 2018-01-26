@@ -53,7 +53,7 @@ public class HitboxDrawingSystem extends IteratingSystem
 		if (Components.ecbMapper.has(entity))
 		{
 			//Draw ECB
-			drawer.setColor(Color.GREEN);
+			drawer.setColor(Color.BLUE);
 			for (CollisionBox s : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
 				s.draw(drawer);

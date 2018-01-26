@@ -23,7 +23,9 @@ import javax.script.ScriptContext;
 
 public class TestInputSubaction implements Subaction
 {
-	public Object eval(ScriptContext globals, StackedBindings locals)
+	
+	@Override
+	public Object eval(ScriptContext globals, StackedBindings locals) throws RemoteJump
 	{
 		return null; //Stub
 	}

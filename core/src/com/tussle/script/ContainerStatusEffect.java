@@ -41,5 +41,6 @@ public class ContainerStatusEffect extends ScriptIterator
 				context,
 				destructSig
 		);
+		wrappedProcedure = (globals, locals) -> this;
 	}
 }

@@ -49,7 +49,8 @@ public class Player
 		{
 			//TODO: Add code
 		}
-		return null; //Stub
+		
 		//if (Components.playerOwnershipMapper)
+		return null; //stub
 	}
 }

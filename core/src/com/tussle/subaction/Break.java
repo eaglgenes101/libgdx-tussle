@@ -31,7 +31,7 @@ public class Break extends RemoteJump
 	
 	public Break(Subaction source, String targ)
 	{
-		super(source, "Loop break to "+targ.toString()+" from ");
+		super(source, "Loop break to "+targ+" from ");
 		target = targ;
 	}
 	

@@ -18,38 +18,37 @@
 package com.tussle.main;
 
 import com.badlogic.ashley.core.ComponentMapper;
-import com.tussle.allegiance.AllegianceComponent;
 import com.tussle.collision.ECBComponent;
 import com.tussle.collision.ElasticityComponent;
 import com.tussle.collision.StageElementComponent;
-import com.tussle.control.ControlComponent;
-import com.tussle.dependency.DependencyComponent;
 import com.tussle.hitbox.HitboxComponent;
 import com.tussle.hitbox.HitboxLockComponent;
 import com.tussle.hitbox.HurtboxComponent;
 import com.tussle.motion.PositionComponent;
 import com.tussle.motion.VelocityComponent;
+import com.tussle.ownership.EntityOwnershipComponent;
+import com.tussle.ownership.PlayerOwnershipComponent;
 import com.tussle.script.ScriptContextComponent;
 import com.tussle.sprite.SpriteComponent;
 
 public class Components
 {
-	public static final ComponentMapper<AllegianceComponent> allegianceMapper =
-			ComponentMapper.getFor(AllegianceComponent.class);
 	public static final ComponentMapper<ECBComponent> ecbMapper =
 			ComponentMapper.getFor(ECBComponent.class);
 	public static final ComponentMapper<ElasticityComponent> elasticityMapper =
 			ComponentMapper.getFor(ElasticityComponent.class);
+	public static final ComponentMapper<EntityOwnershipComponent> entityOwnershipMapper =
+			ComponentMapper.getFor(EntityOwnershipComponent.class);
 	public static final ComponentMapper<StageElementComponent> stageElementMapper =
 			ComponentMapper.getFor(StageElementComponent.class);
-	public static final ComponentMapper<ControlComponent> controlMapper =
-			ComponentMapper.getFor(ControlComponent.class);
-	public static final ComponentMapper<DependencyComponent> dependencyMapper =
-			ComponentMapper.getFor(DependencyComponent.class);
+	public static final ComponentMapper<EntityOwnershipComponent> dependencyMapper =
+			ComponentMapper.getFor(EntityOwnershipComponent.class);
 	public static final ComponentMapper<HitboxComponent> hitboxMapper =
 			ComponentMapper.getFor(HitboxComponent.class);
 	public static final ComponentMapper<HurtboxComponent> hurtboxMapper =
 			ComponentMapper.getFor(HurtboxComponent.class);
+	public static final ComponentMapper<PlayerOwnershipComponent> playerOwnershipMapper =
+			ComponentMapper.getFor(PlayerOwnershipComponent.class);
 	public static final ComponentMapper<PositionComponent> positionMapper =
 			ComponentMapper.getFor(PositionComponent.class);
 	public static final ComponentMapper<VelocityComponent> velocityMapper =

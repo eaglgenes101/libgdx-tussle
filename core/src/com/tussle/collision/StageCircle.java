@@ -19,6 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
 public class StageCircle extends StageElement
 {
@@ -35,8 +36,8 @@ public class StageCircle extends StageElement
 
 	public void computeNewPositions()
 	{
-		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
-		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
+		double cos = FastMath.cos(FastMath.toRadians(rotation));
+		double sin = FastMath.sin(FastMath.toRadians(rotation));
 		double locx = localx - originX;
 		double locy = localy - originY;
 		locx *= flipped ? -scale : scale;
@@ -46,7 +47,7 @@ public class StageCircle extends StageElement
 		locy = oldX * sin + locy * cos;
 		currentx = locx + originX + x;
 		currenty = locy + originY + y;
-		currentr = StrictMath.abs(localr*scale);
+		currentr = FastMath.abs(localr*scale);
 		coordinatesDirty = false;
 		if (start)
 		{
@@ -122,7 +123,7 @@ public class StageCircle extends StageElement
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
 				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
-		return stad.getRadius() - disp.magnitude + getRadius(time) < 0;
+		return stad.getRadius() - disp.magnitude + getRadius(time) <= 0;
 	}
 
 	public double stadiumPortion(Stadium stad, double time)
@@ -137,13 +138,13 @@ public class StageCircle extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double minX = StrictMath.min(getX(start)-getRadius(start),
+		double minX = FastMath.min(getX(start)-getRadius(start),
 				getX(end)-getRadius(end));
-		double maxX = StrictMath.max(getX(start)+getRadius(start),
+		double maxX = FastMath.max(getX(start)+getRadius(start),
 				getX(end)+getRadius(end));
-		double minY = StrictMath.min(getY(start)-getRadius(start),
+		double minY = FastMath.min(getY(start)-getRadius(start),
 				getY(end)+getRadius(end));
-		double maxY = StrictMath.max(getY(start)+getRadius(start),
+		double maxY = FastMath.max(getY(start)+getRadius(start),
 				getY(end)+getRadius(end));
 		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}

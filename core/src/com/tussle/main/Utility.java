@@ -23,6 +23,7 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.tussle.collision.ProjectionVector;
 import com.tussle.collision.Stadium;
 import com.tussle.collision.StageElement;
+import org.apache.commons.math3.util.FastMath;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,8 +35,8 @@ public strictfp class Utility
 	public static double[] getXYfromDM(double direction, double magnitude)
 	{
 		double[] returnVect = new double[2];
-		returnVect[0] = magnitude*StrictMath.cos(StrictMath.toRadians(direction));
-		returnVect[1] = magnitude*StrictMath.sin(StrictMath.toDegrees(direction));
+		returnVect[0] = magnitude * FastMath.cos(FastMath.toRadians(direction));
+		returnVect[1] = magnitude*FastMath.sin(FastMath.toDegrees(direction));
 		return returnVect;
 	}
 
@@ -43,7 +44,7 @@ public strictfp class Utility
 	{
 		if (addend == 0) return value;
 		if (addend*(base-value-addend) > 0) return value+addend;
-		else return addend>0?StrictMath.max(base, value):StrictMath.min(base, value);
+		else return addend>0?FastMath.max(base, value):FastMath.min(base, value);
 	}
 
 	public static double addAway(double value, double addend, double base)
@@ -54,8 +55,8 @@ public strictfp class Utility
 
 	public static double addFrom(double value, double amount, double base)
 	{
-		if (amount < 0 && StrictMath.min(value-base,base-value) > amount) return base;
-		else return amount * StrictMath.copySign(1, value-base) + value;
+		if (amount < 0 && FastMath.min(value-base,base-value) > amount) return base;
+		else return amount * FastMath.copySign(1, value-base) + value;
 	}
 
 	public static double[] projection(double x1, double y1, double x2, double y2)
@@ -78,7 +79,7 @@ public strictfp class Utility
 
 	public static double angle(double x, double y)
 	{
-		return StrictMath.toDegrees(StrictMath.atan2(y, x));
+		return FastMath.toDegrees(FastMath.atan2(y, x));
 	}
 
 	public static double[][] outsidePoints(double[] xpoints, double[] ypoints)
@@ -301,7 +302,7 @@ public strictfp class Utility
 		//Now... project all vectors onto the sum of the borders.
 		double sumcos = cos0+cos1;
 		double sumsin = sin0+sin1;
-		double len = StrictMath.hypot(sumcos, sumsin);
+		double len = FastMath.hypot(sumcos, sumsin);
 		if (len == 0) return null;
 		sumcos /= len;
 		sumsin /= len;
@@ -383,7 +384,7 @@ public strictfp class Utility
 		if (collideVec0.magnitude == 0) return 0;
 		double xDisp = collideVec0.xnorm*collideVec0.magnitude;
 		double yDisp = collideVec0.ynorm*collideVec0.magnitude;
-		return -(DXdiff*xDisp+DYdiff*yDisp)/StrictMath.hypot(xDisp, yDisp);
+		return -(DXdiff*xDisp+DYdiff*yDisp)/FastMath.hypot(xDisp, yDisp);
 	}
 
 	public static Stadium middleStad(Stadium s1, Stadium s2)

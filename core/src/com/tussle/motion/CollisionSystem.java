@@ -27,6 +27,7 @@ import com.tussle.postprocess.PostprocessSystem;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.map.LazyMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +39,7 @@ import java.util.Map;
 public strictfp class CollisionSystem extends IteratingSystem
 {
 	public static final double COLLISION_TOLERANCE = .000000001;
+	public static final double COLLISION_PIXEL_STEP = 8;
 	
 	//Entity families
 	Family surfaceFamily = Family.all(PositionComponent.class,
@@ -122,7 +124,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 					final double elasticity;
 					if (Components.elasticityMapper.has(entity))
 					{
-						if (surfNorm.ynorm > StrictMath.abs(surfNorm.xnorm))
+						if (surfNorm.ynorm > FastMath.abs(surfNorm.xnorm))
 							elasticity = Components.elasticityMapper.get(entity).getGroundElasticity();
 						else elasticity = Components.elasticityMapper.get(entity).getWallElasticity();
 					}
@@ -190,6 +192,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			//System.out.print("b");
 			return null;
 		}
+		//TODO: Modify for more robustness
 		//If stage surface normal change too little, we can take them out of consideration
 		MultiValuedMap<CollisionBox, StageElement> earlySurfaces = new HashSetValuedHashMap<>();
 		for (Map.Entry<CollisionBox, Stadium> boxEnt : beforeBoxes.entrySet())
@@ -210,7 +213,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 				for (StageElement se : earlySurfaces.get(box))
 				{
 					ProjectionVector foreVec = fores.get(box).get(se);
-					if (foreVec.magnitude > tentativeDisp.magnitude)
+					if (foreVec.magnitude > tentativeDisp.magnitude || true)
 					{
 						returnElement = se;
 						tentativeBox = box;
@@ -243,7 +246,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 				for (StageElement se : acceptedSurfaces.get(box))
 				{
 					ProjectionVector aftVec = afts.get(box).get(se);
-					if (aftVec.magnitude > tentativeDisp.magnitude)
+					if (aftVec.magnitude > tentativeDisp.magnitude || true)
 					{
 						returnElement = se;
 						tentativeBox = box;
@@ -281,7 +284,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 				//Pruning heuristics
 				//If any of these conditions is true, then subdivision of the path through these surfaces
 				//is unlikely to be worth the extra steps
-				if (spd*(end-start) < 8) continue;
+				if (spd*(end-start) < COLLISION_PIXEL_STEP) continue;
 				if (Utility.projectionsClose(foreEnt.getValue(),
 				        afts.get(boxEnt.getKey()).get(foreEnt.getKey()))) continue;
 				
@@ -294,6 +297,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 		if (firstFores.isEmpty())
 		{
 			//System.out.print("e");
+			//TODO: Run a full step instead of straight returning null
 			return null;
 		}
 		
@@ -345,7 +349,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			              secondHit.getVector().xnorm * secondHit.getVector().magnitude;
 			double ySum = firstHit.getVector().ynorm * firstHit.getVector().magnitude +
 			              secondHit.getVector().ynorm * secondHit.getVector().magnitude;
-			double lSum = StrictMath.hypot(xSum, ySum);
+			double lSum = FastMath.hypot(xSum, ySum);
 			ProjectionVector disp;
 			if (lSum == 0)
 			{

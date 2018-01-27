@@ -18,6 +18,7 @@
 package com.tussle.main;
 
 import com.tussle.collision.ProjectionVector;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Created by eaglgenes101 on 4/15/17.
@@ -127,11 +128,11 @@ public strictfp class Intersector
 		}
 		if (x-pointX == 0 && y-pointY == 0)
 		{
-			double len = StrictMath.hypot(endY - startY, startX - endX);
+			double len = FastMath.hypot(endY - startY, startX - endX);
 			return new ProjectionVector((endY - startY)/len,
 			                            (startX - endX)/len, 0);
 		}
-		double dist = StrictMath.hypot(x-pointX, y-pointY);
+		double dist = FastMath.hypot(x-pointX, y-pointY);
 		return new ProjectionVector((x-pointX)/dist, (y-pointY)/dist, dist);
 	}
 

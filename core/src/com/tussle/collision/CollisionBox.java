@@ -19,6 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Created by eaglgenes101 on 4/15/17.
@@ -75,13 +76,13 @@ public strictfp class CollisionBox extends StageElement
 		double sy = localArea.starty - originY;
 		double ex = localArea.endx - originX;
 		double ey = localArea.endy - originY;
-		double rad = StrictMath.abs(localArea.radius*scale);
+		double rad = FastMath.abs(localArea.radius*scale);
 		sx *= flipped?-scale:scale;
 		sy *= scale;
 		ex *= flipped?-scale:scale;
 		ey *= scale;
-		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
-		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
+		double cos = FastMath.cos(FastMath.toRadians(rotation));
+		double sin = FastMath.sin(FastMath.toRadians(rotation));
 		double oldSX = sx;
 		double oldEX = ex;
 		sx = sx*cos - sy*sin;
@@ -216,26 +217,26 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double startXMin = StrictMath.min(getStartX(start)-getRadius(start),
+		double startXMin = FastMath.min(getStartX(start)-getRadius(start),
 				getStartX(end)-getRadius(end));
-		double startYMin = StrictMath.min(getStartY(start)-getRadius(start),
+		double startYMin = FastMath.min(getStartY(start)-getRadius(start),
 				getStartY(end)-getRadius(end));
-		double startXMax = StrictMath.max(getStartX(start)+getRadius(start),
+		double startXMax = FastMath.max(getStartX(start)+getRadius(start),
 				getStartX(end)+getRadius(end));
-		double startYMax = StrictMath.max(getStartY(start)+getRadius(start),
+		double startYMax = FastMath.max(getStartY(start)+getRadius(start),
 				getStartY(end)+getRadius(end));
-		double endXMin = StrictMath.min(getEndX(start)-getRadius(start),
+		double endXMin = FastMath.min(getEndX(start)-getRadius(start),
 				getEndX(end)-getRadius(end));
-		double endYMin = StrictMath.min(getEndY(start)-getRadius(start),
+		double endYMin = FastMath.min(getEndY(start)-getRadius(start),
 				getEndY(end)-getRadius(end));
-		double endXMax = StrictMath.max(getEndX(start)+getRadius(start),
+		double endXMax = FastMath.max(getEndX(start)+getRadius(start),
 				getEndX(end)+getRadius(end));
-		double endYMax = StrictMath.max(getEndY(start)+getRadius(start),
+		double endYMax = FastMath.max(getEndY(start)+getRadius(start),
 				getEndY(end)+getRadius(end));
-		double minX = StrictMath.min(startXMin, endXMin);
-		double maxX = StrictMath.max(startXMax, endXMax);
-		double minY = StrictMath.min(startYMin, endYMin);
-		double maxY = StrictMath.max(startYMax, endYMax);
+		double minX = FastMath.min(startXMin, endXMin);
+		double maxX = FastMath.max(startXMax, endXMax);
+		double minY = FastMath.min(startYMin, endYMin);
+		double maxY = FastMath.max(startYMax, endYMax);
 		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 
@@ -245,7 +246,7 @@ public strictfp class CollisionBox extends StageElement
 			computeNewPositions();
 		drawer.circle((float)getStartX(0), (float)getStartY(0), (float)getRadius(0));
 		drawer.circle((float)getEndX(0), (float)getEndY(0), (float)getRadius(0));
-		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
+		double len = FastMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
 		if (len > 0)
 		{
@@ -259,7 +260,7 @@ public strictfp class CollisionBox extends StageElement
 
 		drawer.circle((float)getStartX(1), (float)getStartY(1), (float)getRadius(1));
 		drawer.circle((float)getEndX(1), (float)getEndY(1), (float)getRadius(1));
-		len = StrictMath.hypot(getEndX(1)-getStartX(1),
+		len = FastMath.hypot(getEndX(1)-getStartX(1),
 				getEndY(1)-getStartY(1));
 		if (len > 0)
 		{

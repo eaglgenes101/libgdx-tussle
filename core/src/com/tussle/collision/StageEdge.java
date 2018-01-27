@@ -19,6 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Created by eaglgenes101 on 4/18/17.
@@ -39,8 +40,8 @@ public strictfp class StageEdge extends StageElement
 
 	public void computeNewPositions()
 	{
-		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
-		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
+		double cos = FastMath.cos(FastMath.toRadians(rotation));
+		double sin = FastMath.sin(FastMath.toRadians(rotation));
 		double sx = localx1 - originX;
 		double sy = localy1 - originY;
 		double ex = localx2 - originX;
@@ -171,7 +172,7 @@ public strictfp class StageEdge extends StageElement
 		disp.ynorm = -disp.ynorm;
 		disp.magnitude = stad.getRadius() - disp.magnitude;
 		if (disp.xnorm*(startY-endY) + disp.ynorm*(endX-startX) <= 0) return false;
-		return disp.magnitude > 0 && disp.magnitude < 16;
+		return disp.magnitude >= 0 && disp.magnitude <= 16;
 
 	}
 
@@ -191,18 +192,18 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double startXMin = StrictMath.min(getStartX(start), getStartX(end));
-		double startYMin = StrictMath.min(getStartY(start), getStartY(end));
-		double startXMax = StrictMath.max(getStartX(start), getStartX(end));
-		double startYMax = StrictMath.max(getStartY(start), getStartY(end));
-		double endXMin = StrictMath.min(getEndX(start), getEndX(end));
-		double endYMin = StrictMath.min(getEndY(start), getEndY(end));
-		double endXMax = StrictMath.max(getEndX(start), getEndX(end));
-		double endYMax = StrictMath.max(getEndY(start), getEndY(end));
-		double minX = StrictMath.min(startXMin, endXMin);
-		double maxX = StrictMath.max(startXMax, endXMax);
-		double minY = StrictMath.min(startYMin, endYMin);
-		double maxY = StrictMath.max(startYMax, endYMax);
+		double startXMin = FastMath.min(getStartX(start), getStartX(end));
+		double startYMin = FastMath.min(getStartY(start), getStartY(end));
+		double startXMax = FastMath.max(getStartX(start), getStartX(end));
+		double startYMax = FastMath.max(getStartY(start), getStartY(end));
+		double endXMin = FastMath.min(getEndX(start), getEndX(end));
+		double endYMin = FastMath.min(getEndY(start), getEndY(end));
+		double endXMax = FastMath.max(getEndX(start), getEndX(end));
+		double endYMax = FastMath.max(getEndY(start), getEndY(end));
+		double minX = FastMath.min(startXMin, endXMin);
+		double maxX = FastMath.max(startXMax, endXMax);
+		double minY = FastMath.min(startYMin, endYMin);
+		double maxY = FastMath.max(startYMax, endYMax);
 		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 
@@ -210,7 +211,7 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double len = StrictMath.hypot(getEndX(0)-getStartX(0),
+		double len = FastMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
 		if (len > 0)
 		{
@@ -226,7 +227,7 @@ public strictfp class StageEdge extends StageElement
 		else
 			drawer.point((float)getStartX(0), (float)getStartY(0), 0);
 
-		len = StrictMath.hypot(getEndX(1)-getStartX(1),
+		len = FastMath.hypot(getEndX(1)-getStartX(1),
 				getEndY(1)-getStartY(1));
 		if (len > 0)
 		{

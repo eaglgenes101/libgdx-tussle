@@ -18,6 +18,7 @@
 package com.tussle.collision;
 
 import com.badlogic.ashley.core.Entity;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Created by eaglgenes101 on 2/21/17.
@@ -98,8 +99,8 @@ public class Ledge
 		coordinatesDirty = false;
 		final boolean doScale = flipped || scale != 1;
 		final boolean doRotate = (rotation % 360 != 0);
-		double cos = doRotate ? StrictMath.cos(StrictMath.toDegrees(rotation)) : 1;
-		double sin = doRotate ? StrictMath.sin(StrictMath.toDegrees(rotation)) : 0;
+		double cos = doRotate ? FastMath.cos(FastMath.toDegrees(rotation)) : 1;
+		double sin = doRotate ? FastMath.sin(FastMath.toDegrees(rotation)) : 0;
 		double posx = localX - originX;
 		double posy = localY - originY;
 		double rad = localRadius;
@@ -165,8 +166,8 @@ public class Ledge
 	{
 		double dx = x-currentX;
 		double dy = y-currentY;
-		double sin = StrictMath.sin(StrictMath.toRadians(currentDirection));
-		double cos = StrictMath.cos(StrictMath.toRadians(currentDirection));
+		double sin = FastMath.sin(FastMath.toRadians(currentDirection));
+		double cos = FastMath.cos(FastMath.toRadians(currentDirection));
 		return dx*cos + dy*sin > 0 && dx*dx+dy*dy > currentRadius*currentRadius;
 	}
 

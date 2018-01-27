@@ -16,6 +16,9 @@
  */
 
 package com.tussle.collision;
+
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Shamelessly copied by eaglgenes101 on 4/13/17.
  * Below is the license for the file this was derived from.
@@ -152,13 +155,13 @@ public strictfp class Rectangle
 
 	public Rectangle merge (Rectangle rect)
 	{
-		double minX = StrictMath.min(x, rect.x);
-		double maxX = StrictMath.max(x + width, rect.x + rect.width);
+		double minX = FastMath.min(x, rect.x);
+		double maxX = FastMath.max(x + width, rect.x + rect.width);
 		x = minX;
 		width = maxX - minX;
 
-		double minY = StrictMath.min(y, rect.y);
-		double maxY = StrictMath.max(y + height, rect.y + rect.height);
+		double minY = FastMath.min(y, rect.y);
+		double maxY = FastMath.max(y + height, rect.y + rect.height);
 		y = minY;
 		height = maxY - minY;
 
@@ -167,13 +170,13 @@ public strictfp class Rectangle
 
 	public Rectangle merge (double x, double y)
 	{
-		double minX = StrictMath.min(this.x, x);
-		double maxX = StrictMath.max(this.x + width, x);
+		double minX = FastMath.min(this.x, x);
+		double maxX = FastMath.max(this.x + width, x);
 		this.x = minX;
 		this.width = maxX - minX;
 
-		double minY = StrictMath.min(this.y, y);
-		double maxY = StrictMath.max(this.y + height, y);
+		double minY = FastMath.min(this.y, y);
+		double maxY = FastMath.max(this.y + height, y);
 		this.y = minY;
 		this.height = maxY - minY;
 

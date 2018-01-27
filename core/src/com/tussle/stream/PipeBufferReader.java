@@ -17,6 +17,8 @@
 
 package com.tussle.stream;
 
+import org.apache.commons.math3.util.FastMath;
+
 import java.io.Reader;
 
 //Please, use the factory method of PipeBufferWriter to get new PipeBufferReaders
@@ -47,7 +49,7 @@ public class PipeBufferReader extends Reader
 	{
 		if (buffer.length() == 0)
 			return -1;
-		int tryLen = StrictMath.min(len, buffer.length());
+		int tryLen = FastMath.min(len, buffer.length());
 		buffer.getChars(0, tryLen, buf, off);
 		buffer.delete(0, tryLen);
 		return tryLen;

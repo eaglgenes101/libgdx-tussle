@@ -19,6 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
 /**
  * Created by eaglgenes101 on 5/17/17.
@@ -44,8 +45,8 @@ public strictfp class StageCorner extends StageElement
 
 	public void computeNewPositions()
 	{
-		double cos = StrictMath.cos(StrictMath.toRadians(rotation));
-		double sin = StrictMath.sin(StrictMath.toRadians(rotation));
+		double cos = FastMath.cos(FastMath.toRadians(rotation));
+		double sin = FastMath.sin(FastMath.toRadians(rotation));
 		double locx = localx - originX;
 		double locy = localy - originY;
 		double minAngle = localMinAngle;
@@ -66,10 +67,10 @@ public strictfp class StageCorner extends StageElement
 		currenty = locy + originY + y;
 		currentMinAngle = minAngle;
 		currentMaxAngle = maxAngle;
-		currentRightCos = StrictMath.cos(StrictMath.toRadians(minAngle));
-		currentRightSin = StrictMath.sin(StrictMath.toRadians(minAngle));
-		currentLeftCos = StrictMath.cos(StrictMath.toRadians(maxAngle));
-		currentLeftSin = StrictMath.sin(StrictMath.toRadians(maxAngle));
+		currentRightCos = FastMath.cos(FastMath.toRadians(minAngle));
+		currentRightSin = FastMath.sin(FastMath.toRadians(minAngle));
+		currentLeftCos = FastMath.cos(FastMath.toRadians(maxAngle));
+		currentLeftSin = FastMath.sin(FastMath.toRadians(maxAngle));
 		coordinatesDirty = false;
 		if (start)
 		{
@@ -138,7 +139,7 @@ public strictfp class StageCorner extends StageElement
 				return new ProjectionVector(currentRightSin, -currentRightCos, 1);
 			}
 		}
-		double magn = StrictMath.hypot(interpSin, interpCos);
+		double magn = FastMath.hypot(interpSin, interpCos);
 		return new ProjectionVector(interpCos/magn, interpSin/magn, 1);
 	}
 
@@ -160,7 +161,7 @@ public strictfp class StageCorner extends StageElement
 				return new ProjectionVector(currentLeftSin, -currentLeftCos, 1);
 			}
 		}
-		double magn = StrictMath.hypot(interpSin, interpCos);
+		double magn = FastMath.hypot(interpSin, interpCos);
 		return new ProjectionVector(interpCos/magn, interpSin/magn, 1);
 	}
 
@@ -220,10 +221,10 @@ public strictfp class StageCorner extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
-		double minX = StrictMath.min(getX(start), getX(end));
-		double maxX = StrictMath.max(getX(start), getX(end));
-		double minY = StrictMath.min(getY(start), getY(end));
-		double maxY = StrictMath.max(getY(start), getY(end));
+		double minX = FastMath.min(getX(start), getX(end));
+		double maxX = FastMath.max(getX(start), getX(end));
+		double minY = FastMath.min(getY(start), getY(end));
+		double maxY = FastMath.max(getY(start), getY(end));
 		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
 	}
 

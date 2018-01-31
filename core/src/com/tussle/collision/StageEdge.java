@@ -91,6 +91,8 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return previousx1;
+		if (time == 1) return currentx1;
 		return (1-time)*previousx1 + time*currentx1;
 	}
 
@@ -98,6 +100,8 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return previousx2;
+		if (time == 1) return currentx2;
 		return (1-time)*previousx2 + time*currentx2;
 	}
 
@@ -105,6 +109,8 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return previousy1;
+		if (time == 1) return currenty1;
 		return (1-time)*previousy1 + time*currenty1;
 	}
 
@@ -112,6 +118,8 @@ public strictfp class StageEdge extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return previousy2;
+		if (time == 1) return currenty2;
 		return (1-time)*previousy2 + time*currenty2;
 	}
 

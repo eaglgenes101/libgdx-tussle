@@ -32,6 +32,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 public strictfp class Utility
 {
+	public static final long MEMOIZE_CAPACITY = 1 << 20;
+	
 	public static double[] getXYfromDM(double direction, double magnitude)
 	{
 		double[] returnVect = new double[2];
@@ -309,7 +311,7 @@ public strictfp class Utility
 		double maxlen = Double.NEGATIVE_INFINITY;
 		for (ProjectionVector v : vectors)
 		{
-			double scalarProj = (v.xnorm*v.magnitude*sumcos+v.ynorm*v.magnitude*sumsin)
+			double scalarProj = (v.xComp()*sumcos+v.yComp()*sumsin)
 					/(sumcos*sumcos+sumsin*sumsin);
 			if (scalarProj > maxlen)
 				maxlen = scalarProj;
@@ -382,8 +384,8 @@ public strictfp class Utility
 		//Which direction are they separated?
 		ProjectionVector collideVec0 = se.depth(startStad, startTime);
 		if (collideVec0.magnitude == 0) return 0;
-		double xDisp = collideVec0.xnorm*collideVec0.magnitude;
-		double yDisp = collideVec0.ynorm*collideVec0.magnitude;
+		double xDisp = collideVec0.xComp();
+		double yDisp = collideVec0.yComp();
 		return -(DXdiff*xDisp+DYdiff*yDisp)/FastMath.hypot(xDisp, yDisp);
 	}
 

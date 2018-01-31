@@ -111,6 +111,8 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return getPreviousStadium().getStartx();
+		if (time == 1) return getCurrentStadium().getStartx();
 		return (1-time)*getPreviousStadium().getStartx() +
 				(time)*getCurrentStadium().getStartx();
 	}
@@ -119,6 +121,8 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return getPreviousStadium().getEndx();
+		if (time == 1) return getCurrentStadium().getEndx();
 		return (1-time)*getPreviousStadium().getEndx() +
 				(time)*getCurrentStadium().getEndx();
 	}
@@ -127,6 +131,8 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return getPreviousStadium().getStarty();
+		if (time == 1) return getCurrentStadium().getStarty();
 		return (1-time)*getPreviousStadium().getStarty() +
 				(time)*getCurrentStadium().getStarty();
 	}
@@ -135,6 +141,8 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return getPreviousStadium().getEndy();
+		if (time == 1) return getCurrentStadium().getEndy();
 		return (1-time)*getPreviousStadium().getEndy() +
 				(time)*getCurrentStadium().getEndy();
 	}
@@ -143,6 +151,8 @@ public strictfp class CollisionBox extends StageElement
 	{
 		if (coordinatesDirty)
 			computeNewPositions();
+		if (time == 0) return getPreviousStadium().getRadius();
+		if (time == 1) return getCurrentStadium().getRadius();
 		return (1-time)*getPreviousStadium().getRadius() +
 				(time)*getCurrentStadium().getRadius();
 	}

@@ -50,6 +50,16 @@ public class ProjectionVector
 		}
 		else return false;
 	}
+	
+	public double xComp()
+	{
+		return xnorm*magnitude;
+	}
+	
+	public double yComp()
+	{
+		return ynorm*magnitude;
+	}
 
 	@Override
 	public int hashCode()

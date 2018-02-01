@@ -24,20 +24,20 @@ import com.tussle.collision.*;
 import com.tussle.main.Components;
 import com.tussle.main.Utility;
 import com.tussle.postprocess.PostprocessSystem;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.map.LazyMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Created by eaglgenes101 on 6/7/17.
  */
 public strictfp class CollisionSystem extends IteratingSystem
 {
-	public static final double COLLISION_PIXEL_STEP = 8;
+	public static final double PIXEL_STEP = 1;
 	
 	//Entity families
 	Family surfaceFamily = Family.all(PositionComponent.class,
@@ -170,15 +170,6 @@ public strictfp class CollisionSystem extends IteratingSystem
 	{
 		if (fores.isEmpty()) return null;
 		
-		//Compute afts
-		CollisionMap afts = new CollisionMap();
-		for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
-		{
-			CollisionBox c = foreEntry.getKey().getLeft();
-			StageElement s = foreEntry.getKey().getRight();
-			afts.put(c, s, s.depth(afterBoxes.get(c), end));
-		}
-		
 		//Split the given surfaces into two groups: those which are not worth timestep subdividing,
 		//and those which are
 		Predicate<Pair<CollisionBox, StageElement>> splitHeuristic =
@@ -187,9 +178,26 @@ public strictfp class CollisionSystem extends IteratingSystem
 			CollisionBox c = m.getLeft();
 			StageElement s = m.getRight();
 			double spd = Utility.speedDifference(s, beforeBoxes.get(c), afterBoxes.get(c), start, end);
-			return !Utility.projectionsClose(fores.get(c, s), afts.get(c, s)) &&
-			       spd*(end-start) >= COLLISION_PIXEL_STEP;
+			return spd*(end-start) >= PIXEL_STEP; //Add optimization heuristics when I finally get correct results
 		};
+		
+		//if (fores.keySet().parallelStream().anyMatch(splitHeuristic))
+		/*
+		boolean doSplit = false;
+		for (Pair<CollisionBox, StageElement> foreKey : fores.keySet())
+		{
+			if (splitHeuristic.evaluate(foreKey))
+			{
+				doSplit = true;
+				break;
+			}
+		}
+		
+		if (doSplit)
+		{
+		
+		}
+		*/
 		
 		//Populate firstHalves, for suitable entries
 		//TODO: Figure out how to use a predicated map view instead of copying entries
@@ -197,13 +205,17 @@ public strictfp class CollisionSystem extends IteratingSystem
 		CollisionMap wholeAfts = new CollisionMap();
 		for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
 		{
-			if (splitHeuristic.evaluate(foreEntry.getKey()))
+			if (splitHeuristic.test(foreEntry.getKey()))
 				firstHalves.put(foreEntry.getKey(), foreEntry.getValue());
 			else
-				wholeAfts.put(foreEntry.getKey(), afts.get(foreEntry.getKey()));
+				wholeAfts.put(foreEntry.getKey(),
+				              foreEntry.getKey().getRight().depth(
+				              		afterBoxes.get(foreEntry.getKey().getLeft()), end
+				              )
+				);
 		}
 		
-		//Set these right up
+		//Set this up
 		CollisionTriad latestHit = null;
 		
 		//First, run everything over the firstHalves
@@ -243,7 +255,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			{
 				CollisionBox c = halfEntry.getKey().getLeft();
 				StageElement s = halfEntry.getKey().getRight();
-				secondHalves.put(c, s, s.depth(postAfterBoxes.get(c), end));
+				secondHalves.put(c, s, s.depth(postMiddleBoxes.get(c), avg));
 			}
 			CollisionTriad secondHalfHit = ecbHit(avg, end, postMiddleBoxes, postAfterBoxes, secondHalves);
 			if (secondHalfHit != null)
@@ -256,9 +268,12 @@ public strictfp class CollisionSystem extends IteratingSystem
 				{
 					double xSum = latestHit.vector.xComp() + secondHalfHit.vector.xComp();
 					double ySum = latestHit.vector.yComp() + secondHalfHit.vector.yComp();
-					latestHit = secondHalfHit;
+					latestHit.box = secondHalfHit.getBox();
+					latestHit.surface = secondHalfHit.getSurface();
 					if (xSum == 0 && ySum == 0)
 					{
+						latestHit.vector.xnorm = secondHalfHit.vector.xnorm;
+						latestHit.vector.ynorm = secondHalfHit.vector.ynorm;
 						latestHit.vector.magnitude = 0;
 					}
 					else
@@ -295,5 +310,21 @@ public strictfp class CollisionSystem extends IteratingSystem
 		
 		//Combine our three subresults to get our final result
 		return latestHit;
+	}
+	
+	public ProjectionVector singleSurfaceHit(double start, double end, Stadium startStad, Stadium endStad,
+	                                       StageElement stageElement)
+	{
+		//First, get the whole-step answer
+		ProjectionVector beforeProj = stageElement.depth(startStad, start);
+		ProjectionVector afterProj = stageElement.depth(endStad, end);
+		
+		if (Utility.speedDifference(stageElement, startStad, endStad, start, end)*(end-start) < PIXEL_STEP ||
+				(Utility.projectionsClose(beforeProj, afterProj) &&
+				 stageElement.collides(startStad, start) == stageElement.collides(endStad, end)))
+		{
+		
+		}
+		return null; //Stub
 	}
 }

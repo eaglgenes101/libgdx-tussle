@@ -22,6 +22,7 @@ package com.tussle.collision;
  */
 public class ProjectionVector
 {
+	//TODO: Turn into a flyweight object
 	protected double xnorm;
 	protected double ynorm;
 	protected double magnitude;

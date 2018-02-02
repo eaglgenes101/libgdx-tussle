@@ -38,6 +38,7 @@ public class IntersectorTest
 		assertEquals(d2SegmentPoint(-1, 0, 1, 0, 0, 0), 0, FP_TOLERANCE);
 		assertEquals(d2SegmentPoint(-1, 1, 1, -1, 1, 1), 2, FP_TOLERANCE);
 		assertEquals(d2SegmentPoint(-1, -1, 1, 1, 2, 0), 2, FP_TOLERANCE);
+		assertEquals(d2SegmentPoint(0, 0, 0, 0, 1, 1), 2, FP_TOLERANCE);
 	}
 
 	@Test
@@ -47,6 +48,9 @@ public class IntersectorTest
 		assertEquals(partSegmentPoint(-1, 0, 1, 0, 0, 0), .5, FP_TOLERANCE);
 		assertEquals(partSegmentPoint(-1, 1, 1, -1, 1, 1), .5, FP_TOLERANCE);
 		assertEquals(partSegmentPoint(-1, -1, 1, 1, 2, 0), 1, FP_TOLERANCE);
+		assertEquals(partSegmentPoint(-1, -1, 1, 1, -2, -2), 0, FP_TOLERANCE);
+		assertEquals(partSegmentPoint(-1, -1, 1, 1, 2, 2), 1, FP_TOLERANCE);
+		assertEquals(partSegmentPoint(0, 0, 0, 0, 1, 1), .5, FP_TOLERANCE);
 	}
 
 	@Test

@@ -198,30 +198,22 @@ public strictfp class Intersector
 			if ((a < b) && ((a < c && a <= d) || (a == c && a == d)))
 			{
 				ProjectionVector v = dispSegmentPoint(x3, y3, x4, y4, x1, y1);
-				v.xnorm *= -1;
-				v.ynorm *= -1;
-				v.magnitude *= -1;
-				return v;
+				return new ProjectionVector(-v.xNorm(), -v.yNorm(), -v.magnitude());
 			}
 			else if ((b < c) && ((b < d && b <= a) || (b == d && b == a)))
 			{
 				ProjectionVector v = dispSegmentPoint(x3, y3, x4, y4, x2, y2);
-				v.xnorm *= -1;
-				v.ynorm *= -1;
-				v.magnitude *= -1;
-				return v;
+				return new ProjectionVector(-v.xNorm(), -v.yNorm(), -v.magnitude());
 			}
 			else if ((c < d) && ((c < a && c <= b) || (c == a && c == b)))
 			{
 				ProjectionVector v = dispSegmentPoint(x1, y1, x2, y2, x3, y3);
-				v.magnitude *= -1;
-				return v;
+				return new ProjectionVector(v.xNorm(), v.yNorm(), -v.magnitude());
 			}
 			else
 			{
 				ProjectionVector v = dispSegmentPoint(x1, y1, x2, y2, x4, y4);
-				v.magnitude *= -1;
-				return v;
+				return new ProjectionVector(v.xNorm(), v.yNorm(), -v.magnitude());
 			}
 		}
 		else
@@ -230,16 +222,12 @@ public strictfp class Intersector
 			if ((a < b) && ((a < c && a <= d) || (a == c && a == d)))
 			{
 				ProjectionVector v = dispSegmentPoint(x3, y3, x4, y4, x1, y1);
-				v.xnorm *= -1;
-				v.ynorm *= -1;
-				return v;
+				return new ProjectionVector(-v.xNorm(), -v.yNorm(), v.magnitude());
 			}
 			else if ((b < c) && ((b < d && b <= a) || (b == d && b == a)))
 			{
 				ProjectionVector v = dispSegmentPoint(x3, y3, x4, y4, x2, y2);
-				v.xnorm *= -1;
-				v.ynorm *= -1;
-				return v;
+				return new ProjectionVector(-v.xNorm(), -v.yNorm(), v.magnitude());
 			}
 			else if ((c < d) && ((c < a && c <= b) || (c == a && c == b)))
 				return dispSegmentPoint(x1, y1, x2, y2, x3, y3);

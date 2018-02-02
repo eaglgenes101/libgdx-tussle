@@ -56,15 +56,15 @@ public class IntersectorTest
 		ProjectionVector p1 = dispSegmentPoint(-1, -1, 1, 1, 0, 0);
 		ProjectionVector p2 = dispSegmentPoint(-1, -1, 1, 1, -1, 1);
 		ProjectionVector p3 = dispSegmentPoint(-1, -1, 1, 1, 0, 3);
-		assertEquals(p1.xnorm, .7071, FP_TOLERANCE);
-		assertEquals(p1.ynorm, -.7071, FP_TOLERANCE);
-		assertEquals(p1.magnitude, 0, FP_TOLERANCE);
-		assertEquals(p2.xnorm, .7071, FP_TOLERANCE);
-		assertEquals(p2.ynorm, -.7071, FP_TOLERANCE);
-		assertEquals(p2.magnitude, 1.4142, FP_TOLERANCE);
-		assertEquals(p3.xnorm, .4472, FP_TOLERANCE);
-		assertEquals(p3.ynorm, -.8944, FP_TOLERANCE);
-		assertEquals(p3.magnitude, 2.2361, FP_TOLERANCE);
+		assertEquals(p1.xNorm(), .7071, FP_TOLERANCE);
+		assertEquals(p1.yNorm(), -.7071, FP_TOLERANCE);
+		assertEquals(p1.magnitude(), 0, FP_TOLERANCE);
+		assertEquals(p2.xNorm(), .7071, FP_TOLERANCE);
+		assertEquals(p2.yNorm(), -.7071, FP_TOLERANCE);
+		assertEquals(p2.magnitude(), 1.4142, FP_TOLERANCE);
+		assertEquals(p3.xNorm(), .4472, FP_TOLERANCE);
+		assertEquals(p3.yNorm(), -.8944, FP_TOLERANCE);
+		assertEquals(p3.magnitude(), 2.2361, FP_TOLERANCE);
 	}
 
 	@Test
@@ -105,15 +105,15 @@ public class IntersectorTest
 		ProjectionVector p1 = displacementSegments(-1, -1, 1, 1, -1, 0, 0, 1);
 		ProjectionVector p2 = displacementSegments(-1, -1, 1, 1, 2, 2, 3, 3);
 		ProjectionVector p3 = displacementSegments(-1, -1, 1, 1, -2, -1, -1, -2);
-		assertEquals(p1.xnorm, .7071, FP_TOLERANCE);
-		assertEquals(p1.ynorm, -.7071, FP_TOLERANCE);
-		assertEquals(p1.magnitude, .7071, FP_TOLERANCE);
-		assertEquals(p2.xnorm, -.7071, FP_TOLERANCE);
-		assertEquals(p2.ynorm, -.7071, FP_TOLERANCE);
-		assertEquals(p2.magnitude, 1.4142, FP_TOLERANCE);
-		assertEquals(p3.xnorm, .7071, FP_TOLERANCE);
-		assertEquals(p3.ynorm, .7071, FP_TOLERANCE);
-		assertEquals(p3.magnitude, .7071, FP_TOLERANCE);
+		assertEquals(p1.xNorm(), .7071, FP_TOLERANCE);
+		assertEquals(p1.yNorm(), -.7071, FP_TOLERANCE);
+		assertEquals(p1.magnitude(), .7071, FP_TOLERANCE);
+		assertEquals(p2.xNorm(), -.7071, FP_TOLERANCE);
+		assertEquals(p2.yNorm(), -.7071, FP_TOLERANCE);
+		assertEquals(p2.magnitude(), 1.4142, FP_TOLERANCE);
+		assertEquals(p3.xNorm(), .7071, FP_TOLERANCE);
+		assertEquals(p3.yNorm(), .7071, FP_TOLERANCE);
+		assertEquals(p3.magnitude(), .7071, FP_TOLERANCE);
 	}
 
 }

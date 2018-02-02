@@ -87,6 +87,9 @@ public strictfp class CollisionSystem extends IteratingSystem
 		//Now find the hit stage element corresponding to the largest disp
 		CollisionTriad hit = ecbHit(0, 1, beforeStads, afterStads, minVectors);
 		
+		//Position to move to
+		final double finalX;
+		final double finalY;
 		//After all this, operate collision effects
 		if (hit != null)
 		{
@@ -94,14 +97,13 @@ public strictfp class CollisionSystem extends IteratingSystem
 			if (Components.velocityMapper.has(entity))
 			{
 				Stadium finalStad = new Stadium(hit.getBox().getCurrentStadium());
-				finalStad.displace(hit.getVector().xComp(),
-				                    hit.getVector().yComp());
+				finalStad.displace(hit.getVector().xComp(), hit.getVector().yComp());
 				ProjectionVector surfNorm = hit.getSurface().depth(finalStad, 1);
 				double[] surfVel = hit.getSurface().instantVelocity(finalStad, 1);
 				
 				double diffX = Components.velocityMapper.get(entity).xVel - surfVel[0];
 				double diffY = Components.velocityMapper.get(entity).yVel - surfVel[1];
-				if (diffX * surfNorm.xnorm + diffY * surfNorm.ynorm <= 0)
+				if (diffX * surfNorm.xNorm() + diffY * surfNorm.yNorm() <= 0)
 				{
 					getEngine().getSystem(PostprocessSystem.class).add(
 							entity,
@@ -111,20 +113,27 @@ public strictfp class CollisionSystem extends IteratingSystem
 								              hit.getVector().yComp());
 							}
 					);
+					finalX = Components.positionMapper.get(entity).x+hit.getVector().xComp();
+					finalY = Components.positionMapper.get(entity).y+hit.getVector().yComp();
 				}
-				if (diffX * surfNorm.xnorm + diffY * surfNorm.ynorm < 0)
+				else
+				{
+					finalX = Components.positionMapper.get(entity).x;
+					finalY = Components.positionMapper.get(entity).y;
+				}
+				if (diffX * surfNorm.xNorm() + diffY * surfNorm.yNorm() < 0)
 				{
 					final double elasticity;
 					if (Components.elasticityMapper.has(entity))
 					{
-						if (surfNorm.ynorm > FastMath.abs(surfNorm.xnorm))
+						if (surfNorm.yNorm() > FastMath.abs(surfNorm.xNorm()))
 							elasticity = Components.elasticityMapper.get(entity).getGroundElasticity();
 						else elasticity = Components.elasticityMapper.get(entity).getWallElasticity();
 					}
 					else
 						elasticity = 0;
 					//Get vector projection and rejection
-					final double[] projection = Utility.projection(diffX, diffY, surfNorm.xnorm, surfNorm.ynorm);
+					final double[] projection = Utility.projection(diffX, diffY, surfNorm.xNorm(), surfNorm.yNorm());
 					
 					getEngine().getSystem(PostprocessSystem.class).add(
 							entity,
@@ -146,7 +155,14 @@ public strictfp class CollisionSystem extends IteratingSystem
 							              hit.getVector().yComp());
 						}
 				);
+				finalX = Components.positionMapper.get(entity).x+hit.getVector().xComp();
+				finalY = Components.positionMapper.get(entity).y+hit.getVector().yComp();
 			}
+		}
+		else
+		{
+			finalX = Components.positionMapper.get(entity).x;
+			finalY = Components.positionMapper.get(entity).y;
 		}
 		
 		getEngine().getSystem(PostprocessSystem.class).add(
@@ -155,14 +171,15 @@ public strictfp class CollisionSystem extends IteratingSystem
 				(comp) -> {
 					for (CollisionBox c : comp.getCollisionBoxes())
 					{
-						c.setPosition(Components.positionMapper.get(entity).x,
-						              Components.positionMapper.get(entity).y);
+						c.setPosition(finalX, finalY);
 						c.setAreas();
 					}
 				}
 		);
 	}
 	
+	//TODO: Instead of "strongest wins", combine the different displacement
+	//vectors intelligently
 	public CollisionTriad ecbHit(double start, double end,
 	                             Map<CollisionBox, Stadium> beforeBoxes,
 	                             Map<CollisionBox, Stadium> afterBoxes,
@@ -181,62 +198,25 @@ public strictfp class CollisionSystem extends IteratingSystem
 			return spd*(end-start) >= PIXEL_STEP; //Add optimization heuristics when I finally get correct results
 		};
 		
-		//if (fores.keySet().parallelStream().anyMatch(splitHeuristic))
-		/*
-		boolean doSplit = false;
-		for (Pair<CollisionBox, StageElement> foreKey : fores.keySet())
+		if (fores.keySet().stream().anyMatch(splitHeuristic))
 		{
-			if (splitHeuristic.evaluate(foreKey))
-			{
-				doSplit = true;
-				break;
-			}
-		}
-		
-		if (doSplit)
-		{
-		
-		}
-		*/
-		
-		//Populate firstHalves, for suitable entries
-		//TODO: Figure out how to use a predicated map view instead of copying entries
-		CollisionMap firstHalves = new CollisionMap();
-		CollisionMap wholeAfts = new CollisionMap();
-		for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
-		{
-			if (splitHeuristic.test(foreEntry.getKey()))
-				firstHalves.put(foreEntry.getKey(), foreEntry.getValue());
-			else
-				wholeAfts.put(foreEntry.getKey(),
-				              foreEntry.getKey().getRight().depth(
-				              		afterBoxes.get(foreEntry.getKey().getLeft()), end
-				              )
-				);
-		}
-		
-		//Set this up
-		CollisionTriad latestHit = null;
-		
-		//First, run everything over the firstHalves
-		if (!firstHalves.isEmpty())
-		{
-			double avg = (start + end) / 2;
+			//Split in half, and run
+			double avg = (start+end)/2;
 			Map<CollisionBox, Stadium> middleBoxes = LazyMap.lazyMap(
 					new HashMap<>(),
 					(CollisionBox c) -> Utility.middleStad(beforeBoxes.get(c), afterBoxes.get(c))
 			);
-			CollisionTriad firstHit = ecbHit(start, avg, beforeBoxes, middleBoxes, firstHalves);
+			CollisionTriad latestHit = ecbHit(start, avg, beforeBoxes, middleBoxes, fores);
+			
 			Map<CollisionBox, Stadium> postMiddleBoxes;
 			Map<CollisionBox, Stadium> postAfterBoxes;
-			if (firstHit != null)
+			if (latestHit != null)
 			{
-				latestHit = firstHit;
-				double xDisp = firstHit.getVector().xComp();
-				double yDisp = firstHit.getVector().yComp();
+				double xDisp = latestHit.getVector().xComp();
+				double yDisp = latestHit.getVector().yComp();
 				postMiddleBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(CollisionBox c) -> middleBoxes.get(c).displace(xDisp, yDisp)
+						(CollisionBox c) -> new Stadium(middleBoxes.get(c)).displace(xDisp, yDisp)
 				);
 				postAfterBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
@@ -250,14 +230,14 @@ public strictfp class CollisionSystem extends IteratingSystem
 			}
 			
 			//Populate a new collision map for the second half
-			CollisionMap secondHalves = new CollisionMap();
-			for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> halfEntry : firstHalves.entrySet())
+			CollisionMap mids = new CollisionMap();
+			for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
 			{
-				CollisionBox c = halfEntry.getKey().getLeft();
-				StageElement s = halfEntry.getKey().getRight();
-				secondHalves.put(c, s, s.depth(postMiddleBoxes.get(c), avg));
+				CollisionBox c = foreEntry.getKey().getLeft();
+				StageElement s = foreEntry.getKey().getRight();
+				mids.put(c, s, s.depth(postMiddleBoxes.get(c), avg));
 			}
-			CollisionTriad secondHalfHit = ecbHit(avg, end, postMiddleBoxes, postAfterBoxes, secondHalves);
+			CollisionTriad secondHalfHit = ecbHit(avg, end, postMiddleBoxes, postAfterBoxes, mids);
 			if (secondHalfHit != null)
 			{
 				if (latestHit == null)
@@ -272,59 +252,50 @@ public strictfp class CollisionSystem extends IteratingSystem
 					latestHit.surface = secondHalfHit.getSurface();
 					if (xSum == 0 && ySum == 0)
 					{
-						latestHit.vector.xnorm = secondHalfHit.vector.xnorm;
-						latestHit.vector.ynorm = secondHalfHit.vector.ynorm;
-						latestHit.vector.magnitude = 0;
+						latestHit.vector = new ProjectionVector(
+								secondHalfHit.vector.xNorm(),
+								secondHalfHit.vector.yNorm(),
+								0
+						);
 					}
 					else
 					{
 						double magSum = FastMath.hypot(xSum, ySum);
-						latestHit.vector.xnorm = xSum/magSum;
-						latestHit.vector.ynorm = ySum/magSum;
-						latestHit.vector.magnitude = magSum;
+						latestHit.vector = new ProjectionVector(
+								xSum/magSum,
+								ySum/magSum,
+								magSum
+						);
 					}
 					
 				}
 			}
+			return latestHit;
 		}
-		
-		//Then join back with the wholeSteps to get the second half entries
-		for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> wholeEntry : wholeAfts.entrySet())
+		else
 		{
-			CollisionBox c = wholeEntry.getKey().getLeft();
-			StageElement s = wholeEntry.getKey().getRight();
-			if (s.collides(afterBoxes.get(c), end))
+			//Take the whole step at once
+			CollisionTriad latestHit = null;
+			for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
 			{
-				if (latestHit == null)
+				CollisionBox c = foreEntry.getKey().getLeft();
+				StageElement s = foreEntry.getKey().getRight();
+				if (s.collides(afterBoxes.get(c), end))
 				{
-					latestHit = new CollisionTriad(c, s, wholeEntry.getValue());
-				}
-				else if (latestHit.getVector().magnitude < wholeEntry.getValue().magnitude)
-				{
-					latestHit.box = c;
-					latestHit.surface = s;
-					latestHit.vector = wholeEntry.getValue();
+					ProjectionVector depth = s.depth(afterBoxes.get(c), end);
+					if (latestHit == null)
+					{
+						latestHit = new CollisionTriad(c, s, depth);
+					}
+					else if (latestHit.getVector().magnitude() < depth.magnitude())
+					{
+						latestHit.box = c;
+						latestHit.surface = s;
+						latestHit.vector = depth;
+					}
 				}
 			}
+			return latestHit;
 		}
-		
-		//Combine our three subresults to get our final result
-		return latestHit;
-	}
-	
-	public ProjectionVector singleSurfaceHit(double start, double end, Stadium startStad, Stadium endStad,
-	                                       StageElement stageElement)
-	{
-		//First, get the whole-step answer
-		ProjectionVector beforeProj = stageElement.depth(startStad, start);
-		ProjectionVector afterProj = stageElement.depth(endStad, end);
-		
-		if (Utility.speedDifference(stageElement, startStad, endStad, start, end)*(end-start) < PIXEL_STEP ||
-				(Utility.projectionsClose(beforeProj, afterProj) &&
-				 stageElement.collides(startStad, start) == stageElement.collides(endStad, end)))
-		{
-		
-		}
-		return null; //Stub
 	}
 }

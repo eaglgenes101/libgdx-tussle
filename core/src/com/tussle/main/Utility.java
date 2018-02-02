@@ -137,10 +137,10 @@ public strictfp class Utility
 		Iterator<ProjectionVector> i = vectors.iterator();
 		ProjectionVector p0 = i.next();
 		ProjectionVector p1 = i.next();
-		double cos0 = p0.xnorm;
-		double sin0 = p0.ynorm;
-		double cos1 = p1.xnorm;
-		double sin1 = p1.ynorm;
+		double cos0 = p0.xNorm();
+		double sin0 = p0.yNorm();
+		double cos1 = p1.xNorm();
+		double sin1 = p1.yNorm();
 		//zeroth on the right, first on the left
 		if (cos0 * sin1 < cos1 * sin0)
 		{
@@ -154,8 +154,8 @@ public strictfp class Utility
 		while (i.hasNext())
 		{
 			ProjectionVector next = i.next();
-			double nextcos = next.xnorm;
-			double nextsin = next.ynorm;
+			double nextcos = next.xNorm();
+			double nextsin = next.yNorm();
 			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
 			{
 				//Case 0: Within cross product bounds
@@ -184,7 +184,7 @@ public strictfp class Utility
 	public static Collection<ProjectionVector> prunedProjections(Collection<ProjectionVector> vectors)
 	{
 		SortedSet<ProjectionVector> sortedVectors = new ConcurrentSkipListSet<>(
-		        Comparator.comparingDouble((ProjectionVector p)-> -p.magnitude));
+		        Comparator.comparingDouble((ProjectionVector p)-> -p.magnitude()));
 		sortedVectors.addAll(vectors);
 		if (isPruned(sortedVectors))
 			return sortedVectors;
@@ -192,10 +192,10 @@ public strictfp class Utility
 		Iterator<ProjectionVector> i = sortedVectors.iterator();
 		ProjectionVector p0 = i.next();
 		ProjectionVector p1 = i.next();
-		double cos0 = p0.xnorm;
-		double sin0 = p0.ynorm;
-		double cos1 = p1.xnorm;
-		double sin1 = p1.ynorm;
+		double cos0 = p0.xNorm();
+		double sin0 = p0.yNorm();
+		double cos1 = p1.xNorm();
+		double sin1 = p1.yNorm();
 		//zeroth on the right, first on the left
 		if (cos0 * sin1 < cos1 * sin0)
 		{
@@ -209,8 +209,8 @@ public strictfp class Utility
 		while (i.hasNext())
 		{
 			ProjectionVector next = i.next();
-			double nextcos = next.xnorm;
-			double nextsin = next.ynorm;
+			double nextcos = next.xNorm();
+			double nextsin = next.yNorm();
 			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
 			{
 				//Case 0: Within cross product bounds
@@ -230,7 +230,7 @@ public strictfp class Utility
 			else
 			{
 				//Case 3: Opposite side, immediately return false
-				reduceMagnitude = next.magnitude;
+				reduceMagnitude = next.magnitude();
 				break;
 			}
 		}
@@ -241,10 +241,10 @@ public strictfp class Utility
 			for (Iterator<ProjectionVector> j = sortedVectors.iterator(); j.hasNext();)
 			{
 				ProjectionVector vec = j.next();
-				if (vec.magnitude <= reduceMagnitude)
+				if (vec.magnitude() <= reduceMagnitude)
 					j.remove();
 				else
-					vec.magnitude -= reduceMagnitude;
+					vec = new ProjectionVector(vec.xNorm(), vec.yNorm(), vec.magnitude()-reduceMagnitude);
 			}
 		}
 		return sortedVectors;
@@ -260,10 +260,10 @@ public strictfp class Utility
 		ProjectionVector p0 = i.next();
 		ProjectionVector p1 = i.next();
 		//Get bordering unit vectors
-		double cos0 = p0.xnorm;
-		double sin0 = p0.ynorm;
-		double cos1 = p1.xnorm;
-		double sin1 = p1.ynorm;
+		double cos0 = p0.xNorm();
+		double sin0 = p0.yNorm();
+		double cos1 = p1.xNorm();
+		double sin1 = p1.yNorm();
 		//zeroth on the right, first on the left
 		if (cos0 * sin1 < cos1 * sin0)
 		{
@@ -277,8 +277,8 @@ public strictfp class Utility
 		while (i.hasNext())
 		{
 			ProjectionVector next = i.next();
-			double nextcos = next.xnorm;
-			double nextsin = next.ynorm;
+			double nextcos = next.xNorm();
+			double nextsin = next.yNorm();
 			if (nextcos*sin0 >= cos0*nextsin && cos1*nextsin >= nextcos*sin1)
 			{
 				//Case 0: Within cross product bounds
@@ -363,8 +363,8 @@ public strictfp class Utility
 
 	public static boolean projectionsClose(ProjectionVector p1, ProjectionVector p2)
 	{
-		return (p1.xnorm*p2.xnorm+p1.ynorm*p2.ynorm > .8) &&
-			   (p2.magnitude-p1.magnitude <= 8);
+		return (p1.xNorm()*p2.xNorm()+p1.yNorm()*p2.yNorm() > .8) &&
+			   (p2.magnitude()-p1.magnitude() <= 8);
 	}
 
 	public static double speedDifference(StageElement se,
@@ -373,8 +373,8 @@ public strictfp class Utility
 		double time = endTime-startTime;
 		if (time == 0) return Double.NaN;
 
-		double[] stageVelocity = se.instantVelocity(endStad, time);
-		double ecbPortion = se.stadiumPortion(endStad, time);
+		double[] stageVelocity = se.instantVelocity(endStad, endTime);
+		double ecbPortion = se.stadiumPortion(endStad, endTime);
 		double partDX = ((1-ecbPortion)*(endStad.getStartx() - startStad.getStartx())
 		                + ecbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
 		double partDY = ((1-ecbPortion)*(endStad.getStarty() - startStad.getStarty())
@@ -383,10 +383,13 @@ public strictfp class Utility
 		double DYdiff = partDY-stageVelocity[1];
 		//Which direction are they separated?
 		ProjectionVector collideVec0 = se.depth(startStad, startTime);
-		if (collideVec0.magnitude == 0) return 0;
+		//if (collideVec0.magnitude == 0) return 0;
+		/*
 		double xDisp = collideVec0.xComp();
 		double yDisp = collideVec0.yComp();
 		return -(DXdiff*xDisp+DYdiff*yDisp)/FastMath.hypot(xDisp, yDisp);
+		*/
+		return (DXdiff*collideVec0.xNorm()+DYdiff*collideVec0.yNorm());
 	}
 
 	public static Stadium middleStad(Stadium s1, Stadium s2)

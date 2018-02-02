@@ -22,9 +22,9 @@ package com.tussle.collision;
  */
 public class ProjectionVector
 {
-	public double xnorm;
-	public double ynorm;
-	public double magnitude;
+	protected double xnorm;
+	protected double ynorm;
+	protected double magnitude;
 
 	public ProjectionVector(double x, double y, double dist)
 	{
@@ -59,6 +59,21 @@ public class ProjectionVector
 	public double yComp()
 	{
 		return ynorm*magnitude;
+	}
+	
+	public double xNorm()
+	{
+		return xnorm;
+	}
+	
+	public double yNorm()
+	{
+		return ynorm;
+	}
+	
+	public double magnitude()
+	{
+		return magnitude;
 	}
 
 	@Override

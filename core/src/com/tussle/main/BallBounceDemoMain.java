@@ -59,14 +59,14 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		);
 		ball0.getComponent(ScriptContextComponent.class).addStatusEffect(dummyStatus0);
 		ball0.getComponent(PositionComponent.class).setPosition(100, 0);
-		ball0.getComponent(VelocityComponent.class).setVelocity(1, -4);
+		ball0.getComponent(VelocityComponent.class).setVelocity(4, -4);
 		ball0.getComponent(ECBComponent.class).put(dummyStatus0 , new CollisionBox(0, 0, 0, 0, 32));
-		ball0.getComponent(ElasticityComponent.class).wallElasticity = .9;
-		ball0.getComponent(ElasticityComponent.class).groundElasticity = .9;
+		ball0.getComponent(ElasticityComponent.class).wallElasticity = 1.5;
+		ball0.getComponent(ElasticityComponent.class).groundElasticity = 1.5;
 		ball0.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
 		ball0.getComponent(StageElementComponent.class).put(dummyStatus0, new StageCircle(0, 0, 32));
 
-
+		/*
 		ball1 = engine.createEntity();
 		ball1.add(engine.createComponent(PositionComponent.class));
 		ball1.add(engine.createComponent(VelocityComponent.class));
@@ -87,7 +87,8 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		ball1.getComponent(ElasticityComponent.class).groundElasticity = .9;
 		ball1.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
 		ball1.getComponent(StageElementComponent.class).put(dummyStatus1, new StageCircle(0, 0, 32));
-
+		*/
+		
 		cage = engine.createEntity();
 		cage.add(engine.createComponent(PositionComponent.class));
 		cage.add(engine.createComponent(StageElementComponent.class));
@@ -107,7 +108,7 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(320, 240, 320, -240));
 
 		engine.addEntity(ball0);
-		engine.addEntity(ball1);
+		//engine.addEntity(ball1);
 		engine.addEntity(cage);
 	}
 

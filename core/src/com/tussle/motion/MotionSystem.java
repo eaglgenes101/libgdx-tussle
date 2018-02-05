@@ -20,8 +20,6 @@ package com.tussle.motion;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.tussle.collision.CollisionBox;
-import com.tussle.collision.ECBComponent;
 import com.tussle.collision.StageElement;
 import com.tussle.collision.StageElementComponent;
 import com.tussle.main.Components;
@@ -56,17 +54,6 @@ public class MotionSystem extends IteratingSystem
 					{
 						se.setBeforePos(xPos, yPos);
 						se.setAfterPos(xPos+xVel, yPos+yVel);
-					}
-				}
-		);
-		getEngine().getSystem(PostprocessSystem.class).add(
-				entity,
-				ECBComponent.class,
-				cl -> {
-					for (CollisionBox c : cl.getCollisionBoxes())
-					{
-						c.setBeforePos(xPos, yPos);
-						c.setAfterPos(xPos+xVel, yPos+yVel);
 					}
 				}
 		);

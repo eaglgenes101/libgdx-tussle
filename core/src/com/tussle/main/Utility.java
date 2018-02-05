@@ -372,24 +372,31 @@ public strictfp class Utility
 	{
 		double time = endTime-startTime;
 		if (time == 0) return Double.NaN;
-
-		double[] stageVelocity = se.instantVelocity(endStad, endTime);
-		double ecbPortion = se.stadiumPortion(endStad, endTime);
-		double partDX = ((1-ecbPortion)*(endStad.getStartx() - startStad.getStartx())
-		                + ecbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
-		double partDY = ((1-ecbPortion)*(endStad.getStarty() - startStad.getStarty())
-		                + ecbPortion*(endStad.getEndy() - startStad.getEndy()))/time;
-		double DXdiff = partDX-stageVelocity[0];
-		double DYdiff = partDY-stageVelocity[1];
+		
+		
+		double[] startStageVelocity = se.instantVelocity(startStad, startTime);
+		double startEcbPortion = se.stadiumPortion(startStad, startTime);
+		double startPartDX = ((1-startEcbPortion)*(endStad.getStartx() - startStad.getStartx())
+		                      + startEcbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
+		double startPartDY = ((1-startEcbPortion)*(endStad.getStarty() - startStad.getStarty())
+		                      + startEcbPortion*(endStad.getEndy() - startStad.getEndy()))/time;
+		double startDXDiff = startPartDX-startStageVelocity[0];
+		double startDYDiff = startPartDY-startStageVelocity[1];
+		
+		double[] endStageVelocity = se.instantVelocity(endStad, endTime);
+		double endEcbPortion = se.stadiumPortion(endStad, endTime);
+		double endPartDX = ((1-endEcbPortion)*(endStad.getStartx() - startStad.getStartx())
+		                + endEcbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
+		double endPartDY = ((1-endEcbPortion)*(endStad.getStarty() - startStad.getStarty())
+		                + endEcbPortion*(endStad.getEndy() - startStad.getEndy()))/time;
+		double endDXDiff = endPartDX-endStageVelocity[0];
+		double endDYDiff = endPartDY-endStageVelocity[1];
+		
 		//Which direction are they separated?
 		ProjectionVector collideVec0 = se.depth(startStad, startTime);
-		//if (collideVec0.magnitude == 0) return 0;
-		/*
-		double xDisp = collideVec0.xComp();
-		double yDisp = collideVec0.yComp();
-		return -(DXdiff*xDisp+DYdiff*yDisp)/FastMath.hypot(xDisp, yDisp);
-		*/
-		return (DXdiff*collideVec0.xNorm()+DYdiff*collideVec0.yNorm());
+		ProjectionVector collideVec1 = se.depth(endStad, endTime);
+		return FastMath.max(startDXDiff*collideVec0.xNorm()+startDYDiff*collideVec0.yNorm(),
+							endDXDiff*collideVec1.xNorm()+endDYDiff*collideVec1.yNorm());
 	}
 
 	public static Stadium middleStad(Stadium s1, Stadium s2)

@@ -61,8 +61,15 @@ public class MotionLog
 		}
 	}
 	
-	public void displace(double timeFrom, double xDisp, double yDisp)
+	public void displace(double timeFrom, double timeTo, double xDisp, double yDisp)
 	{
-	
+		//Create entries for timeFrom and timeTo if they don't already exist
+		if (timeFrom < 0 || timeFrom > 1 || timeTo < 0 || timeTo > 1)
+			throw new IllegalArgumentException();
+		
+		if (!base.containsKey(timeFrom))
+			base.put(timeFrom, interpolate(timeFrom));
+		if (!base.containsKey(timeTo))
+			base.put(timeTo, interpolate(timeTo));
 	}
 }

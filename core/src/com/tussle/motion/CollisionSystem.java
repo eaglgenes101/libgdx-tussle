@@ -275,27 +275,40 @@ public strictfp class CollisionSystem extends IteratingSystem
 		else
 		{
 			//Take the whole step at once
-			CollisionTriad latestHit = null;
-			for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
+			CollisionMap afts = new CollisionMap();
+			for (Pair<CollisionBox, StageElement> foreKey : fores.keySet())
 			{
-				CollisionBox c = foreEntry.getKey().getLeft();
-				StageElement s = foreEntry.getKey().getRight();
-				if (s.collides(afterBoxes.get(c), end))
+				if (foreKey.getRight().collides(beforeBoxes.get(foreKey.getLeft()), start) ||
+					foreKey.getRight().collides(afterBoxes.get(foreKey.getLeft()), end))
 				{
-					ProjectionVector depth = s.depth(afterBoxes.get(c), end);
-					if (latestHit == null)
-					{
-						latestHit = new CollisionTriad(c, s, depth);
-					}
-					else if (latestHit.getVector().magnitude() < depth.magnitude())
-					{
-						latestHit.box = c;
-						latestHit.surface = s;
-						latestHit.vector = depth;
-					}
+					afts.put(foreKey, foreKey.getRight().depth(afterBoxes.get(foreKey.getLeft()), end));
 				}
 			}
-			return latestHit;
+			ProjectionVector combinedVectors = Utility.combineProjections(
+					Utility.prunedProjections(afts.values())
+			);
+			if (combinedVectors != null)
+			{
+				double dotScore = Double.NEGATIVE_INFINITY;
+				CollisionBox highScoreBox = null;
+				StageElement highScoreElement = null;
+				for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
+				{
+					double candidateDotScore = viewEntry.getValue().xComp() * combinedVectors.xNorm() +
+					                           viewEntry.getValue().yComp() * combinedVectors.yNorm();
+					if (candidateDotScore > dotScore)
+					{
+						dotScore = candidateDotScore;
+						highScoreBox = viewEntry.getKey().getLeft();
+						highScoreElement = viewEntry.getKey().getRight();
+					}
+				}
+				if (dotScore > 0)
+					return new CollisionTriad(highScoreBox, highScoreElement, combinedVectors);
+				else
+					return null;
+			}
+			else return null;
 		}
 	}
 }

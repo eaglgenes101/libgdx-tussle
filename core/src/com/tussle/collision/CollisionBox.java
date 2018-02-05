@@ -26,135 +26,119 @@ import org.apache.commons.math3.util.FastMath;
  */
 public strictfp class CollisionBox extends StageElement
 {
-	private Stadium localArea;
-	private Stadium currentArea;
-	private Stadium previousArea;
-
-	public CollisionBox(Stadium base)
-	{
-		localArea = base;
-		currentArea = base;
-		previousArea = base;
-	}
+	private double localx0, localy0, localx1, localy1, localrad;
+	private double beforex0, beforey0, beforex1, beforey1, beforerad;
+	private double afterx0, aftery0, afterx1, aftery1, afterrad;
 	
 	public CollisionBox(double startx, double starty, double endx, double endy, double radius)
 	{
-		localArea = new Stadium(startx, starty, endx, endy, radius);
-		currentArea = new Stadium(localArea);
-		previousArea = new Stadium(localArea);
+		super();
+		localx0 = startx; localy0 = starty; localx1 = endx; localy1 = endy; localrad = radius;
 	}
 	
 	public CollisionBox(CollisionBox base)
 	{
-		this.localArea = new Stadium(base.localArea);
-		this.currentArea = new Stadium(base.currentArea);
-		this.previousArea = new Stadium(base.previousArea);
+		super(base);
+		localx0 = base.localx0; localy0 = base.localy0;
+		localx1 = base.localx1; localy1 = base.localy1; localrad = base.localrad;
 	}
 
-	public Stadium getCurrentStadium()
+	public Stadium getAfterStadium()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return currentArea;
+		if (aftDirty) computeNewAfterPositions();
+		return new Stadium(afterx0, aftery0, afterx1, aftery1, afterrad);
 	}
 
-	public Stadium getPreviousStadium()
+	public Stadium getBeforeStadium()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return previousArea;
+		if (befDirty) computeNewBeforePositions();
+		return new Stadium(beforex0, beforey0, beforex1, beforey1, beforerad);
 	}
-
-	public void setAreas()
+	
+	public void computeNewBeforePositions()
 	{
-		previousArea.set(currentArea);
-	}
-
-	public void computeNewPositions()
-	{
-		double sx = localArea.startx - originX;
-		double sy = localArea.starty - originY;
-		double ex = localArea.endx - originX;
-		double ey = localArea.endy - originY;
-		double rad = FastMath.abs(localArea.radius*scale);
-		sx *= flipped?-scale:scale;
-		sy *= scale;
-		ex *= flipped?-scale:scale;
-		ey *= scale;
-		double cos = FastMath.cos(FastMath.toRadians(rotation));
-		double sin = FastMath.sin(FastMath.toRadians(rotation));
+		double sx = (localx0 - befOriginX) * (befFlip ? -befScale : befScale);
+		double sy = (localy0 - befOriginY) * befScale;
+		double ex = (localx1 - befOriginX) * (befFlip ? -befScale : befScale);
+		double ey = (localy1 - befOriginY) * befScale;
+		double rad = FastMath.abs(localrad * befScale);
+		double cos = FastMath.cos(FastMath.toRadians(befRot));
+		double sin = FastMath.sin(FastMath.toRadians(befRot));
 		double oldSX = sx;
 		double oldEX = ex;
 		sx = sx*cos - sy*sin;
 		sy = oldSX*sin + sy*cos;
 		ex = ex*cos - ey*sin;
 		ey = oldEX*sin + ey*cos;
-		currentArea.setStart(sx+originX+x, sy+originY+y)
-				.setEnd(ex+originX+x, ey+originY+y).setRadius(rad);
-		coordinatesDirty = false;
-		if (start)
-		{
-			start = false;
-			setAreas();
-		}
+		beforex0 = sx + befOriginX + befX;
+		beforey0 = sy + befOriginY + befY;
+		beforex1 = ex + befOriginX + befX;
+		beforey1 = ey + befOriginY + befY;
+		beforerad = rad;
+		befDirty = false;
 	}
-
-	public void setStadium(Stadium newStadium)
+	
+	public void computeNewAfterPositions()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		localArea.set(newStadium);
-		coordinatesDirty = true;
+		double sx = (localx0 - aftOriginX) * (aftFlip ? -aftScale : aftScale);
+		double sy = (localy0 - aftOriginY) * aftScale;
+		double ex = (localx1 - aftOriginX) * (aftFlip ? -aftScale : aftScale);
+		double ey = (localy1 - aftOriginY) * aftScale;
+		double rad = FastMath.abs(localrad * aftScale);
+		double cos = FastMath.cos(FastMath.toRadians(aftRot));
+		double sin = FastMath.sin(FastMath.toRadians(aftRot));
+		double oldSX = sx;
+		double oldEX = ex;
+		sx = sx*cos - sy*sin;
+		sy = oldSX*sin + sy*cos;
+		ex = ex*cos - ey*sin;
+		ey = oldEX*sin + ey*cos;
+		afterx0 = sx + aftOriginX + aftX;
+		aftery0 = sy + aftOriginY + aftY;
+		afterx1 = ex + aftOriginX + aftX;
+		aftery1 = ey + aftOriginY + aftY;
+		afterrad = rad;
+		aftDirty = false;
 	}
 
 	public double getStartX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return getPreviousStadium().getStartx();
-		if (time == 1) return getCurrentStadium().getStartx();
-		return (1-time)*getPreviousStadium().getStartx() +
-				(time)*getCurrentStadium().getStartx();
+		cleanForTime(time);
+		if (time == 0) return beforex0;
+		if (time == 1) return afterx0;
+		return (1-time)*beforex0 + time*afterx0;
 	}
 
 	public double getEndX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return getPreviousStadium().getEndx();
-		if (time == 1) return getCurrentStadium().getEndx();
-		return (1-time)*getPreviousStadium().getEndx() +
-				(time)*getCurrentStadium().getEndx();
+		cleanForTime(time);
+		if (time == 0) return beforex1;
+		if (time == 1) return afterx1;
+		return (1-time)*beforex1 + time*afterx1;
 	}
 
 	public double getStartY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return getPreviousStadium().getStarty();
-		if (time == 1) return getCurrentStadium().getStarty();
-		return (1-time)*getPreviousStadium().getStarty() +
-				(time)*getCurrentStadium().getStarty();
+		cleanForTime(time);
+		if (time == 0) return beforey0;
+		if (time == 1) return aftery0;
+		return (1-time)*beforey0 + time*aftery0;
 	}
 
 	public double getEndY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return getPreviousStadium().getEndy();
-		if (time == 1) return getCurrentStadium().getEndy();
-		return (1-time)*getPreviousStadium().getEndy() +
-				(time)*getCurrentStadium().getEndy();
+		cleanForTime(time);
+		if (time == 0) return beforey1;
+		if (time == 1) return aftery1;
+		return (1-time)*beforey1 + time*aftery1;
 	}
 
 	public double getRadius(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return getPreviousStadium().getRadius();
-		if (time == 1) return getCurrentStadium().getRadius();
-		return (1-time)*getPreviousStadium().getRadius() +
-				(time)*getCurrentStadium().getRadius();
+		cleanForTime(time);
+		if (time == 0) return beforerad;
+		if (time == 1) return afterrad;
+		return (1-time)*beforerad + time*afterrad;
 	}
 
 	public Stadium getStadiumAt(double time)
@@ -165,8 +149,7 @@ public strictfp class CollisionBox extends StageElement
 
 	public ProjectionVector depth(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -181,16 +164,16 @@ public strictfp class CollisionBox extends StageElement
 
 	public double[] instantVelocity(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		double startDX = getCurrentStadium().getStartx() - getPreviousStadium().getStartx();
-		double startDY = getCurrentStadium().getStarty() - getPreviousStadium().getStarty();
-		double endDX = getCurrentStadium().getEndx() - getPreviousStadium().getEndx();
-		double endDY = getCurrentStadium().getEndy() - getPreviousStadium().getEndy();
+		double startDX = getAfterStadium().getStartx() - getBeforeStadium().getStartx();
+		double startDY = getAfterStadium().getStarty() - getBeforeStadium().getStarty();
+		double endDX = getAfterStadium().getEndx() - getBeforeStadium().getEndx();
+		double endDY = getAfterStadium().getEndy() - getBeforeStadium().getEndy();
 		double section = Intersector.partSegments(startX, startY, endX, endY,
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
 		double secDX = (1-section)*startDX + section*endDX;
@@ -200,8 +183,7 @@ public strictfp class CollisionBox extends StageElement
 
 	public boolean collides(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -213,8 +195,7 @@ public strictfp class CollisionBox extends StageElement
 
 	public double stadiumPortion(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -225,8 +206,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public Rectangle getBounds(double start, double end)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double startXMin = FastMath.min(getStartX(start)-getRadius(start),
 				getStartX(end)-getRadius(end));
 		double startYMin = FastMath.min(getStartY(start)-getRadius(start),
@@ -252,8 +233,8 @@ public strictfp class CollisionBox extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		drawer.circle((float)getStartX(0), (float)getStartY(0), (float)getRadius(0));
 		drawer.circle((float)getEndX(0), (float)getEndY(0), (float)getRadius(0));
 		double len = FastMath.hypot(getEndX(0)-getStartX(0),

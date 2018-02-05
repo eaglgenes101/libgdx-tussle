@@ -50,15 +50,6 @@ public strictfp class CollisionSystem extends IteratingSystem
 	
 	public void processEntity(Entity entity, float delta)
 	{
-		getEngine().getSystem(PostprocessSystem.class).add(
-				entity,
-				ECBComponent.class,
-				(ECBComponent comp) -> {
-					for (CollisionBox c : comp.getCollisionBoxes())
-						c.setPosition(Components.positionMapper.get(entity).x,
-						              Components.positionMapper.get(entity).y);
-				}
-		);
 		CollisionMap minVectors = new CollisionMap();
 		Map<CollisionBox, Stadium> beforeStads = new HashMap<>();
 		Map<CollisionBox, Stadium> afterStads = new HashMap<>();
@@ -67,8 +58,6 @@ public strictfp class CollisionSystem extends IteratingSystem
 		for (CollisionBox box : Components.ecbMapper.get(entity).getCollisionBoxes())
 		{
 			CollisionBox ourBox = new CollisionBox(box);
-			ourBox.setPosition(Components.positionMapper.get(entity).x,
-			                   Components.positionMapper.get(entity).y);
 			beforeStads.put(box, ourBox.getStadiumAt(0));
 			afterStads.put(box, ourBox.getStadiumAt(1));
 			//First, populate the highest-level hash maps
@@ -96,7 +85,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			//Reflect off of the hit surface
 			if (Components.velocityMapper.has(entity))
 			{
-				Stadium finalStad = new Stadium(hit.getBox().getCurrentStadium());
+				Stadium finalStad = new Stadium(hit.getBox().getAfterStadium());
 				finalStad.displace(hit.getVector().xComp(), hit.getVector().yComp());
 				ProjectionVector surfNorm = hit.getSurface().depth(finalStad, 1);
 				double[] surfVel = hit.getSurface().instantVelocity(finalStad, 1);
@@ -165,14 +154,18 @@ public strictfp class CollisionSystem extends IteratingSystem
 			finalY = Components.positionMapper.get(entity).y;
 		}
 		
+		final double xVel = Components.velocityMapper.has(entity)?
+		                    Components.velocityMapper.get(entity).xVel:0;
+		final double yVel = Components.velocityMapper.has(entity)?
+		                    Components.velocityMapper.get(entity).yVel:0;
 		getEngine().getSystem(PostprocessSystem.class).add(
 				entity,
 				ECBComponent.class,
 				(comp) -> {
 					for (CollisionBox c : comp.getCollisionBoxes())
 					{
-						c.setPosition(finalX, finalY);
-						c.setAreas();
+						c.setBeforePos(finalX, finalY);
+						c.setAfterPos(finalX+xVel, finalY+yVel);
 					}
 				}
 		);
@@ -191,12 +184,12 @@ public strictfp class CollisionSystem extends IteratingSystem
 		//and those which are
 		Predicate<Pair<CollisionBox, StageElement>> splitHeuristic =
 				(Pair<CollisionBox, StageElement> m) ->
-		{
-			CollisionBox c = m.getLeft();
-			StageElement s = m.getRight();
-			double spd = Utility.speedDifference(s, beforeBoxes.get(c), afterBoxes.get(c), start, end);
-			return spd*(end-start) >= PIXEL_STEP; //Add optimization heuristics when I finally get correct results
-		};
+				{
+					CollisionBox c = m.getLeft();
+					StageElement s = m.getRight();
+					double spd = Utility.displacementDifference(s, beforeBoxes.get(c), afterBoxes.get(c), start, end);
+					return spd >= PIXEL_STEP; //Add optimization heuristics when I finally get correct results
+				};
 		
 		if (fores.keySet().stream().anyMatch(splitHeuristic))
 		{

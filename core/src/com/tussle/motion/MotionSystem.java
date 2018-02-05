@@ -20,6 +20,8 @@ package com.tussle.motion;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.tussle.collision.CollisionBox;
+import com.tussle.collision.ECBComponent;
 import com.tussle.collision.StageElement;
 import com.tussle.collision.StageElementComponent;
 import com.tussle.main.Components;
@@ -37,11 +39,14 @@ public class MotionSystem extends IteratingSystem
 
 	public void processEntity(Entity entity, float delta)
 	{
+		final double xVel = Components.velocityMapper.get(entity).xVel;
+		final double yVel = Components.velocityMapper.get(entity).yVel;
+		final double xPos = Components.positionMapper.get(entity).x;
+		final double yPos = Components.positionMapper.get(entity).y;
 		getEngine().getSystem(PostprocessSystem.class).add(
 				entity,
 				PositionComponent.class,
-				cl->cl.displace(Components.velocityMapper.get(entity).xVel,
-				                Components.velocityMapper.get(entity).yVel)
+				cl -> cl.displace(xVel, yVel)
 		);
 		getEngine().getSystem(PostprocessSystem.class).add(
 				entity,
@@ -49,9 +54,19 @@ public class MotionSystem extends IteratingSystem
 				cl -> {
 					for (StageElement se : cl.getStageElements())
 					{
-						se.setAreas();
-						se.setPosition(Components.positionMapper.get(entity).x,
-						               Components.positionMapper.get(entity).y);
+						se.setBeforePos(xPos, yPos);
+						se.setAfterPos(xPos+xVel, yPos+yVel);
+					}
+				}
+		);
+		getEngine().getSystem(PostprocessSystem.class).add(
+				entity,
+				ECBComponent.class,
+				cl -> {
+					for (CollisionBox c : cl.getCollisionBoxes())
+					{
+						c.setBeforePos(xPos, yPos);
+						c.setAfterPos(xPos+xVel, yPos+yVel);
 					}
 				}
 		);

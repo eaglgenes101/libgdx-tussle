@@ -24,13 +24,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
  */
 public abstract class StageElement
 {
-	protected double x = 0, y = 0;
-	protected double originX = 0, originY = 0;
-	protected double rotation = 0;
-	protected double scale = 1;
-	protected boolean flipped = false;
-	protected boolean coordinatesDirty = true;
-	protected boolean start = true;
+	protected double befX = 0, befY = 0, aftX = 0, aftY = 0;
+	protected double befOriginX = 0, befOriginY = 0, aftOriginX = 0, aftOriginY = 0;
+	protected double befRot = 0, aftRot = 0;
+	protected double befScale = 1, aftScale = 1;
+	protected boolean befFlip = false, aftFlip = false;
+	protected boolean befDirty = true, aftDirty = true;
 	
 	public StageElement()
 	{
@@ -40,65 +39,86 @@ public abstract class StageElement
 	//Copy constructors!
 	public StageElement(StageElement other)
 	{
-		this.x = other.x;
-		this.y = other.y;
-		this.originX = other.originX;
-		this.originY = other.originY;
-		this.rotation = other.rotation;
-		this.scale = other.scale;
-		this.flipped = other.flipped;
-		this.coordinatesDirty = other.coordinatesDirty;
-		this.start = other.start;
+		this.befX = other.befX;this.befY = other.befY;
+		this.aftX = other.aftX;this.aftY = other.aftY;
+		this.befOriginX = other.befOriginX;this.befOriginY = other.befOriginY;
+		this.aftOriginX = other.aftOriginX;this.aftOriginY = other.aftOriginY;
+		this.befRot = other.befRot;this.aftRot = other.aftRot;
+		this.befFlip = other.befFlip;this.aftFlip = other.aftFlip;
 	}
 
-	public abstract void setAreas();
-
-	protected abstract void computeNewPositions();
-
-	public void setOrigin(double originX, double originY)
+	protected abstract void computeNewBeforePositions();
+	
+	protected abstract void computeNewAfterPositions();
+	
+	protected void cleanForTime(double time)
 	{
-		this.originX = originX;
-		this.originY = originY;
-		coordinatesDirty = true;
+		if (time != 0) computeNewAfterPositions();
+		if (time != 1) computeNewBeforePositions();
+	}
+	
+	public void setBeforeOrigin(double originX, double originY)
+	{
+		befOriginX = originX;
+		befOriginY = originY;
+		befDirty = true;
+	}
+	
+	public void setAfterOrigin(double originX, double originY)
+	{
+		aftOriginX = originX;
+		aftOriginY = originY;
+		aftDirty = true;
 	}
 
-	public void setPosition(double x, double y)
+	public void setBeforePos(double x, double y)
 	{
-		this.x = x;
-		this.y = y;
-		coordinatesDirty = true;
+		this.befX = x;
+		this.befY = y;
+		befDirty = true;
 	}
-
-	public void setRotation(double degrees)
+	
+	public void setAfterPos(double x, double y)
 	{
-		this.rotation = degrees;
-		coordinatesDirty = true;
+		this.aftX = x;
+		this.aftY = y;
+		aftDirty = true;
 	}
-
-	public void setScale(double scale)
+	
+	public void setBeforeRot(double degrees)
 	{
-		this.scale = scale;
-		coordinatesDirty = true;
+		this.befRot = degrees;
+		befDirty = true;
 	}
-
-	public void setFlipped(boolean flipped)
+	
+	public void setAfterRot(double degrees)
 	{
-		this.flipped = flipped;
-		coordinatesDirty = true;
+		this.aftRot = degrees;
+		aftDirty = true;
 	}
-
-	public double getRotation()
+	
+	public void setBeforeScale(double scale)
 	{
-		double returnVal = rotation;
-		if (flipped) returnVal = 180-returnVal;
-		if (scale<0) returnVal = 180+returnVal;
-		return returnVal;
+		this.befScale = scale;
+		befDirty = true;
 	}
-
-	public void cutTrail()
+	
+	public void setAfterScale(double scale)
 	{
-		start = true;
-		coordinatesDirty = true;
+		this.aftScale = scale;
+		aftDirty = true;
+	}
+	
+	public void setBeforeFlipped(boolean flipped)
+	{
+		this.befFlip = flipped;
+		befDirty = true;
+	}
+	
+	public void setAfterFlipped(boolean flipped)
+	{
+		this.aftFlip = flipped;
+		aftDirty = true;
 	}
 
 	//Minimal displacement needed to prevent intersection given the time and stadium

@@ -69,10 +69,13 @@ public class PostprocessSystem extends EntitySystem
 	                                      Class<E> comp,
 	                                      PostprocessStep<? super E> step)
 	{
-		componentListMap.get(comp).put(
-				e,
-				componentListMap.get(comp).get(e).andThen(step)
-		);
+		if (e.getComponent(comp) != null)
+		{
+			componentListMap.get(comp).put(
+					e,
+					componentListMap.get(comp).get(e).andThen(step)
+			);
+		}
 	}
 	
 	

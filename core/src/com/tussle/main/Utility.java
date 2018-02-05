@@ -324,7 +324,7 @@ public strictfp class Utility
 													 double x3, double y3, double x4, double y4)
 	{
 		// This problem can be reduced to the following linear system:
-		// (y2-y1)x + (x1-x2)y = x1*y2 - x2*y1
+		// (y2-aftY)x + (aftX-x2)y = aftX*y2 - x2*aftY
 		// (y4-y3)x + (x3-x4)y = x3*y4 - x4*y3
 
 		//Yay for Julia's sympy package for doing work for me
@@ -367,36 +367,36 @@ public strictfp class Utility
 			   (p2.magnitude()-p1.magnitude() <= 8);
 	}
 
-	public static double speedDifference(StageElement se,
-	        Stadium startStad, Stadium endStad, double startTime, double endTime)
+	public static double displacementDifference(StageElement se, Stadium startStad, Stadium endStad,
+	                                            double startTime, double endTime)
 	{
-		double time = endTime-startTime;
-		if (time == 0) return Double.NaN;
-		
-		
 		double[] startStageVelocity = se.instantVelocity(startStad, startTime);
 		double startEcbPortion = se.stadiumPortion(startStad, startTime);
 		double startPartDX = ((1-startEcbPortion)*(endStad.getStartx() - startStad.getStartx())
-		                      + startEcbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
+		                      + startEcbPortion*(endStad.getEndx() - startStad.getEndx()));
 		double startPartDY = ((1-startEcbPortion)*(endStad.getStarty() - startStad.getStarty())
-		                      + startEcbPortion*(endStad.getEndy() - startStad.getEndy()))/time;
+		                      + startEcbPortion*(endStad.getEndy() - startStad.getEndy()));
 		double startDXDiff = startPartDX-startStageVelocity[0];
 		double startDYDiff = startPartDY-startStageVelocity[1];
 		
 		double[] endStageVelocity = se.instantVelocity(endStad, endTime);
 		double endEcbPortion = se.stadiumPortion(endStad, endTime);
 		double endPartDX = ((1-endEcbPortion)*(endStad.getStartx() - startStad.getStartx())
-		                + endEcbPortion*(endStad.getEndx() - startStad.getEndx()))/time;
+		                + endEcbPortion*(endStad.getEndx() - startStad.getEndx()));
 		double endPartDY = ((1-endEcbPortion)*(endStad.getStarty() - startStad.getStarty())
-		                + endEcbPortion*(endStad.getEndy() - startStad.getEndy()))/time;
+		                + endEcbPortion*(endStad.getEndy() - startStad.getEndy()));
 		double endDXDiff = endPartDX-endStageVelocity[0];
 		double endDYDiff = endPartDY-endStageVelocity[1];
 		
 		//Which direction are they separated?
 		ProjectionVector collideVec0 = se.depth(startStad, startTime);
 		ProjectionVector collideVec1 = se.depth(endStad, endTime);
-		return FastMath.max(startDXDiff*collideVec0.xNorm()+startDYDiff*collideVec0.yNorm(),
-							endDXDiff*collideVec1.xNorm()+endDYDiff*collideVec1.yNorm());
+		return FastMath.max(FastMath.hypot(startStageVelocity[0], startStageVelocity[1]),
+		                    FastMath.hypot(endStageVelocity[0], endStageVelocity[1])) +
+		       FastMath.max(FastMath.hypot(startPartDX, startPartDY),
+		                    FastMath.hypot(endPartDX, endPartDY));
+		//return FastMath.max(startDXDiff*collideVec0.xNorm()+startDYDiff*collideVec0.yNorm(),
+		//					endDXDiff*collideVec1.xNorm()+endDYDiff*collideVec1.yNorm());
 	}
 
 	public static Stadium middleStad(Stadium s1, Stadium s2)

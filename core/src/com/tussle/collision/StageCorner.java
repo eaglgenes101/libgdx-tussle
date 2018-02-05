@@ -28,137 +28,112 @@ public strictfp class StageCorner extends StageElement
 {
 	public static final double HALF_WHOLE = 180;
 	private double localx, localy, localMinAngle, localMaxAngle;
-	private double currentx, currenty;
-	private double currentMinAngle, currentMaxAngle;
-	private double currentRightCos, currentRightSin, currentLeftCos, currentLeftSin;
-	private double previousx, previousy;
-	private double previousRightCos, previousRightSin, previousLeftCos, previousLeftSin;
-	private double previousMinAngle, previousMaxAngle;
+	private double afterx, aftery, afterMinAngle, afterMaxAngle;
+	private double afterRightCos, afterRightSin, afterLeftCos, afterLeftSin;
+	private double beforex, beforey, beforeMinAngle, beforeMaxAngle;
+	private double beforeRightCos, beforeRightSin, beforeLeftCos, beforeLeftSin;
 
 	public StageCorner(double x, double y, double minAngle, double maxAngle)
 	{
+		super();
 		localx = x;
 		localy = y;
 		localMinAngle = minAngle;
 		localMaxAngle = maxAngle;
 	}
 
-	public void computeNewPositions()
+	public void computeNewBeforePositions()
 	{
-		double cos = FastMath.cos(FastMath.toRadians(rotation));
-		double sin = FastMath.sin(FastMath.toRadians(rotation));
-		double locx = localx - originX;
-		double locy = localy - originY;
-		double minAngle = localMinAngle;
-		double maxAngle = localMaxAngle;
-		if (flipped)
-		{
-			minAngle = HALF_WHOLE - minAngle;
-			maxAngle = HALF_WHOLE - maxAngle;
-		}
-		locx *= flipped ? -scale : scale;
-		locy *= scale;
+		double cos = FastMath.cos(FastMath.toRadians(befRot));
+		double sin = FastMath.sin(FastMath.toRadians(befRot));
+		double locx = (localx - befOriginX)*(befFlip?-befScale:befScale);
+		double locy = (localy - befOriginY)*befScale;
+		double minAngle = befFlip?HALF_WHOLE-localMinAngle:localMinAngle + befRot;
+		double maxAngle = befFlip?HALF_WHOLE-localMaxAngle:localMaxAngle + befRot;
 		double oldX = locx;
 		locx = locx * cos - locy * sin;
 		locy = oldX * sin + locy * cos;
-		minAngle += rotation;
-		maxAngle += rotation;
-		currentx = locx + originX + x;
-		currenty = locy + originY + y;
-		currentMinAngle = minAngle;
-		currentMaxAngle = maxAngle;
-		currentRightCos = FastMath.cos(FastMath.toRadians(minAngle));
-		currentRightSin = FastMath.sin(FastMath.toRadians(minAngle));
-		currentLeftCos = FastMath.cos(FastMath.toRadians(maxAngle));
-		currentLeftSin = FastMath.sin(FastMath.toRadians(maxAngle));
-		coordinatesDirty = false;
-		if (start)
-		{
-			start = false;
-			setAreas();
-		}
+		beforex = locx + befOriginX + befX;
+		beforey = locy + befOriginY + befY;
+		beforeMinAngle = minAngle;
+		beforeMaxAngle = maxAngle;
+		beforeRightCos = FastMath.cos(FastMath.toRadians(minAngle));
+		beforeRightSin = FastMath.sin(FastMath.toRadians(minAngle));
+		beforeLeftCos = FastMath.cos(FastMath.toRadians(maxAngle));
+		beforeLeftSin = FastMath.sin(FastMath.toRadians(maxAngle));
+		befDirty = false;
 	}
-
-	public void setAreas()
+	
+	public void computeNewAfterPositions()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		previousx = currentx;
-		previousy = currenty;
-		previousRightCos = currentRightCos;
-		previousRightSin = currentRightSin;
-		previousLeftCos = currentLeftCos;
-		previousLeftSin = currentLeftSin;
-		previousMinAngle = currentMinAngle;
-		previousMaxAngle = currentMaxAngle;
-	}
-
-	public void setPoint(double x, double y)
-	{
-		localx = x;
-		localy = y;
-		coordinatesDirty = true;
-	}
-
-	public void setAngles(double min, double max)
-	{
-		localMinAngle = min;
-		localMaxAngle = max;
-		coordinatesDirty = true;
+		double cos = FastMath.cos(FastMath.toRadians(aftRot));
+		double sin = FastMath.sin(FastMath.toRadians(aftRot));
+		double locx = (localx - aftOriginX)*(aftFlip?-aftScale:aftScale);
+		double locy = (localy - aftOriginY)*aftScale;
+		double minAngle = aftFlip?HALF_WHOLE-localMinAngle:localMinAngle + aftRot;
+		double maxAngle = aftFlip?HALF_WHOLE-localMaxAngle:localMaxAngle + aftRot;
+		double oldX = locx;
+		locx = locx * cos - locy * sin;
+		locy = oldX * sin + locy * cos;
+		afterx = locx + aftOriginX + aftX;
+		aftery = locy + aftOriginY + aftY;
+		afterMinAngle = minAngle;
+		afterMaxAngle = maxAngle;
+		afterRightCos = FastMath.cos(FastMath.toRadians(minAngle));
+		afterRightSin = FastMath.sin(FastMath.toRadians(minAngle));
+		afterLeftCos = FastMath.cos(FastMath.toRadians(maxAngle));
+		afterLeftSin = FastMath.sin(FastMath.toRadians(maxAngle));
+		aftDirty = false;
 	}
 
 	public double getX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return (1-time)*previousx + time*currentx;
+		cleanForTime(time);
+		return (1-time) * beforex + time * afterx;
 	}
 
 	public double getY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return (1-time)*previousy + time*currenty;
+		cleanForTime(time);
+		return (1-time) * beforey + time * aftery;
 	}
 
-	public ProjectionVector getRightNormal(double time)
+	ProjectionVector getRightNormal(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		//Not as simple as interpolating angle unfortunately
-		double interpCos = (1-time)*previousRightCos + time*currentRightCos;
-		double interpSin = (1-time)*previousRightSin + time*currentRightSin;
+		double interpCos = (1-time) * beforeRightCos + time * afterRightCos;
+		double interpSin = (1-time) * beforeRightSin + time * afterRightSin;
 		if (interpCos == 0 && interpSin == 0)
 		{
-			if (previousRightCos*currentRightCos + previousRightSin*currentRightSin > 0)
+			if (beforeRightCos * afterRightCos + beforeRightSin * afterRightSin > 0)
 			{
-				return new ProjectionVector(currentRightCos, currentRightSin, 1);
+				return new ProjectionVector(afterRightCos, afterRightSin, 1);
 			}
 			else
 			{
-				return new ProjectionVector(currentRightSin, -currentRightCos, 1);
+				return new ProjectionVector(afterRightSin, -afterRightCos, 1);
 			}
 		}
 		double magn = FastMath.hypot(interpSin, interpCos);
 		return new ProjectionVector(interpCos/magn, interpSin/magn, 1);
 	}
 
-	public ProjectionVector getLeftNormal(double time)
+	ProjectionVector getLeftNormal(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		//Not as simple as interpolating angle unfortunately
-		double interpCos = (1-time)*previousLeftCos + time*currentLeftCos;
-		double interpSin = (1-time)*previousLeftSin + time*currentLeftSin;
+		double interpCos = (1-time) * beforeLeftCos + time * afterLeftCos;
+		double interpSin = (1-time) * beforeLeftSin + time * afterLeftSin;
 		if (interpCos == 0 && interpSin == 0)
 		{
-			if (previousLeftCos*currentLeftCos + previousLeftSin*currentLeftSin > 0)
+			if (beforeLeftCos * afterLeftCos + beforeLeftSin * afterLeftSin > 0)
 			{
-				return new ProjectionVector(currentLeftCos, currentLeftSin, 1);
+				return new ProjectionVector(afterLeftCos, afterLeftSin, 1);
 			}
 			else
 			{
-				return new ProjectionVector(currentLeftSin, -currentLeftCos, 1);
+				return new ProjectionVector(afterLeftSin, -afterLeftCos, 1);
 			}
 		}
 		double magn = FastMath.hypot(interpSin, interpCos);
@@ -167,8 +142,7 @@ public strictfp class StageCorner extends StageElement
 
 	public ProjectionVector depth(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double xPos = getX(time);
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
@@ -182,8 +156,8 @@ public strictfp class StageCorner extends StageElement
 
 	public double[] instantVelocity(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double secDX = getX(1)-getX(0);
 		double secDY = getY(1)-getY(0);
 		return new double[]{secDX, secDY};
@@ -191,8 +165,7 @@ public strictfp class StageCorner extends StageElement
 
 	public boolean collides(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double xPos = getX(time);
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
@@ -211,16 +184,15 @@ public strictfp class StageCorner extends StageElement
 
 	public double stadiumPortion(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),
 				stad.getEndx(), stad.getEndy(), getX(time), getY(time));
 	}
 
 	public Rectangle getBounds(double start, double end)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double minX = FastMath.min(getX(start), getX(end));
 		double maxX = FastMath.max(getX(start), getX(end));
 		double minY = FastMath.min(getY(start), getY(end));
@@ -230,22 +202,23 @@ public strictfp class StageCorner extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
+		computeNewBeforePositions();
+		computeNewAfterPositions();
+		
 		ProjectionVector startRight = getRightNormal(0);
 		ProjectionVector startLeft = getLeftNormal(0);
 		ProjectionVector endRight = getRightNormal(1);
 		ProjectionVector endLeft = getLeftNormal(1);
-
-		if (coordinatesDirty)
-			computeNewPositions();
+		
 		drawer.arc((float)getX(0), (float)getY(0), 12,
-				(float)previousMinAngle, (float)(previousMaxAngle-previousMinAngle));
+		           (float)beforeMinAngle, (float)(beforeMaxAngle - beforeMinAngle));
 		drawer.line((float)getX(0), (float)getY(0),
 				(float)(getX(0)+startRight.xnorm*20), (float)(getY(0)+startRight.ynorm*20));
 		drawer.line((float)getX(0), (float)getY(0),
 				(float)(getX(0)+startLeft.xnorm*20), (float)(getY(0)+startLeft.ynorm*20));
 
 		drawer.arc((float)getX(1), (float)getY(1), 16,
-				(float)currentMinAngle, (float)(currentMaxAngle-currentMinAngle));
+		           (float)afterMinAngle, (float)(afterMaxAngle - afterMinAngle));
 		drawer.line((float)getX(1), (float)getY(1),
 				(float)(getX(1)+endRight.xnorm*20), (float)(getY(1)+endRight.ynorm*20));
 		drawer.line((float)getX(1), (float)getY(1),

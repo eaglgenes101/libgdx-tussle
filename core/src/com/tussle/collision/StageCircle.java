@@ -23,78 +23,69 @@ import org.apache.commons.math3.util.FastMath;
 
 public class StageCircle extends StageElement
 {
-	private double localx = 0, localy = 0, localr = 1;
-	private double currentx, currenty, currentr;
-	private double previousx, previousy, previousr;
+	private double localx, localy, localrad;
+	private double afterx, aftery, afterrad;
+	private double beforex, beforey, beforerad;
 
 	public StageCircle(double x, double y, double r)
 	{
+		super();
 		localx = x;
 		localy = y;
-		localr = r;
+		localrad = r;
 	}
-
-	public void computeNewPositions()
+	
+	public void computeNewBeforePositions()
 	{
-		double cos = FastMath.cos(FastMath.toRadians(rotation));
-		double sin = FastMath.sin(FastMath.toRadians(rotation));
-		double locx = localx - originX;
-		double locy = localy - originY;
-		locx *= flipped ? -scale : scale;
-		locy *= scale;
+		double cos = FastMath.cos(FastMath.toRadians(befRot));
+		double sin = FastMath.sin(FastMath.toRadians(befRot));
+		double locx = (localx - befOriginX)*(befFlip?-befScale:befScale);
+		double locy = (localy - befOriginY)*befScale;
 		double oldX = locx;
 		locx = locx * cos - locy * sin;
 		locy = oldX * sin + locy * cos;
-		currentx = locx + originX + x;
-		currenty = locy + originY + y;
-		currentr = FastMath.abs(localr*scale);
-		coordinatesDirty = false;
-		if (start)
-		{
-			start = false;
-			setAreas();
-		}
+		beforex = locx + befOriginX + befX;
+		beforey = locy + befOriginY + befY;
+		beforerad = FastMath.abs(localrad * befScale);
+		befDirty = false;
 	}
-
-	public void setAreas()
+	
+	public void computeNewAfterPositions()
 	{
-		previousx = currentx;
-		previousy = currenty;
-		previousr = currentr;
-	}
-
-	public void setPoint(double x, double y)
-	{
-		localx = x;
-		localy = y;
-		coordinatesDirty = true;
+		double cos = FastMath.cos(FastMath.toRadians(befRot));
+		double sin = FastMath.sin(FastMath.toRadians(befRot));
+		double locx = (localx - befOriginX)*(befFlip?-befScale:befScale);
+		double locy = (localy - befOriginY)*befScale;
+		double oldX = locx;
+		locx = locx * cos - locy * sin;
+		locy = oldX * sin + locy * cos;
+		afterx = locx + befOriginX + befX;
+		aftery = locy + befOriginY + befY;
+		afterrad = FastMath.abs(localrad * befScale);
+		aftDirty = false;
 	}
 
 	public double getX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return (1-time)*previousx + time*currentx;
+		cleanForTime(time);
+		return (1-time) * beforex + time * afterx;
 	}
 
 	public double getY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return (1-time)*previousy + time*currenty;
+		cleanForTime(time);
+		return (1-time) * beforey + time * aftery;
 	}
 
 	public double getRadius(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		return (1-time)*previousr + time*currentr;
+		cleanForTime(time);
+		return (1-time) * beforerad + time * afterrad;
 	}
 
 	public ProjectionVector depth(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double xPos = getX(time);
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
@@ -108,17 +99,16 @@ public class StageCircle extends StageElement
 
 	public double[] instantVelocity(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		double secDX = currentx - previousx;
-		double secDY = currenty - previousy;
+		computeNewBeforePositions();
+		computeNewAfterPositions();
+		double secDX = afterx - beforex;
+		double secDY = aftery - beforey;
 		return new double[]{secDX, secDY};
 	}
 
 	public boolean collides(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double xPos = getX(time);
 		double yPos = getY(time);
 		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
@@ -128,16 +118,15 @@ public class StageCircle extends StageElement
 
 	public double stadiumPortion(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),
 				stad.getEndx(), stad.getEndy(), getX(time), getY(time));
 	}
 
 	public Rectangle getBounds(double start, double end)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double minX = FastMath.min(getX(start)-getRadius(start),
 				getX(end)-getRadius(end));
 		double maxX = FastMath.max(getX(start)+getRadius(start),
@@ -151,8 +140,8 @@ public class StageCircle extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		drawer.circle((float)getX(0), (float)getY(0), (float)getRadius(0));
 		drawer.circle((float)getX(1), (float)getY(1), (float)getRadius(1));
 	}

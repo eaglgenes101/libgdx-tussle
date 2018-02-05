@@ -26,107 +26,96 @@ import org.apache.commons.math3.util.FastMath;
  */
 public strictfp class StageEdge extends StageElement
 {
-	private double localx1 = 0, localy1 = 0, localx2 = 0, localy2 = 0;
-	private double currentx1 = 0, currenty1 = 0, currentx2 = 0, currenty2 = 0;
-	private double previousx1 = 0, previousy1 = 0, previousx2 = 0, previousy2 = 0;
+	private double localx0, localy0, localx1, localy1;
+	private double afterx0, aftery0, afterx1, aftery1;
+	private double beforex0, beforey0, beforex1, beforey1;
 
-	public StageEdge(double x1, double y1, double x2, double y2)
+	public StageEdge(double x0, double y0, double x1, double y1)
 	{
+		super();
+		localx0 = x0;
+		localy0 = y0;
 		localx1 = x1;
 		localy1 = y1;
-		localx2 = x2;
-		localy2 = y2;
 	}
 
-	public void computeNewPositions()
+	public void computeNewBeforePositions()
 	{
-		double cos = FastMath.cos(FastMath.toRadians(rotation));
-		double sin = FastMath.sin(FastMath.toRadians(rotation));
-		double sx = localx1 - originX;
-		double sy = localy1 - originY;
-		double ex = localx2 - originX;
-		double ey = localy2 - originY;
-		sx *= flipped ? -scale : scale;
-		sy *= scale;
-		ex *= flipped ? -scale : scale;
-		ey *= scale;
+		double cos = FastMath.cos(FastMath.toRadians(befRot));
+		double sin = FastMath.sin(FastMath.toRadians(befRot));
+		double sx = (localx0 - befOriginX)*(befFlip?-befScale:befScale);
+		double sy = (localy0 - befOriginY)*befScale;
+		double ex = (localx1 - befOriginX)*(befFlip?-befScale:befScale);
+		double ey = (localy1 - befOriginY)*befScale;
 		double oldSX = sx;
 		double oldEX = ex;
 		sx = sx * cos - sy * sin;
 		sy = oldSX * sin + sy * cos;
 		ex = ex * cos - ey * sin;
 		ey = oldEX * sin + ey * cos;
-		currentx1 = sx + originX + x;
-		currenty1 = sy + originY + y;
-		currentx2 = ex + originX + x;
-		currenty2 = ey + originY + y;
-		coordinatesDirty = false;
-		if (start)
-		{
-			start = false;
-			setAreas();
-		}
+		beforex0 = sx + befOriginX + befX;
+		beforey0 = sy + befOriginY + befY;
+		beforex1 = ex + befOriginX + befX;
+		beforey1 = ey + befOriginY + befY;
+		befDirty = false;
 	}
-
-	public void setAreas()
+	
+	public void computeNewAfterPositions()
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		previousx1 = currentx1;
-		previousx2 = currentx2;
-		previousy1 = currenty1;
-		previousy2 = currenty2;
-	}
-
-	public void setSegment(double x1, double y1, double x2, double y2)
-	{
-		this.localx1 = x1;
-		this.localy1 = y1;
-		this.localx2 = x2;
-		this.localy2 = y2;
-		coordinatesDirty = true;
+		double cos = FastMath.cos(FastMath.toRadians(aftRot));
+		double sin = FastMath.sin(FastMath.toRadians(aftRot));
+		double sx = (localx0 - aftOriginX)*(aftFlip?-aftScale:aftScale);
+		double sy = (localy0 - aftOriginY)*aftScale;
+		double ex = (localx1 - aftOriginX)*(aftFlip?-aftScale:aftScale);
+		double ey = (localy1 - aftOriginY)*aftScale;
+		double oldSX = sx;
+		double oldEX = ex;
+		sx = sx * cos - sy * sin;
+		sy = oldSX * sin + sy * cos;
+		ex = ex * cos - ey * sin;
+		ey = oldEX * sin + ey * cos;
+		afterx0 = sx + aftOriginX + aftX;
+		aftery0 = sy + aftOriginY + aftY;
+		afterx1 = ex + aftOriginX + aftX;
+		aftery1 = ey + aftOriginY + aftY;
+		aftDirty = false;
 	}
 
 	public double getStartX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return previousx1;
-		if (time == 1) return currentx1;
-		return (1-time)*previousx1 + time*currentx1;
+		cleanForTime(time);
+		if (time == 0) return beforex0;
+		if (time == 1) return afterx0;
+		return (1-time) * beforex0 + time * afterx0;
 	}
 
 	public double getEndX(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return previousx2;
-		if (time == 1) return currentx2;
-		return (1-time)*previousx2 + time*currentx2;
+		cleanForTime(time);
+		if (time == 0) return beforex1;
+		if (time == 1) return afterx1;
+		return (1-time) * beforex1 + time * afterx1;
 	}
 
 	public double getStartY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return previousy1;
-		if (time == 1) return currenty1;
-		return (1-time)*previousy1 + time*currenty1;
+		cleanForTime(time);
+		if (time == 0) return beforey0;
+		if (time == 1) return aftery0;
+		return (1-time) * beforey0 + time * aftery0;
 	}
 
 	public double getEndY(double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
-		if (time == 0) return previousy2;
-		if (time == 1) return currenty2;
-		return (1-time)*previousy2 + time*currenty2;
+		cleanForTime(time);
+		if (time == 0) return beforey1;
+		if (time == 1) return aftery1;
+		return (1-time) * beforey1 + time * aftery1;
 	}
 
 	public ProjectionVector depth(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -142,16 +131,16 @@ public strictfp class StageEdge extends StageElement
 
 	public double[] instantVelocity(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
 		double endY = getEndY(time);
-		double startDX = currentx1 - previousx1;
-		double startDY = currenty1 - previousy1;
-		double endDX = currentx2 - previousx2;
-		double endDY = currenty2 - previousy2;
+		double startDX = afterx0 - beforex0;
+		double startDY = aftery0 - beforey0;
+		double endDX = afterx1 - beforex1;
+		double endDY = aftery1 - beforey1;
 		double section = Intersector.partSegments(startX, startY, endX, endY,
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
 		double secDX = (1-section)*startDX + section*endDX;
@@ -161,8 +150,7 @@ public strictfp class StageEdge extends StageElement
 
 	public boolean collides(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -186,8 +174,7 @@ public strictfp class StageEdge extends StageElement
 
 	public double stadiumPortion(Stadium stad, double time)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		cleanForTime(time);
 		double startX = getStartX(time);
 		double startY = getStartY(time);
 		double endX = getEndX(time);
@@ -198,8 +185,8 @@ public strictfp class StageEdge extends StageElement
 
 	public Rectangle getBounds(double start, double end)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double startXMin = FastMath.min(getStartX(start), getStartX(end));
 		double startYMin = FastMath.min(getStartY(start), getStartY(end));
 		double startXMax = FastMath.max(getStartX(start), getStartX(end));
@@ -217,8 +204,8 @@ public strictfp class StageEdge extends StageElement
 
 	public void draw(ShapeRenderer drawer)
 	{
-		if (coordinatesDirty)
-			computeNewPositions();
+		computeNewBeforePositions();
+		computeNewAfterPositions();
 		double len = FastMath.hypot(getEndX(0)-getStartX(0),
 				getEndY(0)-getStartY(0));
 		if (len > 0)

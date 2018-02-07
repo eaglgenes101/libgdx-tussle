@@ -143,4 +143,16 @@ public class CollisionStadium implements CollisionShape
 				radius
 		);
 	}
+	
+	public CollisionStadium interpolate(CollisionShape other)
+	{
+		if (!(other instanceof CollisionStadium))
+			throw new IllegalArgumentException();
+		CollisionStadium o = (CollisionStadium) other;
+		return new CollisionStadium(
+				(startx+o.startx)/2, (starty+o.starty)/2,
+				(endx+o.endx)/2, (endy+o.endy)/2,
+				(radius+o.radius)/2
+		);
+	}
 }

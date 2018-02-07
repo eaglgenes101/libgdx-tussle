@@ -76,4 +76,16 @@ public class CollisionCircle implements CollisionShape
 	{
 		return new CollisionCircle(x+dx, y+dy, radius);
 	}
+	
+	public CollisionCircle interpolate(CollisionShape other)
+	{
+		if (!(other instanceof CollisionCircle))
+			throw new IllegalArgumentException();
+		CollisionCircle o = (CollisionCircle)other;
+		return new CollisionCircle(
+				(x+o.x)/2,
+				(y+o.y)/2,
+				(radius+o.radius)/2
+		);
+	}
 }

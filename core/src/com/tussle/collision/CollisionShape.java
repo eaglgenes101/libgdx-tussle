@@ -35,4 +35,6 @@ public interface CollisionShape
 	void draw(ShapeRenderer drawer);
 	
 	CollisionShape displacement(double dx, double dy);
+	
+	CollisionShape interpolate(CollisionShape other);
 }

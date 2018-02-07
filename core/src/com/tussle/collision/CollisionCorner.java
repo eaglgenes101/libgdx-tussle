@@ -23,29 +23,31 @@ import org.apache.commons.math3.util.FastMath;
 
 public class CollisionCorner implements CollisionShape
 {
-	double x, y, minAngle, maxAngle;
-	double minCos = Double.NaN, minSin = Double.NaN;
-	double maxCos = Double.NaN, maxSin = Double.NaN;
-	boolean trigInit = false;
+	double x, y;
+	ProjectionVector minVec, maxVec;
 	
 	public CollisionCorner(double x, double y, double min, double max)
 	{
 		this.x = x;
 		this.y = y;
-		minAngle = min;
-		maxAngle = max;
+		minVec = new ProjectionVector(
+				FastMath.cos(FastMath.toRadians(min)),
+				FastMath.sin(FastMath.toRadians(min)),
+				1
+		);
+		maxVec = new ProjectionVector(
+				FastMath.cos(FastMath.toRadians(max)),
+				FastMath.sin(FastMath.toRadians(max)),
+				1
+		);
 	}
 	
-	protected void initTrig()
+	public CollisionCorner(double x, double y, ProjectionVector min, ProjectionVector max)
 	{
-		if (!trigInit)
-		{
-			minCos = FastMath.cos(FastMath.toRadians(minAngle));
-			minSin = FastMath.sin(FastMath.toRadians(minAngle));
-			maxCos = FastMath.cos(FastMath.toRadians(maxAngle));
-			maxSin = FastMath.sin(FastMath.toRadians(maxAngle));
-			trigInit = true;
-		}
+		this.x = x;
+		this.y = y;
+		this.minVec = min;
+		this.maxVec = max;
 	}
 	
 	public ProjectionVector depth(CollisionStadium stad)
@@ -72,10 +74,10 @@ public class CollisionCorner implements CollisionShape
 	
 	public boolean collidesWith(CollisionStadium stad)
 	{
-		initTrig();
 		ProjectionVector disp = depth(stad);
 		return disp.magnitude() <= 16 &&
-		       (minSin*disp.xnorm-minCos*disp.ynorm) * (minSin*maxCos-minCos*maxSin) < 0;
+		       (minVec.yNorm()*disp.xnorm-minVec.xNorm()*disp.ynorm) *
+		       (minVec.yNorm()*maxVec.xNorm()-minVec.xNorm()*maxVec.yNorm()) < 0;
 	}
 	
 	public Rectangle getBounds()
@@ -85,14 +87,69 @@ public class CollisionCorner implements CollisionShape
 	
 	public void draw(ShapeRenderer drawer)
 	{
-		initTrig();
-		drawer.arc((float)x, (float)y, 12, (float)minAngle, (float)(maxAngle - minAngle));
-		drawer.line((float)x, (float)y, (float)(x+minCos*20), (float)(y+minSin*20));
-		drawer.line((float)x, (float)y, (float)(x+maxCos*20), (float)(y+maxSin*20));
+		double minAngle = FastMath.toDegrees(FastMath.atan2(minVec.yNorm(), minVec.xNorm()));
+		double maxAngle = FastMath.toDegrees(FastMath.atan2(maxVec.yNorm(), maxVec.xNorm()));
+		drawer.arc((float)x, (float)y, 12,
+		           (float)minAngle, (float)(maxAngle - minAngle));
+		drawer.line((float)x, (float)y,
+		            (float)(x+minVec.xNorm()*20), (float)(y+minVec.yNorm()*20));
+		drawer.line((float)x, (float)y,
+		            (float)(x+maxVec.xNorm()*20), (float)(y+maxVec.yNorm()*20));
 	}
 	
 	public CollisionCorner displacement(double dx, double dy)
 	{
-		return new CollisionCorner(x+dx, y+dy, minAngle, maxAngle);
+		return new CollisionCorner(
+				x+dx, y+dy,
+				minVec, maxVec
+		);
+	}
+	
+	public CollisionCorner interpolate(CollisionShape other)
+	{
+		if (!(other instanceof CollisionCorner))
+			throw new IllegalArgumentException();
+		CollisionCorner o = (CollisionCorner)other;
+		double minXSum = minVec.xComp()+o.minVec.xComp();
+		double minYSum = minVec.yComp()+o.minVec.yComp();
+		double maxXSum = maxVec.xComp()+o.maxVec.xComp();
+		double maxYSum = maxVec.yComp()+o.maxVec.yComp();
+		ProjectionVector minProj;
+		ProjectionVector maxProj;
+		if (minXSum == 0 && minYSum == 0)
+		{
+			if (minVec.xComp() * o.minVec.xComp() + minVec.yComp() * o.minVec.yComp() > 0)
+			{
+				minProj = new ProjectionVector(minVec.xComp(), minVec.yComp(), 0);
+			}
+			else
+			{
+				minProj = new ProjectionVector(minVec.yComp(), -minVec.xComp(), 0);
+			}
+		}
+		else
+		{
+			double magnitude = FastMath.hypot(minXSum, minYSum);
+			minProj = new ProjectionVector(
+					minXSum/magnitude, minYSum/magnitude, magnitude/2);
+		}
+		if (maxXSum == 0 && maxYSum == 0)
+		{
+			if (maxVec.xComp() * o.maxVec.xComp() + maxVec.yComp() * o.maxVec.yComp() > 0)
+			{
+				maxProj = new ProjectionVector(maxVec.xComp(), maxVec.yComp(), 0);
+			}
+			else
+			{
+				maxProj = new ProjectionVector(maxVec.yComp(), -maxVec.xComp(), 0);
+			}
+		}
+		else
+		{
+			double magnitude = FastMath.hypot(maxXSum, maxYSum);
+			maxProj = new ProjectionVector(
+					maxXSum/magnitude, maxYSum/magnitude, magnitude/2);
+		}
+		return new CollisionCorner((x+o.x)/2, (y+o.y)/2, minProj, maxProj);
 	}
 }

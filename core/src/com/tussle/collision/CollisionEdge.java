@@ -105,4 +105,15 @@ public class CollisionEdge implements CollisionShape
 	{
 		return new CollisionEdge(startx+dx, starty+dy, endx+dx, endy+dy);
 	}
+	
+	public CollisionEdge interpolate(CollisionShape other)
+	{
+		if (!(other instanceof CollisionEdge))
+			throw new IllegalArgumentException();
+		CollisionEdge o = (CollisionEdge)other;
+		return new CollisionEdge(
+				(startx+o.startx)/2, (starty+o.starty)/2,
+				(endx+o.endx)/2, (endy+o.endy)/2
+		);
+	}
 }

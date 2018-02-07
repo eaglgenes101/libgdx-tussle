@@ -25,9 +25,14 @@ public interface CollisionShape
 	ProjectionVector depth(CollisionStadium stad);
 	double[] nearestPoint(CollisionStadium stad);
 	double stadiumPortion(CollisionStadium stad);
+	
+	//Defines additional predicates that must be satisfied in addition to
+	//depth having positive magnitude before collision acts
 	boolean collidesWith(CollisionStadium stad);
 	
 	Rectangle getBounds();
 	
 	void draw(ShapeRenderer drawer);
+	
+	CollisionShape displacement(double dx, double dy);
 }

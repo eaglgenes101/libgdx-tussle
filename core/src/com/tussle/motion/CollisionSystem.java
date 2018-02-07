@@ -85,8 +85,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 			//Reflect off of the hit surface
 			if (Components.velocityMapper.has(entity))
 			{
-				CollisionStadium finalStad = new CollisionStadium(
-						hit.getBox().getAfterStadium(),
+				CollisionStadium finalStad = hit.getBox().getAfterStadium().displacement(
 						hit.getVector().xComp(), hit.getVector().yComp()
 				);
 				ProjectionVector surfNorm = hit.getSurface().depth(finalStad, 1);
@@ -211,11 +210,11 @@ public strictfp class CollisionSystem extends IteratingSystem
 				double yDisp = latestHit.getVector().yComp();
 				postMiddleBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageStadium c) -> new CollisionStadium(middleBoxes.get(c), xDisp, yDisp)
+						(StageStadium c) -> middleBoxes.get(c).displacement(xDisp, yDisp)
 				);
 				postAfterBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageStadium c) -> new CollisionStadium(afterBoxes.get(c), xDisp, yDisp)
+						(StageStadium c) -> afterBoxes.get(c).displacement(xDisp, yDisp)
 				);
 			}
 			else

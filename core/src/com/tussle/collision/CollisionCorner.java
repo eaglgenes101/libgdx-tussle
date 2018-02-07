@@ -19,29 +19,43 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
-public class CollisionCircle implements CollisionShape
+public class CollisionCorner implements CollisionShape
 {
-	protected double x;
-	protected double y;
-	protected double radius;
+	double x, y, minAngle, maxAngle;
+	double minCos = Double.NaN, minSin = Double.NaN;
+	double maxCos = Double.NaN, maxSin = Double.NaN;
+	boolean trigInit = false;
 	
-	public CollisionCircle(double x, double y, double rad)
+	public CollisionCorner(double x, double y, double min, double max)
 	{
 		this.x = x;
 		this.y = y;
-		radius = rad;
+		minAngle = min;
+		maxAngle = max;
+	}
+	
+	protected void initTrig()
+	{
+		if (!trigInit)
+		{
+			minCos = FastMath.cos(FastMath.toRadians(minAngle));
+			minSin = FastMath.sin(FastMath.toRadians(minAngle));
+			maxCos = FastMath.cos(FastMath.toRadians(maxAngle));
+			maxSin = FastMath.sin(FastMath.toRadians(maxAngle));
+			trigInit = true;
+		}
 	}
 	
 	public ProjectionVector depth(CollisionStadium stad)
 	{
-		
 		ProjectionVector disp = Intersector.dispSegmentPoint(
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy(), x, y);
 		//disp.xnorm = -disp.xnorm;
 		//disp.ynorm = -disp.ynorm;
-		//disp.magnitude = stad.getRadius()+getRadius(time)-disp.magnitude;
-		disp.magnitude -= stad.getRadius()+radius;
+		//disp.magnitude = stad.getRadius()-disp.magnitude;
+		disp.magnitude -= stad.getRadius();
 		return disp;
 	}
 	
@@ -52,28 +66,33 @@ public class CollisionCircle implements CollisionShape
 	
 	public double stadiumPortion(CollisionStadium stad)
 	{
-		
 		return Intersector.partSegmentPoint(
 				stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy(), x, y);
 	}
 	
 	public boolean collidesWith(CollisionStadium stad)
 	{
-		return true;
+		initTrig();
+		ProjectionVector disp = depth(stad);
+		return disp.magnitude() <= 16 &&
+		       (minSin*disp.xnorm-minCos*disp.ynorm) * (minSin*maxCos-minCos*maxSin) < 0;
 	}
 	
 	public Rectangle getBounds()
 	{
-		return new Rectangle(x-radius, y-radius, 2*radius, 2*radius);
+		return new Rectangle(x, y, 0, 0);
 	}
 	
 	public void draw(ShapeRenderer drawer)
 	{
-		drawer.circle((float)x, (float)y, (float)radius);
+		initTrig();
+		drawer.arc((float)x, (float)y, 12, (float)minAngle, (float)(maxAngle - minAngle));
+		drawer.line((float)x, (float)y, (float)(x+minCos*20), (float)(y+minSin*20));
+		drawer.line((float)x, (float)y, (float)(x+maxCos*20), (float)(y+maxSin*20));
 	}
 	
-	public CollisionCircle displacement(double dx, double dy)
+	public CollisionCorner displacement(double dx, double dy)
 	{
-		return new CollisionCircle(x+dx, y+dy, radius);
+		return new CollisionCorner(x+dx, y+dy, minAngle, maxAngle);
 	}
 }

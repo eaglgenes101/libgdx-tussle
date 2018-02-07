@@ -113,7 +113,7 @@ public strictfp class StageEdge extends StageElement
 		return (1-time) * beforey1 + time * aftery1;
 	}
 
-	public ProjectionVector depth(Stadium stad, double time)
+	public ProjectionVector depth(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		double startX = getStartX(time);
@@ -129,7 +129,7 @@ public strictfp class StageEdge extends StageElement
 		return disp;
 	}
 
-	public double[] instantVelocity(Stadium stad, double time)
+	public double[] instantVelocity(CollisionStadium stad, double time)
 	{
 		computeNewBeforePositions();
 		computeNewAfterPositions();
@@ -148,7 +148,7 @@ public strictfp class StageEdge extends StageElement
 		return new double[]{secDX, secDY};
 	}
 
-	public boolean collides(Stadium stad, double time)
+	public boolean collides(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		double startX = getStartX(time);
@@ -172,7 +172,7 @@ public strictfp class StageEdge extends StageElement
 
 	}
 
-	public double stadiumPortion(Stadium stad, double time)
+	public double stadiumPortion(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		double startX = getStartX(time);

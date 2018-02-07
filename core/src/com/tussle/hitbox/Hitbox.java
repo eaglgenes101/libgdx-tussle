@@ -19,7 +19,7 @@ package com.tussle.hitbox;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.tussle.collision.CollisionBox;
+import com.tussle.collision.StageStadium;
 import com.tussle.postprocess.PostprocessSystem;
 import com.tussle.script.ScriptContextComponent;
 import com.tussle.script.ScriptIterator;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 public class Hitbox
 {
 	//Collision Box
-	CollisionBox box;
+	StageStadium box;
 	Entity owner;
 	ScriptIterator controller;
 	
@@ -58,7 +58,7 @@ public class Hitbox
 		controller = s;
 	}
 	
-	public CollisionBox getBox()
+	public StageStadium getBox()
 	{
 		return box;
 	}

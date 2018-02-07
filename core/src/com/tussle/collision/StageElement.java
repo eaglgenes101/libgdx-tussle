@@ -122,16 +122,16 @@ public abstract class StageElement
 	}
 
 	//Minimal displacement needed to prevent intersection given the time and stadium
-	public abstract ProjectionVector depth(Stadium end, double time);
+	public abstract ProjectionVector depth(CollisionStadium end, double time);
 
 	//Instantaneous velocity at point closest to the given stadium
-	public abstract double[] instantVelocity(Stadium start, double time);
+	public abstract double[] instantVelocity(CollisionStadium start, double time);
 
 	//Portion of the stadium that the stage element is closest to
-	public abstract double stadiumPortion(Stadium start, double time);
+	public abstract double stadiumPortion(CollisionStadium start, double time);
 
 	//Boolean indicating if the ECB interacts with the stage surface at this time
-	public abstract boolean collides(Stadium end, double time);
+	public abstract boolean collides(CollisionStadium end, double time);
 
 	public abstract Rectangle getBounds(double start, double end);
 

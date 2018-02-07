@@ -29,21 +29,21 @@ import java.util.*;
  */
 public class ECBComponent implements Component
 {
-	LinkedHashMap<ScriptIterator, LinkedHashSet<CollisionBox>> ecbs;
+	LinkedHashMap<ScriptIterator, LinkedHashSet<StageStadium>> ecbs;
 	
 	public ECBComponent()
 	{
 		ecbs = new LinkedHashMap<>();
 	}
 	
-	public void put(ScriptIterator iterator, CollisionBox box)
+	public void put(ScriptIterator iterator, StageStadium box)
 	{
 		if (!ecbs.containsKey(iterator))
 			ecbs.put(iterator, new LinkedHashSet<>());
 		ecbs.get(iterator).add(box);
 	}
 	
-	public void remove(ScriptIterator iterator, CollisionBox box)
+	public void remove(ScriptIterator iterator, StageStadium box)
 	{
 		ecbs.get(iterator).remove(box);
 	}
@@ -53,20 +53,20 @@ public class ECBComponent implements Component
 		ecbs.remove(iterator);
 	}
 	
-	private transient Collection<CollisionBox> hitboxValues;
+	private transient Collection<StageStadium> hitboxValues;
 	
-	public Collection<CollisionBox> getCollisionBoxes()
+	public Collection<StageStadium> getCollisionBoxes()
 	{
 		if (hitboxValues == null)
 		{
-			hitboxValues = new AbstractCollection<CollisionBox>()
+			hitboxValues = new AbstractCollection<StageStadium>()
 			{
-				public Iterator<CollisionBox> iterator()
+				public Iterator<StageStadium> iterator()
 				{
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									ecbs.values(),
-									(LinkedHashSet<CollisionBox> coll) -> coll.iterator()
+									(LinkedHashSet<StageStadium> coll) -> coll.iterator()
 							)
 					);
 				}

@@ -51,13 +51,13 @@ public strictfp class CollisionSystem extends IteratingSystem
 	public void processEntity(Entity entity, float delta)
 	{
 		CollisionMap minVectors = new CollisionMap();
-		Map<CollisionBox, Stadium> beforeStads = new HashMap<>();
-		Map<CollisionBox, Stadium> afterStads = new HashMap<>();
+		Map<StageStadium, CollisionStadium> beforeStads = new HashMap<>();
+		Map<StageStadium, CollisionStadium> afterStads = new HashMap<>();
 		
 		//Move a box copy first
-		for (CollisionBox box : Components.ecbMapper.get(entity).getCollisionBoxes())
+		for (StageStadium box : Components.ecbMapper.get(entity).getCollisionBoxes())
 		{
-			CollisionBox ourBox = new CollisionBox(box);
+			StageStadium ourBox = new StageStadium(box);
 			beforeStads.put(box, ourBox.getStadiumAt(0));
 			afterStads.put(box, ourBox.getStadiumAt(1));
 			//First, populate the highest-level hash maps
@@ -85,8 +85,10 @@ public strictfp class CollisionSystem extends IteratingSystem
 			//Reflect off of the hit surface
 			if (Components.velocityMapper.has(entity))
 			{
-				Stadium finalStad = new Stadium(hit.getBox().getAfterStadium());
-				finalStad.displace(hit.getVector().xComp(), hit.getVector().yComp());
+				CollisionStadium finalStad = new CollisionStadium(
+						hit.getBox().getAfterStadium(),
+						hit.getVector().xComp(), hit.getVector().yComp()
+				);
 				ProjectionVector surfNorm = hit.getSurface().depth(finalStad, 1);
 				double[] surfVel = hit.getSurface().instantVelocity(finalStad, 1);
 				
@@ -162,7 +164,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 				entity,
 				ECBComponent.class,
 				(comp) -> {
-					for (CollisionBox c : comp.getCollisionBoxes())
+					for (StageStadium c : comp.getCollisionBoxes())
 					{
 						c.setBeforePos(finalX, finalY);
 						c.setAfterPos(finalX+xVel, finalY+yVel);
@@ -174,18 +176,18 @@ public strictfp class CollisionSystem extends IteratingSystem
 	//TODO: Instead of "strongest wins", combine the different displacement
 	//vectors intelligently
 	public CollisionTriad ecbHit(double start, double end,
-	                             Map<CollisionBox, Stadium> beforeBoxes,
-	                             Map<CollisionBox, Stadium> afterBoxes,
+	                             Map<StageStadium, CollisionStadium> beforeBoxes,
+	                             Map<StageStadium, CollisionStadium> afterBoxes,
 	                             CollisionMap fores)
 	{
 		if (fores.isEmpty()) return null;
 		
 		//Split the given surfaces into two groups: those which are not worth timestep subdividing,
 		//and those which are
-		Predicate<Pair<CollisionBox, StageElement>> splitHeuristic =
-				(Pair<CollisionBox, StageElement> m) ->
+		Predicate<Pair<StageStadium, StageElement>> splitHeuristic =
+				(Pair<StageStadium, StageElement> m) ->
 				{
-					CollisionBox c = m.getLeft();
+					StageStadium c = m.getLeft();
 					StageElement s = m.getRight();
 					double spd = Utility.displacementDifference(s, beforeBoxes.get(c), afterBoxes.get(c), start, end);
 					return spd >= PIXEL_STEP; //Add optimization heuristics when I finally get correct results
@@ -195,25 +197,25 @@ public strictfp class CollisionSystem extends IteratingSystem
 		{
 			//Split in half, and run
 			double avg = (start+end)/2;
-			Map<CollisionBox, Stadium> middleBoxes = LazyMap.lazyMap(
+			Map<StageStadium, CollisionStadium> middleBoxes = LazyMap.lazyMap(
 					new HashMap<>(),
-					(CollisionBox c) -> Utility.middleStad(beforeBoxes.get(c), afterBoxes.get(c))
+					(StageStadium c) -> Utility.middleStad(beforeBoxes.get(c), afterBoxes.get(c))
 			);
 			CollisionTriad latestHit = ecbHit(start, avg, beforeBoxes, middleBoxes, fores);
 			
-			Map<CollisionBox, Stadium> postMiddleBoxes;
-			Map<CollisionBox, Stadium> postAfterBoxes;
+			Map<StageStadium, CollisionStadium> postMiddleBoxes;
+			Map<StageStadium, CollisionStadium> postAfterBoxes;
 			if (latestHit != null)
 			{
 				double xDisp = latestHit.getVector().xComp();
 				double yDisp = latestHit.getVector().yComp();
 				postMiddleBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(CollisionBox c) -> new Stadium(middleBoxes.get(c)).displace(xDisp, yDisp)
+						(StageStadium c) -> new CollisionStadium(middleBoxes.get(c), xDisp, yDisp)
 				);
 				postAfterBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(CollisionBox c) -> new Stadium(afterBoxes.get(c)).displace(xDisp, yDisp)
+						(StageStadium c) -> new CollisionStadium(afterBoxes.get(c), xDisp, yDisp)
 				);
 			}
 			else
@@ -224,9 +226,9 @@ public strictfp class CollisionSystem extends IteratingSystem
 			
 			//Populate a new collision map for the second half
 			CollisionMap mids = new CollisionMap();
-			for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
+			for (Map.Entry<Pair<StageStadium, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
 			{
-				CollisionBox c = foreEntry.getKey().getLeft();
+				StageStadium c = foreEntry.getKey().getLeft();
 				StageElement s = foreEntry.getKey().getRight();
 				mids.put(c, s, s.depth(postMiddleBoxes.get(c), avg));
 			}
@@ -269,7 +271,7 @@ public strictfp class CollisionSystem extends IteratingSystem
 		{
 			//Take the whole step at once
 			CollisionMap afts = new CollisionMap();
-			for (Pair<CollisionBox, StageElement> foreKey : fores.keySet())
+			for (Pair<StageStadium, StageElement> foreKey : fores.keySet())
 			{
 				if (foreKey.getRight().collides(beforeBoxes.get(foreKey.getLeft()), start) ||
 					foreKey.getRight().collides(afterBoxes.get(foreKey.getLeft()), end))
@@ -283,9 +285,9 @@ public strictfp class CollisionSystem extends IteratingSystem
 			if (combinedVectors != null)
 			{
 				double dotScore = Double.NEGATIVE_INFINITY;
-				CollisionBox highScoreBox = null;
+				StageStadium highScoreBox = null;
 				StageElement highScoreElement = null;
-				for (Map.Entry<Pair<CollisionBox, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
+				for (Map.Entry<Pair<StageStadium, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
 				{
 					double candidateDotScore = viewEntry.getValue().xComp() * combinedVectors.xNorm() +
 					                           viewEntry.getValue().yComp() * combinedVectors.yNorm();

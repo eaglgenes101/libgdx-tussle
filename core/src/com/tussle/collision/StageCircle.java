@@ -83,7 +83,7 @@ public class StageCircle extends StageElement
 		return (1-time) * beforerad + time * afterrad;
 	}
 
-	public ProjectionVector depth(Stadium stad, double time)
+	public ProjectionVector depth(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		double xPos = getX(time);
@@ -97,7 +97,7 @@ public class StageCircle extends StageElement
 		return disp;
 	}
 
-	public double[] instantVelocity(Stadium stad, double time)
+	public double[] instantVelocity(CollisionStadium stad, double time)
 	{
 		computeNewBeforePositions();
 		computeNewAfterPositions();
@@ -106,7 +106,7 @@ public class StageCircle extends StageElement
 		return new double[]{secDX, secDY};
 	}
 
-	public boolean collides(Stadium stad, double time)
+	public boolean collides(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		double xPos = getX(time);
@@ -116,7 +116,7 @@ public class StageCircle extends StageElement
 		return stad.getRadius() - disp.magnitude + getRadius(time) <= 0;
 	}
 
-	public double stadiumPortion(Stadium stad, double time)
+	public double stadiumPortion(CollisionStadium stad, double time)
 	{
 		cleanForTime(time);
 		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),

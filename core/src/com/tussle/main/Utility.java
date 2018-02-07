@@ -21,7 +21,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tussle.collision.ProjectionVector;
-import com.tussle.collision.Stadium;
+import com.tussle.collision.CollisionStadium;
 import com.tussle.collision.StageElement;
 import org.apache.commons.math3.util.FastMath;
 
@@ -367,7 +367,7 @@ public strictfp class Utility
 			   (p2.magnitude()-p1.magnitude() <= 8);
 	}
 
-	public static double displacementDifference(StageElement se, Stadium startStad, Stadium endStad,
+	public static double displacementDifference(StageElement se, CollisionStadium startStad, CollisionStadium endStad,
 	                                            double startTime, double endTime)
 	{
 		double[] startStageVelocity = se.instantVelocity(startStad, startTime);
@@ -399,9 +399,9 @@ public strictfp class Utility
 		//					endDXDiff*collideVec1.xNorm()+endDYDiff*collideVec1.yNorm());
 	}
 
-	public static Stadium middleStad(Stadium s1, Stadium s2)
+	public static CollisionStadium middleStad(CollisionStadium s1, CollisionStadium s2)
 	{
-		return new Stadium((s1.getStartx()+s2.getStartx())/2, (s1.getStarty()+s2.getStarty())/2,
+		return new CollisionStadium((s1.getStartx() + s2.getStartx()) / 2, (s1.getStarty() + s2.getStarty()) / 2,
 				(s1.getEndx()+s2.getEndx())/2, (s1.getEndy()+s2.getEndy())/2,
 				(s1.getRadius()+s2.getRadius())/2);
 	}

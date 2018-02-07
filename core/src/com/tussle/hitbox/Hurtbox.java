@@ -17,16 +17,16 @@
 
 package com.tussle.hitbox;
 
-import com.tussle.collision.CollisionBox;
+import com.tussle.collision.StageStadium;
 
 import java.util.List;
 
 public class Hurtbox
 {
-	CollisionBox box;
+	StageStadium box;
 	List<ArmorFilter> filters;
 	
-	public Hurtbox(CollisionBox hurtbox)
+	public Hurtbox(StageStadium hurtbox)
 	{
 		box = hurtbox;
 	}

@@ -17,36 +17,36 @@
 
 package com.tussle.motion;
 
-import com.tussle.collision.Stadium;
+import com.tussle.collision.CollisionStadium;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MotionLog
 {
-	ConcurrentSkipListMap<Double, Stadium> base;
+	ConcurrentSkipListMap<Double, CollisionStadium> base;
 	
-	public MotionLog(Stadium start, Stadium end)
+	public MotionLog(CollisionStadium start, CollisionStadium end)
 	{
 		base = new ConcurrentSkipListMap<>();
 		base.put(0.0, start);
 		base.put(1.0, end);
 	}
 	
-	public Stadium interpolate(double time)
+	public CollisionStadium interpolate(double time)
 	{
 		if (time < 0.0 || time > 1.0)
 			throw new IllegalArgumentException();
-		Map.Entry<Double, Stadium> lowerEntry = base.floorEntry(time);
-		Map.Entry<Double, Stadium> upperEntry = base.ceilingEntry(time);
+		Map.Entry<Double, CollisionStadium> lowerEntry = base.floorEntry(time);
+		Map.Entry<Double, CollisionStadium> upperEntry = base.ceilingEntry(time);
 		if (lowerEntry.getKey().equals(upperEntry.getKey()))
 		{
-			return new Stadium(lowerEntry.getValue());
+			return new CollisionStadium(lowerEntry.getValue());
 		}
 		else
 		{
 			double t = (time-lowerEntry.getKey())/(upperEntry.getKey()-lowerEntry.getKey());
-			return new Stadium(
+			return new CollisionStadium(
 					(1-t)*lowerEntry.getValue().getStartx() +
 					t*upperEntry.getValue().getStartx(),
 					(1-t)*lowerEntry.getValue().getStarty() +

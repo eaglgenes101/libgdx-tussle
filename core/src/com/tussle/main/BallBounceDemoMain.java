@@ -60,7 +60,7 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		ball0.getComponent(ScriptContextComponent.class).addStatusEffect(dummyStatus0);
 		ball0.getComponent(PositionComponent.class).setPosition(100, 0);
 		ball0.getComponent(VelocityComponent.class).setVelocity(4, -4);
-		ball0.getComponent(ECBComponent.class).put(dummyStatus0 , new CollisionBox(0, 0, 0, 0, 32));
+		ball0.getComponent(ECBComponent.class).put(dummyStatus0 , new StageStadium(0, 0, 0, 0, 32));
 		ball0.getComponent(ElasticityComponent.class).wallElasticity = 1.5;
 		ball0.getComponent(ElasticityComponent.class).groundElasticity = 1.5;
 		ball0.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
@@ -82,7 +82,7 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		ball1.getComponent(ScriptContextComponent.class).addStatusEffect(dummyStatus1);
 		ball1.getComponent(PositionComponent.class).setPosition(0, 100);
 		ball1.getComponent(VelocityComponent.class).setVelocity(2, 2);
-		ball1.getComponent(ECBComponent.class).put(dummyStatus1, new CollisionBox(0, 0, 0, 0, 32));
+		ball1.getComponent(ECBComponent.class).put(dummyStatus1, new StageStadium(0, 0, 0, 0, 32));
 		ball1.getComponent(ElasticityComponent.class).wallElasticity = .9;
 		ball1.getComponent(ElasticityComponent.class).groundElasticity = .9;
 		ball1.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");

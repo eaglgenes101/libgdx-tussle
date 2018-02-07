@@ -15,29 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.motion;
+package com.tussle.collision;
 
-import com.tussle.collision.StageStadium;
-import com.tussle.collision.ProjectionVector;
-import com.tussle.collision.StageElement;
-import org.apache.commons.lang3.tuple.Pair;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-import java.util.LinkedHashMap;
-
-public class CollisionMap extends LinkedHashMap<Pair<StageStadium, StageElement>,
-		                                            ProjectionVector>
+//Use StageElement to generate these factory shapes
+public interface CollisionShape
 {
-	public ProjectionVector get(StageStadium c, StageElement s)
-	{
-		//Ah well, looks like I'm going to have to use a transient pair
-		return get(Pair.of(c, s));
-	}
+	ProjectionVector depth(CollisionStadium stad);
+	double[] nearestPoint(CollisionStadium stad);
+	double stadiumPortion(CollisionStadium stad);
+	boolean collidesWith(CollisionStadium stad);
 	
-	public ProjectionVector put(StageStadium c, StageElement s, ProjectionVector p)
-	{
-		return put(Pair.of(c, s), p);
-	}
+	Rectangle getBounds();
 	
-	
-	
+	void draw(ShapeRenderer drawer);
 }

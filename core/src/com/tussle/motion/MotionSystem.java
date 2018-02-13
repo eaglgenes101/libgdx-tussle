@@ -55,6 +55,8 @@ public class MotionSystem extends IteratingSystem
 			CollisionMap minVectors = new CollisionMap();
 			Map<StageStadium, CollisionStadium> beforeStads = new HashMap<>();
 			Map<StageStadium, CollisionStadium> afterStads = new HashMap<>();
+			Map<StageElement, CollisionShape> beforeElements = new HashMap<>();
+			Map<StageElement, CollisionShape> afterElements = new HashMap<>();
 			
 			//Move a box copy first
 			for (StageStadium box : Components.ecbMapper.get(entity).getCollisionBoxes())
@@ -72,12 +74,14 @@ public class MotionSystem extends IteratingSystem
 							if (seBounds.overlaps(boxBounds))
 							{
 								minVectors.put(box, se, se.getBefore().depth(box.getBefore()));
+								beforeElements.put(se, se.getBefore());
+								afterElements.put(se, se.getAfter());
 							}
 						}
 					}
 			}
 			//Now find the hit stage element corresponding to the largest disp
-			CollisionTriad hit = ecbHit(0, 1, beforeStads, afterStads, minVectors);
+			CollisionTriad hit = ecbHit(beforeStads, afterStads, beforeElements, afterElements, minVectors);
 			
 			//Position to move to
 			final double dx;
@@ -202,9 +206,10 @@ public class MotionSystem extends IteratingSystem
 	}
 	
 	
-	public CollisionTriad ecbHit(double start, double end,
-	                             Map<StageStadium, CollisionStadium> beforeBoxes,
+	public CollisionTriad ecbHit(Map<StageStadium, CollisionStadium> beforeBoxes,
 	                             Map<StageStadium, CollisionStadium> afterBoxes,
+	                             Map<StageElement, CollisionShape> beforeSurfaces,
+	                             Map<StageElement, CollisionShape> afterSurfaces,
 	                             CollisionMap fores)
 	{
 		if (fores.isEmpty()) return null;
@@ -216,23 +221,28 @@ public class MotionSystem extends IteratingSystem
 				{
 					StageStadium c = m.getLeft();
 					StageElement s = m.getRight();
-					double[] velocity = Utility.displacementDiff(s.getBefore(), s.getAfter(),
-					                                             c.getBefore(), c.getAfter());
-					return FastMath.hypot(velocity[0], velocity[1]) >= 4;
+					double[] velocity = Utility.displacementDiff(beforeSurfaces.get(s), afterSurfaces.get(s),
+					                                             beforeBoxes.get(c), afterBoxes.get(c));
+					return FastMath.hypot(velocity[0], velocity[1]) >= PIXEL_STEP;
 				};
 		
 		if (fores.keySet().stream().anyMatch(splitHeuristic))
 		{
 			//Split in half, and run
-			double avg = (start+end)/2;
 			Map<StageStadium, CollisionStadium> middleBoxes = LazyMap.lazyMap(
 					new HashMap<>(),
-					(StageStadium c) -> Utility.middleStad(beforeBoxes.get(c), afterBoxes.get(c))
+					(StageStadium c) -> beforeBoxes.get(c).interpolate(afterBoxes.get(c))
 			);
-			CollisionTriad latestHit = ecbHit(start, avg, beforeBoxes, middleBoxes, fores);
+			Map<StageElement, CollisionShape> middleSurfaces = LazyMap.lazyMap(
+					new HashMap<>(),
+					(StageElement s) -> beforeSurfaces.get(s).interpolate(afterSurfaces.get(s))
+			);
+			CollisionTriad latestHit = ecbHit(beforeBoxes, middleBoxes, beforeSurfaces, middleSurfaces, fores);
 			
 			Map<StageStadium, CollisionStadium> postMiddleBoxes;
 			Map<StageStadium, CollisionStadium> postAfterBoxes;
+			Map<StageElement, CollisionShape> postMiddleSurfaces;
+			Map<StageElement, CollisionShape> postAfterSurfaces;
 			if (latestHit != null)
 			{
 				double xDisp = latestHit.getVector().xComp();
@@ -245,11 +255,21 @@ public class MotionSystem extends IteratingSystem
 						new HashMap<>(),
 						(StageStadium c) -> afterBoxes.get(c).displacement(xDisp, yDisp)
 				);
+				postMiddleSurfaces = LazyMap.lazyMap(
+						new HashMap<>(),
+						(StageElement s) -> middleSurfaces.get(s).displacement(xDisp, yDisp)
+				);
+				postAfterSurfaces = LazyMap.lazyMap(
+						new HashMap<>(),
+						(StageElement s) -> afterSurfaces.get(s).displacement(xDisp, yDisp)
+				);
 			}
 			else
 			{
 				postMiddleBoxes = middleBoxes;
 				postAfterBoxes = afterBoxes;
+				postMiddleSurfaces = middleSurfaces;
+				postAfterSurfaces = afterSurfaces;
 			}
 			
 			//Populate a new collision map for the second half
@@ -260,7 +280,8 @@ public class MotionSystem extends IteratingSystem
 				StageElement s = foreEntry.getKey().getRight();
 				mids.put(c, s, s.getBefore().interpolate(s.getAfter()).depth(postMiddleBoxes.get(c)));
 			}
-			CollisionTriad secondHalfHit = ecbHit(avg, end, postMiddleBoxes, postAfterBoxes, mids);
+			CollisionTriad secondHalfHit = ecbHit(postMiddleBoxes, postAfterBoxes,
+			                                      postMiddleSurfaces, postAfterSurfaces, mids);
 			if (secondHalfHit != null)
 			{
 				if (latestHit == null)

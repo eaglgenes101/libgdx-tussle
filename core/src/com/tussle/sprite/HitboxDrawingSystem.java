@@ -56,7 +56,8 @@ public class HitboxDrawingSystem extends IteratingSystem
 			drawer.setColor(Color.BLUE);
 			for (StageStadium s : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
-				s.draw(drawer);
+				s.getBefore().draw(drawer);
+				s.getAfter().draw(drawer);
 			}
 		}
 		if (Components.stageElementMapper.has(entity))
@@ -64,7 +65,8 @@ public class HitboxDrawingSystem extends IteratingSystem
 			drawer.setColor(Color.GREEN);
 			for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
 			{
-				s.draw(drawer);
+				s.getBefore().draw(drawer);
+				s.getAfter().draw(drawer);
 			}
 		}
 	}

@@ -17,8 +17,6 @@
 
 package com.tussle.collision;
 
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.tussle.main.Intersector;
 import org.apache.commons.math3.util.FastMath;
 
 public class StageCircle extends StageElement
@@ -27,123 +25,43 @@ public class StageCircle extends StageElement
 	private double afterx, aftery, afterrad;
 	private double beforex, beforey, beforerad;
 
-	public StageCircle(double x, double y, double r)
+	public StageCircle(double x, double y, double r, double globalX, double globalY,
+	                   double scale)
 	{
-		super();
 		localx = x;
 		localy = y;
 		localrad = r;
+		formFor(globalX, globalY, scale);
 	}
 	
-	public void computeNewBeforePositions()
+	protected void formFor(double globalX, double globalY, double scale)
 	{
-		double cos = FastMath.cos(FastMath.toRadians(befRot));
-		double sin = FastMath.sin(FastMath.toRadians(befRot));
-		double locx = (localx - befOriginX)*(befFlip?-befScale:befScale);
-		double locy = (localy - befOriginY)*befScale;
-		double oldX = locx;
-		locx = locx * cos - locy * sin;
-		locy = oldX * sin + locy * cos;
-		beforex = locx + befOriginX + befX;
-		beforey = locy + befOriginY + befY;
-		beforerad = FastMath.abs(localrad * befScale);
-		befDirty = false;
+		afterx = localx + globalX;
+		aftery = localy + globalY;
+		afterrad = FastMath.abs(localrad * scale);
 	}
 	
-	public void computeNewAfterPositions()
+	public CollisionCircle getBefore()
 	{
-		double cos = FastMath.cos(FastMath.toRadians(befRot));
-		double sin = FastMath.sin(FastMath.toRadians(befRot));
-		double locx = (localx - befOriginX)*(befFlip?-befScale:befScale);
-		double locy = (localy - befOriginY)*befScale;
-		double oldX = locx;
-		locx = locx * cos - locy * sin;
-		locy = oldX * sin + locy * cos;
-		afterx = locx + befOriginX + befX;
-		aftery = locy + befOriginY + befY;
-		afterrad = FastMath.abs(localrad * befScale);
-		aftDirty = false;
+		if (hasBefore)
+			return new CollisionCircle(beforex, beforey, beforerad);
+		else
+			return new CollisionCircle(afterx, aftery, afterrad);
 	}
-
-	public double getX(double time)
+	
+	public CollisionCircle getAfter()
 	{
-		cleanForTime(time);
-		return (1-time) * beforex + time * afterx;
+		return new CollisionCircle(afterx, aftery, afterrad);
 	}
-
-	public double getY(double time)
+	
+	public void step(double dx, double dy, double xpos, double ypos,
+	                 double rot, double scale, boolean flipped)
 	{
-		cleanForTime(time);
-		return (1-time) * beforey + time * aftery;
-	}
-
-	public double getRadius(double time)
-	{
-		cleanForTime(time);
-		return (1-time) * beforerad + time * afterrad;
-	}
-
-	public ProjectionVector depth(CollisionStadium stad, double time)
-	{
-		cleanForTime(time);
-		double xPos = getX(time);
-		double yPos = getY(time);
-		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
-				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
-		//disp.xnorm = -disp.xnorm;
-		//disp.ynorm = -disp.ynorm;
-		//disp.magnitude = stad.getRadius()+getRadius(time)-disp.magnitude;
-		disp.magnitude -= stad.getRadius()+getRadius(time);
-		return disp;
-	}
-
-	public double[] instantVelocity(CollisionStadium stad, double time)
-	{
-		computeNewBeforePositions();
-		computeNewAfterPositions();
-		double secDX = afterx - beforex;
-		double secDY = aftery - beforey;
-		return new double[]{secDX, secDY};
-	}
-
-	public boolean collides(CollisionStadium stad, double time)
-	{
-		cleanForTime(time);
-		double xPos = getX(time);
-		double yPos = getY(time);
-		ProjectionVector disp = Intersector.dispSegmentPoint(stad.getStartx(),
-				stad.getStarty(), stad.getEndx(), stad.getEndy(), xPos, yPos);
-		return stad.getRadius() - disp.magnitude + getRadius(time) <= 0;
-	}
-
-	public double stadiumPortion(CollisionStadium stad, double time)
-	{
-		cleanForTime(time);
-		return Intersector.partSegmentPoint(stad.getStartx(), stad.getStarty(),
-				stad.getEndx(), stad.getEndy(), getX(time), getY(time));
-	}
-
-	public Rectangle getBounds(double start, double end)
-	{
-		computeNewBeforePositions();
-		computeNewAfterPositions();
-		double minX = FastMath.min(getX(start)-getRadius(start),
-				getX(end)-getRadius(end));
-		double maxX = FastMath.max(getX(start)+getRadius(start),
-				getX(end)+getRadius(end));
-		double minY = FastMath.min(getY(start)-getRadius(start),
-				getY(end)+getRadius(end));
-		double maxY = FastMath.max(getY(start)+getRadius(start),
-				getY(end)+getRadius(end));
-		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
-	}
-
-	public void draw(ShapeRenderer drawer)
-	{
-		computeNewBeforePositions();
-		computeNewAfterPositions();
-		drawer.circle((float)getX(0), (float)getY(0), (float)getRadius(0));
-		drawer.circle((float)getX(1), (float)getY(1), (float)getRadius(1));
+		beforex = afterx + dx;
+		beforey = aftery + dy;
+		beforerad = afterrad;
+		formFor(xpos, ypos, scale);
+		hasBefore = true;
 	}
 
 }

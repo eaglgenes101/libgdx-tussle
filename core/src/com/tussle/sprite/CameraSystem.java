@@ -88,8 +88,8 @@ public class CameraSystem extends IteratingSystem
 		{
 			for (StageElement s : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
-				com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
-				if (s.getBounds(0, 0) != null)
+				com.tussle.collision.Rectangle rect = s.getAfter().getBounds();
+				if (s.getBefore().getBounds() != null)
 				{
 					if (entityMinX > rect.x) entityMinX = (float)rect.x;
 					if (entityMinY > rect.y) entityMinY = (float)rect.y;
@@ -102,8 +102,8 @@ public class CameraSystem extends IteratingSystem
 		{
 			for (StageElement s : Components.stageElementMapper.get(entity).getStageElements())
 			{
-				com.tussle.collision.Rectangle rect = s.getBounds(1, 1);
-				if (s.getBounds(0, 0) != null)
+				com.tussle.collision.Rectangle rect = s.getAfter().getBounds();
+				if (s.getBefore().getBounds() != null)
 				{
 					if (entityMinX > rect.x) entityMinX = (float)rect.x;
 					if (entityMinY > rect.y) entityMinY = (float)rect.y;

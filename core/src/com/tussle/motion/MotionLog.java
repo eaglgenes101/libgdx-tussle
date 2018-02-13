@@ -17,47 +17,36 @@
 
 package com.tussle.motion;
 
-import com.tussle.collision.CollisionStadium;
+import com.tussle.collision.CollisionShape;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class MotionLog
 {
-	ConcurrentSkipListMap<Double, CollisionStadium> base;
+	ConcurrentSkipListMap<Double, CollisionShape> base;
 	
-	public MotionLog(CollisionStadium start, CollisionStadium end)
+	public MotionLog(CollisionShape start, CollisionShape end)
 	{
 		base = new ConcurrentSkipListMap<>();
 		base.put(0.0, start);
 		base.put(1.0, end);
 	}
 	
-	public CollisionStadium interpolate(double time)
+	public CollisionShape interpolate(double time)
 	{
 		if (time < 0.0 || time > 1.0)
 			throw new IllegalArgumentException();
-		Map.Entry<Double, CollisionStadium> lowerEntry = base.floorEntry(time);
-		Map.Entry<Double, CollisionStadium> upperEntry = base.ceilingEntry(time);
+		Map.Entry<Double, CollisionShape> lowerEntry = base.floorEntry(time);
+		Map.Entry<Double, CollisionShape> upperEntry = base.ceilingEntry(time);
 		if (lowerEntry.getKey().equals(upperEntry.getKey()))
 		{
-			return new CollisionStadium(lowerEntry.getValue());
+			return lowerEntry.getValue();
 		}
 		else
 		{
 			double t = (time-lowerEntry.getKey())/(upperEntry.getKey()-lowerEntry.getKey());
-			return new CollisionStadium(
-					(1-t)*lowerEntry.getValue().getStartx() +
-					t*upperEntry.getValue().getStartx(),
-					(1-t)*lowerEntry.getValue().getStarty() +
-					t*upperEntry.getValue().getStarty(),
-					(1-t)*lowerEntry.getValue().getEndx() +
-					t*upperEntry.getValue().getEndx(),
-					(1-t)*lowerEntry.getValue().getEndy() +
-					t*upperEntry.getValue().getEndy(),
-					(1-t)*lowerEntry.getValue().getRadius() +
-					t*upperEntry.getValue().getEndy()
-			);
+			return lowerEntry.getValue().interpolate(lowerEntry.getValue());
 		}
 	}
 	
@@ -66,10 +55,13 @@ public class MotionLog
 		//Create entries for timeFrom and timeTo if they don't already exist
 		if (timeFrom < 0 || timeFrom > 1 || timeTo < 0 || timeTo > 1)
 			throw new IllegalArgumentException();
-		
 		if (!base.containsKey(timeFrom))
 			base.put(timeFrom, interpolate(timeFrom));
 		if (!base.containsKey(timeTo))
 			base.put(timeTo, interpolate(timeTo));
+		for (Map.Entry<Double, CollisionShape> entry : base.tailMap(timeTo).entrySet())
+		{
+			entry.setValue(entry.getValue().displacement(xDisp, yDisp));
+		}
 	}
 }

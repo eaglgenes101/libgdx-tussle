@@ -60,11 +60,14 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		ball0.getComponent(ScriptContextComponent.class).addStatusEffect(dummyStatus0);
 		ball0.getComponent(PositionComponent.class).setPosition(100, 0);
 		ball0.getComponent(VelocityComponent.class).setVelocity(4, -4);
-		ball0.getComponent(ECBComponent.class).put(dummyStatus0 , new StageStadium(0, 0, 0, 0, 32));
+		ball0.getComponent(ECBComponent.class).put(dummyStatus0,
+		        new StageStadium(0, 0, 0, 0, 32,
+		                         100, 0, 0, 1, false));
 		ball0.getComponent(ElasticityComponent.class).wallElasticity = 1.5;
 		ball0.getComponent(ElasticityComponent.class).groundElasticity = 1.5;
 		ball0.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
-		ball0.getComponent(StageElementComponent.class).put(dummyStatus0, new StageCircle(0, 0, 32));
+		ball0.getComponent(StageElementComponent.class).put(dummyStatus0,
+		        new StageCircle(0, 0, 32, 100, 0, 1));
 
 		/*
 		ball1 = engine.createEntity();
@@ -98,14 +101,30 @@ public class BallBounceDemoMain extends ApplicationAdapter
 				engine.getSystem(SubactionScriptSystem.class).getDestructionSignaller()
 		);
 		cage.getComponent(ScriptContextComponent.class).addStatusEffect(dummyCage);
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(-320, 240, -320, -240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(320, 240, -320, 240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(320, -240, 320, 240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(-320, -240, 320, -240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(320, -240, -320, -240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(-320, -240, -320, 240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(-320, 240, 320, 240));
-		cage.getComponent(StageElementComponent.class).put(dummyCage, new StageEdge(320, 240, 320, -240));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(-320, 240, -320, -240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(320, 240, -320, 240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(320, -240, 320, 240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(-320, -240, 320, -240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(320, -240, -320, -240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(-320, -240, -320, 240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+		        new StageEdge(-320, 240, 320, 240,
+		                      0, 0, 0, 1, false));
+		cage.getComponent(StageElementComponent.class).put(dummyCage,
+				new StageEdge(320, 240, 320, -240,
+				              0, 0, 0, 1, false));
 
 		engine.addEntity(ball0);
 		//engine.addEntity(ball1);

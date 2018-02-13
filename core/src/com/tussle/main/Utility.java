@@ -20,9 +20,9 @@ package com.tussle.main;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.JsonValue;
-import com.tussle.collision.ProjectionVector;
+import com.tussle.collision.CollisionShape;
 import com.tussle.collision.CollisionStadium;
-import com.tussle.collision.StageElement;
+import com.tussle.collision.ProjectionVector;
 import org.apache.commons.math3.util.FastMath;
 
 import java.io.IOException;
@@ -361,42 +361,50 @@ public strictfp class Utility
 		return (dx*lx+dy*ly)/(lx*lx+ly*ly);
 	}
 
-	public static boolean projectionsClose(ProjectionVector p1, ProjectionVector p2)
+	public static double displacementDots(CollisionShape startShape, CollisionShape endShape,
+	                                      CollisionStadium startStad, CollisionStadium endStad)
 	{
-		return (p1.xNorm()*p2.xNorm()+p1.yNorm()*p2.yNorm() > .8) &&
-			   (p2.magnitude()-p1.magnitude() <= 8);
+		double[] startPos = startShape.nearestPoint(startStad);
+		double[] endPos = endShape.nearestPoint(endStad);
+		double startEcbPortion = startShape.stadiumPortion(startStad);
+		double endEcbPortion = endShape.stadiumPortion(endStad);
+		double stadStartDX = (1-startEcbPortion)*startStad.getStartx() +
+		                     startEcbPortion*startStad.getEndx() - startPos[0];
+		double stadStartDY = (1-startEcbPortion)*startStad.getStarty() +
+		                     startEcbPortion*startStad.getEndy() - startPos[1];
+		double stadEndDX = (1-endEcbPortion)*endStad.getStartx() +
+		                   endEcbPortion*endStad.getEndx() - endPos[0];
+		double stadEndDY = (1-endEcbPortion)*endStad.getStarty() +
+		                   endEcbPortion*endStad.getEndy() - endPos[1];
+		if ((stadStartDX == 0 && stadStartDY == 0) ||
+		    (stadEndDX == 0 && stadEndDY == 0))
+		{
+			return Double.NaN; //Sorry, can't help you here
+		}
+		else
+		{
+			return (stadStartDX*stadEndDX + stadStartDY*stadEndDY)
+					/ FastMath.hypot(stadStartDX, stadStartDY)
+					/ FastMath.hypot(stadEndDX, stadEndDY);
+		}
 	}
 
-	public static double displacementDifference(StageElement se, CollisionStadium startStad, CollisionStadium endStad,
-	                                            double startTime, double endTime)
+	public static double[] displacementDiff(CollisionShape startShape, CollisionShape endShape,
+	                                        CollisionStadium startStad, CollisionStadium endStad)
 	{
-		double[] startStageVelocity = se.instantVelocity(startStad, startTime);
-		double startEcbPortion = se.stadiumPortion(startStad, startTime);
-		double startPartDX = ((1-startEcbPortion)*(endStad.getStartx() - startStad.getStartx())
-		                      + startEcbPortion*(endStad.getEndx() - startStad.getEndx()));
-		double startPartDY = ((1-startEcbPortion)*(endStad.getStarty() - startStad.getStarty())
-		                      + startEcbPortion*(endStad.getEndy() - startStad.getEndy()));
-		double startDXDiff = startPartDX-startStageVelocity[0];
-		double startDYDiff = startPartDY-startStageVelocity[1];
-		
-		double[] endStageVelocity = se.instantVelocity(endStad, endTime);
-		double endEcbPortion = se.stadiumPortion(endStad, endTime);
-		double endPartDX = ((1-endEcbPortion)*(endStad.getStartx() - startStad.getStartx())
-		                + endEcbPortion*(endStad.getEndx() - startStad.getEndx()));
-		double endPartDY = ((1-endEcbPortion)*(endStad.getStarty() - startStad.getStarty())
-		                + endEcbPortion*(endStad.getEndy() - startStad.getEndy()));
-		double endDXDiff = endPartDX-endStageVelocity[0];
-		double endDYDiff = endPartDY-endStageVelocity[1];
-		
-		//Which direction are they separated?
-		ProjectionVector collideVec0 = se.depth(startStad, startTime);
-		ProjectionVector collideVec1 = se.depth(endStad, endTime);
-		return FastMath.max(FastMath.hypot(startStageVelocity[0], startStageVelocity[1]),
-		                    FastMath.hypot(endStageVelocity[0], endStageVelocity[1])) +
-		       FastMath.max(FastMath.hypot(startPartDX, startPartDY),
-		                    FastMath.hypot(endPartDX, endPartDY));
-		//return FastMath.max(startDXDiff*collideVec0.xNorm()+startDYDiff*collideVec0.yNorm(),
-		//					endDXDiff*collideVec1.xNorm()+endDYDiff*collideVec1.yNorm());
+		double[] startPos = startShape.nearestPoint(startStad);
+		double[] endPos = endShape.nearestPoint(endStad);
+		double startEcbPortion = startShape.stadiumPortion(startStad);
+		double endEcbPortion = endShape.stadiumPortion(endStad);
+		double stadStartDX = (1-startEcbPortion)*startStad.getStartx() +
+		                     startEcbPortion*startStad.getEndx() - startPos[0];
+		double stadStartDY = (1-startEcbPortion)*startStad.getStarty() +
+		                     startEcbPortion*startStad.getEndy() - startPos[1];
+		double stadEndDX = (1-endEcbPortion)*endStad.getStartx() +
+		                   endEcbPortion*endStad.getEndx() - endPos[0];
+		double stadEndDY = (1-endEcbPortion)*endStad.getStarty() +
+		                   endEcbPortion*endStad.getEndy() - endPos[1];
+		return new double[]{stadEndDX-stadStartDX, stadEndDY-stadStartDY};
 	}
 
 	public static CollisionStadium middleStad(CollisionStadium s1, CollisionStadium s2)

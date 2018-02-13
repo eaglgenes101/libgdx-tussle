@@ -22,7 +22,7 @@ import com.tussle.collision.ProjectionVector;
 import com.tussle.collision.StageElement;
 
 //A tuple of collision box, stage element, and projection vector
-//used for exactly one method in CollisionSystem.
+//used for exactly one method in MotionSystem.
 //Kinda heavyweight for a tuple, but it works
 public class CollisionTriad
 {

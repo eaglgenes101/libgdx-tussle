@@ -19,7 +19,6 @@ package com.tussle.main;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.gdx.assets.AssetManager;
-import com.tussle.motion.CollisionSystem;
 import com.tussle.motion.MotionSystem;
 import com.tussle.postprocess.PostprocessSystem;
 import com.tussle.script.SubactionCleanerSystem;
@@ -42,7 +41,6 @@ public class TussleEngine extends Engine
 		manager = new AssetManager();
 		
 		//Add entity systems
-		addSystem(new CollisionSystem(0));
 		addSystem(new MotionSystem(1));
 		addSystem(new CameraSystem(2));
 		addSystem(new SpriteSystem(manager, getSystem(CameraSystem.class).getCamera(),3));

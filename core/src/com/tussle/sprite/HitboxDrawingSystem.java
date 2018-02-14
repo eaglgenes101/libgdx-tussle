@@ -23,7 +23,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.tussle.collision.StageStadium;
+import com.tussle.collision.CollisionStadium;
 import com.tussle.collision.StageElement;
 import com.tussle.main.Components;
 import com.tussle.motion.PositionComponent;
@@ -54,7 +54,7 @@ public class HitboxDrawingSystem extends IteratingSystem
 		{
 			//Draw ECB
 			drawer.setColor(Color.BLUE);
-			for (StageStadium s : Components.ecbMapper.get(entity).getCollisionBoxes())
+			for (StageElement<CollisionStadium> s : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
 				s.getBefore().draw(drawer);
 				s.getAfter().draw(drawer);

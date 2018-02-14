@@ -17,18 +17,46 @@
 
 package com.tussle.collision;
 
+import com.tussle.motion.PositionComponent;
+import com.tussle.motion.TransformComponent;
+import com.tussle.motion.VelocityComponent;
+
 /**
  * Created by eaglgenes101 on 4/24/17.
  */
-public abstract class StageElement
+public class StageElement<T extends CollisionShape>
 {
-	//Whether the StageElement has a before presence, allowing
-	//interpolation to make sense
-	protected boolean hasBefore = false;
+	T localShape;
+	T beforeShape;
+	T afterShape;
 	
-	public abstract CollisionShape getBefore();
-	public abstract CollisionShape getAfter();
+	public StageElement(T local, PositionComponent position, TransformComponent transform)
+	{
+		localShape = local;
+		beforeShape = (T)localShape.transformBy(position.x, position.y, 0, 1, false);
+		afterShape = beforeShape;
+	}
 	
-	public abstract void step(double dx, double dy, double xpos, double ypos,
-	                          double rot, double scale, boolean flipped);
+	public CollisionShape getBefore()
+	{
+		return beforeShape;
+	}
+	
+	public CollisionShape getAfter()
+	{
+		return afterShape;
+	}
+	
+	public void step(PositionComponent position, TransformComponent transform,
+	                 VelocityComponent velocity, double dx, double dy)
+	{
+		beforeShape = (T) afterShape.displacementBy(dx, dy);
+		afterShape = (T)localShape.transformBy(
+				position.x+dx+(velocity==null?0:velocity.xVel),
+				position.y+dy+(velocity==null?0:velocity.yVel),
+				0,
+				1,
+				false
+		);
+	}
 }

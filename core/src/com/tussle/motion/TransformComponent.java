@@ -17,27 +17,10 @@
 
 package com.tussle.motion;
 
-import com.tussle.collision.CollisionStadium;
-import com.tussle.collision.ProjectionVector;
-import com.tussle.collision.StageElement;
-import org.apache.commons.lang3.tuple.Pair;
+import com.badlogic.ashley.core.Component;
 
-import java.util.LinkedHashMap;
-
-public class CollisionMap extends LinkedHashMap<Pair<StageElement<CollisionStadium>, StageElement>,
-		                                            ProjectionVector>
+public class TransformComponent implements Component
 {
-	public ProjectionVector get(StageElement<CollisionStadium> c, StageElement s)
-	{
-		//Ah well, looks like I'm going to have to use a transient pair
-		return get(Pair.of(c, s));
-	}
-	
-	public ProjectionVector put(StageElement<CollisionStadium> c, StageElement s, ProjectionVector p)
-	{
-		return put(Pair.of(c, s), p);
-	}
-	
-	
-	
+	//Stubbed for now
+	//Will be used later
 }

@@ -17,7 +17,7 @@
 
 package com.tussle.motion;
 
-import com.tussle.collision.StageStadium;
+import com.tussle.collision.CollisionStadium;
 import com.tussle.collision.ProjectionVector;
 import com.tussle.collision.StageElement;
 
@@ -26,18 +26,18 @@ import com.tussle.collision.StageElement;
 //Kinda heavyweight for a tuple, but it works
 public class CollisionTriad
 {
-	StageStadium box;
+	StageElement<CollisionStadium> box;
 	StageElement surface;
 	ProjectionVector vector;
 	
-	public CollisionTriad(StageStadium b, StageElement s, ProjectionVector v)
+	public CollisionTriad(StageElement<CollisionStadium> b, StageElement s, ProjectionVector v)
 	{
 		box = b;
 		surface = s;
 		vector = v;
 	}
 	
-	public StageStadium getBox()
+	public StageElement<CollisionStadium> getBox()
 	{
 		return box;
 	}

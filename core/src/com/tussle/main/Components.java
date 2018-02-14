@@ -25,6 +25,7 @@ import com.tussle.hitbox.HitboxComponent;
 import com.tussle.hitbox.HitboxLockComponent;
 import com.tussle.hitbox.HurtboxComponent;
 import com.tussle.motion.PositionComponent;
+import com.tussle.motion.TransformComponent;
 import com.tussle.motion.VelocityComponent;
 import com.tussle.ownership.EntityOwnershipComponent;
 import com.tussle.ownership.PlayerOwnershipComponent;
@@ -59,4 +60,6 @@ public class Components
 			ComponentMapper.getFor(SpriteComponent.class);
 	public static final ComponentMapper<HitboxLockComponent> hitboxLockMapper =
 			ComponentMapper.getFor(HitboxLockComponent.class);
+	public static final ComponentMapper<TransformComponent> transformMapper =
+			ComponentMapper.getFor(TransformComponent.class);
 }

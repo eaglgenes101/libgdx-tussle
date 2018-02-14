@@ -29,21 +29,21 @@ import java.util.*;
  */
 public class ECBComponent implements Component
 {
-	LinkedHashMap<ScriptIterator, LinkedHashSet<StageStadium>> ecbs;
+	LinkedHashMap<ScriptIterator, LinkedHashSet<StageElement<CollisionStadium>>> ecbs;
 	
 	public ECBComponent()
 	{
 		ecbs = new LinkedHashMap<>();
 	}
 	
-	public void put(ScriptIterator iterator, StageStadium box)
+	public void put(ScriptIterator iterator, StageElement<CollisionStadium> box)
 	{
 		if (!ecbs.containsKey(iterator))
 			ecbs.put(iterator, new LinkedHashSet<>());
 		ecbs.get(iterator).add(box);
 	}
 	
-	public void remove(ScriptIterator iterator, StageStadium box)
+	public void remove(ScriptIterator iterator, StageElement<CollisionStadium> box)
 	{
 		ecbs.get(iterator).remove(box);
 	}
@@ -53,20 +53,20 @@ public class ECBComponent implements Component
 		ecbs.remove(iterator);
 	}
 	
-	private transient Collection<StageStadium> hitboxValues;
+	private transient Collection<StageElement<CollisionStadium>> hitboxValues;
 	
-	public Collection<StageStadium> getCollisionBoxes()
+	public Collection<StageElement<CollisionStadium>> getCollisionBoxes()
 	{
 		if (hitboxValues == null)
 		{
-			hitboxValues = new AbstractCollection<StageStadium>()
+			hitboxValues = new AbstractCollection<StageElement<CollisionStadium>>()
 			{
-				public Iterator<StageStadium> iterator()
+				public Iterator<StageElement<CollisionStadium>> iterator()
 				{
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									ecbs.values(),
-									(LinkedHashSet<StageStadium> coll) -> coll.iterator()
+									(LinkedHashSet<StageElement<CollisionStadium>> coll) -> coll.iterator()
 							)
 					);
 				}

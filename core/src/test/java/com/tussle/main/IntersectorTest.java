@@ -54,7 +54,7 @@ public class IntersectorTest
 	}
 
 	@Test
-	@DisplayName("The displacement between a point and a line segment")
+	@DisplayName("The displacementBy between a point and a line segment")
 	void dispSegmentPointTest()
 	{
 		ProjectionVector p1 = dispSegmentPoint(-1, -1, 1, 1, 0, 0);
@@ -103,7 +103,7 @@ public class IntersectorTest
 	}
 
 	@Test
-	@DisplayName("The displacement needed to have two segments just touching")
+	@DisplayName("The displacementBy needed to have two segments just touching")
 	void displacementSegmentsTest()
 	{
 		ProjectionVector p1 = displacementSegments(-1, -1, 1, 1, -1, 0, 0, 1);

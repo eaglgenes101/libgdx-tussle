@@ -19,6 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.tussle.main.Intersector;
+import org.apache.commons.math3.util.FastMath;
 
 public class CollisionCircle implements CollisionShape
 {
@@ -72,7 +73,7 @@ public class CollisionCircle implements CollisionShape
 		drawer.circle((float)x, (float)y, (float)radius);
 	}
 	
-	public CollisionCircle displacement(double dx, double dy)
+	public CollisionCircle displacementBy(double dx, double dy)
 	{
 		return new CollisionCircle(x+dx, y+dy, radius);
 	}
@@ -87,5 +88,10 @@ public class CollisionCircle implements CollisionShape
 				(y+o.y)/2,
 				(radius+o.radius)/2
 		);
+	}
+	
+	public CollisionCircle transformBy(double dx, double dy, double rot, double scale, boolean flip)
+	{
+		return new CollisionCircle(x+dx, y+dy, FastMath.abs(radius*scale));
 	}
 }

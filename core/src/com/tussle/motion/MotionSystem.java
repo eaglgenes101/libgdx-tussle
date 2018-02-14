@@ -53,16 +53,16 @@ public class MotionSystem extends IteratingSystem
 		if (Components.ecbMapper.has(entity))
 		{
 			CollisionMap minVectors = new CollisionMap();
-			Map<StageStadium, CollisionStadium> beforeStads = new HashMap<>();
-			Map<StageStadium, CollisionStadium> afterStads = new HashMap<>();
+			Map<StageElement<CollisionStadium>, CollisionStadium> beforeStads = new HashMap<>();
+			Map<StageElement<CollisionStadium>, CollisionStadium> afterStads = new HashMap<>();
 			Map<StageElement, CollisionShape> beforeElements = new HashMap<>();
 			Map<StageElement, CollisionShape> afterElements = new HashMap<>();
 			
 			//Move a box copy first
-			for (StageStadium box : Components.ecbMapper.get(entity).getCollisionBoxes())
+			for (StageElement<CollisionStadium> box : Components.ecbMapper.get(entity).getCollisionBoxes())
 			{
-				beforeStads.put(box, box.getBefore());
-				afterStads.put(box, box.getAfter());
+				beforeStads.put(box, (CollisionStadium)box.getBefore());
+				afterStads.put(box, (CollisionStadium)box.getAfter());
 				//First, populate the highest-level hash maps
 				for (Entity ent : getEngine().getEntitiesFor(surfaceFamily))
 					if (ent != entity)
@@ -73,7 +73,7 @@ public class MotionSystem extends IteratingSystem
 							Rectangle boxBounds = box.getBefore().getBounds().merge(box.getAfter().getBounds());
 							if (seBounds.overlaps(boxBounds))
 							{
-								minVectors.put(box, se, se.getBefore().depth(box.getBefore()));
+								minVectors.put(box, se, se.getBefore().depth((CollisionStadium)box.getBefore()));
 								beforeElements.put(se, se.getBefore());
 								afterElements.put(se, se.getAfter());
 							}
@@ -92,7 +92,7 @@ public class MotionSystem extends IteratingSystem
 				//Reflect off of the hit surface
 				if (Components.velocityMapper.has(entity))
 				{
-					CollisionStadium finalStad = hit.getBox().getAfter().displacement(
+					CollisionStadium finalStad = hit.getBox().getAfter().displacementBy(
 							hit.getVector().xComp(), hit.getVector().yComp()
 					);
 					ProjectionVector surfNorm = hit.getSurface().getAfter().depth(finalStad);
@@ -206,8 +206,8 @@ public class MotionSystem extends IteratingSystem
 	}
 	
 	
-	public CollisionTriad ecbHit(Map<StageStadium, CollisionStadium> beforeBoxes,
-	                             Map<StageStadium, CollisionStadium> afterBoxes,
+	public CollisionTriad ecbHit(Map<StageElement<CollisionStadium>, CollisionStadium> beforeBoxes,
+	                             Map<StageElement<CollisionStadium>, CollisionStadium> afterBoxes,
 	                             Map<StageElement, CollisionShape> beforeSurfaces,
 	                             Map<StageElement, CollisionShape> afterSurfaces,
 	                             CollisionMap fores)
@@ -216,10 +216,10 @@ public class MotionSystem extends IteratingSystem
 		
 		//Split the given surfaces into two groups: those which are not worth timestep subdividing,
 		//and those which are
-		Predicate<Pair<StageStadium, StageElement>> splitHeuristic =
-				(Pair<StageStadium, StageElement> m) ->
+		Predicate<Pair<StageElement<CollisionStadium>, StageElement>> splitHeuristic =
+				(Pair<StageElement<CollisionStadium>, StageElement> m) ->
 				{
-					StageStadium c = m.getLeft();
+					StageElement<CollisionStadium> c = m.getLeft();
 					StageElement s = m.getRight();
 					double[] velocity = Utility.displacementDiff(beforeSurfaces.get(s), afterSurfaces.get(s),
 					                                             beforeBoxes.get(c), afterBoxes.get(c));
@@ -229,9 +229,9 @@ public class MotionSystem extends IteratingSystem
 		if (fores.keySet().stream().anyMatch(splitHeuristic))
 		{
 			//Split in half, and run
-			Map<StageStadium, CollisionStadium> middleBoxes = LazyMap.lazyMap(
+			Map<StageElement<CollisionStadium>, CollisionStadium> middleBoxes = LazyMap.lazyMap(
 					new HashMap<>(),
-					(StageStadium c) -> beforeBoxes.get(c).interpolate(afterBoxes.get(c))
+					(StageElement<CollisionStadium> c) -> beforeBoxes.get(c).interpolate(afterBoxes.get(c))
 			);
 			Map<StageElement, CollisionShape> middleSurfaces = LazyMap.lazyMap(
 					new HashMap<>(),
@@ -239,8 +239,8 @@ public class MotionSystem extends IteratingSystem
 			);
 			CollisionTriad latestHit = ecbHit(beforeBoxes, middleBoxes, beforeSurfaces, middleSurfaces, fores);
 			
-			Map<StageStadium, CollisionStadium> postMiddleBoxes;
-			Map<StageStadium, CollisionStadium> postAfterBoxes;
+			Map<StageElement<CollisionStadium>, CollisionStadium> postMiddleBoxes;
+			Map<StageElement<CollisionStadium>, CollisionStadium> postAfterBoxes;
 			Map<StageElement, CollisionShape> postMiddleSurfaces;
 			Map<StageElement, CollisionShape> postAfterSurfaces;
 			if (latestHit != null)
@@ -249,19 +249,19 @@ public class MotionSystem extends IteratingSystem
 				double yDisp = latestHit.getVector().yComp();
 				postMiddleBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageStadium c) -> middleBoxes.get(c).displacement(xDisp, yDisp)
+						(StageElement<CollisionStadium> c) -> middleBoxes.get(c).displacementBy(xDisp, yDisp)
 				);
 				postAfterBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageStadium c) -> afterBoxes.get(c).displacement(xDisp, yDisp)
+						(StageElement<CollisionStadium> c) -> afterBoxes.get(c).displacementBy(xDisp, yDisp)
 				);
 				postMiddleSurfaces = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageElement s) -> middleSurfaces.get(s).displacement(xDisp, yDisp)
+						(StageElement s) -> middleSurfaces.get(s).displacementBy(xDisp, yDisp)
 				);
 				postAfterSurfaces = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageElement s) -> afterSurfaces.get(s).displacement(xDisp, yDisp)
+						(StageElement s) -> afterSurfaces.get(s).displacementBy(xDisp, yDisp)
 				);
 			}
 			else
@@ -274,9 +274,9 @@ public class MotionSystem extends IteratingSystem
 			
 			//Populate a new collision map for the second half
 			CollisionMap mids = new CollisionMap();
-			for (Map.Entry<Pair<StageStadium, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
+			for (Map.Entry<Pair<StageElement<CollisionStadium>, StageElement>, ProjectionVector> foreEntry : fores.entrySet())
 			{
-				StageStadium c = foreEntry.getKey().getLeft();
+				StageElement<CollisionStadium> c = foreEntry.getKey().getLeft();
 				StageElement s = foreEntry.getKey().getRight();
 				mids.put(c, s, s.getBefore().interpolate(s.getAfter()).depth(postMiddleBoxes.get(c)));
 			}
@@ -320,7 +320,7 @@ public class MotionSystem extends IteratingSystem
 		{
 			//Take the whole step at once
 			CollisionMap afts = new CollisionMap();
-			for (Pair<StageStadium, StageElement> foreKey : fores.keySet())
+			for (Pair<StageElement<CollisionStadium>, StageElement> foreKey : fores.keySet())
 			{
 				if (foreKey.getRight().getBefore().collidesWith(beforeBoxes.get(foreKey.getLeft())) ||
 				    foreKey.getRight().getAfter().collidesWith(afterBoxes.get(foreKey.getLeft())))
@@ -334,9 +334,9 @@ public class MotionSystem extends IteratingSystem
 			if (combinedVectors != null)
 			{
 				double dotScore = Double.NEGATIVE_INFINITY;
-				StageStadium highScoreBox = null;
+				StageElement<CollisionStadium> highScoreBox = null;
 				StageElement highScoreElement = null;
-				for (Map.Entry<Pair<StageStadium, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
+				for (Map.Entry<Pair<StageElement<CollisionStadium>, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
 				{
 					double candidateDotScore = viewEntry.getValue().xComp() * combinedVectors.xNorm() +
 					                           viewEntry.getValue().yComp() * combinedVectors.yNorm();

@@ -97,7 +97,7 @@ public class CollisionCorner implements CollisionShape
 		            (float)(x+maxVec.xNorm()*20), (float)(y+maxVec.yNorm()*20));
 	}
 	
-	public CollisionCorner displacement(double dx, double dy)
+	public CollisionCorner displacementBy(double dx, double dy)
 	{
 		return new CollisionCorner(
 				x+dx, y+dy,
@@ -151,5 +151,25 @@ public class CollisionCorner implements CollisionShape
 					maxXSum/magnitude, maxYSum/magnitude, magnitude/2);
 		}
 		return new CollisionCorner((x+o.x)/2, (y+o.y)/2, minProj, maxProj);
+	}
+	
+	public CollisionCorner transformBy(double dx, double dy, double rot, double scale, boolean flip)
+	{
+		double cos = FastMath.cos(FastMath.toRadians(rot));
+		double sin = FastMath.sin(FastMath.toRadians(rot));
+		double locx = x*(flip?-scale:scale);
+		double locy = y*scale;
+		double lowXNorm = (minVec.xNorm()*cos*(flip?-scale:scale) - minVec.yNorm()*sin*scale);
+		double lowYNorm = (minVec.yNorm()*sin*scale + minVec.xNorm()*cos*(flip?-scale:scale));
+		double lowMag = FastMath.hypot(lowXNorm, lowYNorm);
+		ProjectionVector lowVec = new ProjectionVector(lowXNorm/lowMag, lowYNorm/lowMag, 1);
+		double highXNorm = (maxVec.xNorm()*cos*(flip?-scale:scale) - maxVec.yNorm()*sin*scale);
+		double highYNorm = (maxVec.yNorm()*sin*scale + maxVec.xNorm()*cos*(flip?-scale:scale));
+		double highMag = FastMath.hypot(highXNorm, highYNorm);
+		ProjectionVector highVec = new ProjectionVector(highXNorm/highMag, highYNorm/highMag, 1);
+		return new CollisionCorner(
+				locx * cos - locy * sin + dx, locx * sin + locy * cos + dy,
+				lowVec, highVec
+		);
 	}
 }

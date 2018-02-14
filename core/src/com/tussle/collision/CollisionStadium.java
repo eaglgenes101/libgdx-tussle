@@ -31,7 +31,7 @@ public class CollisionStadium implements CollisionShape
 	protected double endx = 0;
 	protected double endy = 0;
 	protected double radius = 0;
-
+	
 	public CollisionStadium(double startx, double starty, double endx, double endy, double radius)
 	{
 		this.startx = startx;
@@ -43,35 +43,35 @@ public class CollisionStadium implements CollisionShape
 	
 	public CollisionStadium(CollisionStadium other, double dx, double dy)
 	{
-		this(other.startx+dx, other.starty+dy,
-		     other.endx+dx, other.endy+dy, other.radius);
+		this(other.startx + dx, other.starty + dy,
+		     other.endx + dx, other.endy + dy, other.radius);
 	}
 	
 	public CollisionStadium(CollisionStadium other)
 	{
 		this(other.startx, other.starty, other.endx, other.endy, other.radius);
 	}
-
+	
 	public double getStartx()
 	{
 		return startx;
 	}
-
+	
 	public double getStarty()
 	{
 		return starty;
 	}
-
+	
 	public double getEndx()
 	{
 		return endx;
 	}
-
+	
 	public double getEndy()
 	{
 		return endy;
 	}
-
+	
 	public double getRadius()
 	{
 		return radius;
@@ -84,17 +84,17 @@ public class CollisionStadium implements CollisionShape
 				startx, starty, endx, endy);
 		disp.xnorm = -disp.xnorm;
 		disp.ynorm = -disp.ynorm;
-		disp.magnitude = stad.getRadius()+radius-disp.magnitude;
+		disp.magnitude = stad.getRadius() + radius - disp.magnitude;
 		return disp;
 	}
 	
 	public double[] nearestPoint(CollisionStadium stad)
 	{
 		double section = Intersector.partSegments(startx, starty, endx, endy,
-		        stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
+		                                          stad.getStartx(), stad.getStarty(), stad.getEndx(), stad.getEndy());
 		return new double[]{
-				(1-section)*startx + section*endx,
-				(1-section)*starty + section*endy
+				(1 - section) * startx + section * endx,
+				(1 - section) * starty + section * endy
 		};
 	}
 	
@@ -112,18 +112,18 @@ public class CollisionStadium implements CollisionShape
 	
 	public Rectangle getBounds()
 	{
-		double minX = FastMath.min(startx, endx)-radius;
-		double maxX = FastMath.max(startx, endx)+radius;
-		double minY = FastMath.min(starty, endy)-radius;
-		double maxY = FastMath.max(starty, endy)+radius;
-		return new Rectangle(minX, minY, maxX-minX, maxY-minY);
+		double minX = FastMath.min(startx, endx) - radius;
+		double maxX = FastMath.max(startx, endx) + radius;
+		double minY = FastMath.min(starty, endy) - radius;
+		double maxY = FastMath.max(starty, endy) + radius;
+		return new Rectangle(minX, minY, maxX - minX, maxY - minY);
 	}
 	
 	public void draw(ShapeRenderer drawer)
 	{
 		drawer.circle((float)startx, (float)starty, (float)radius);
 		drawer.circle((float)endx, (float)endy, (float)radius);
-		double len = FastMath.hypot(endx-startx, endy-starty);
+		double len = FastMath.hypot(endx - startx, endy - starty);
 		if (len > 0)
 		{
 			double dx = (starty - endy) * radius / len;
@@ -135,11 +135,11 @@ public class CollisionStadium implements CollisionShape
 		}
 	}
 	
-	public CollisionStadium displacement(double dx, double dy)
+	public CollisionStadium displacementBy(double dx, double dy)
 	{
 		return new CollisionStadium(
-				startx+dx, starty+dy,
-				endx+dx, endy+dy,
+				startx + dx, starty + dy,
+				endx + dx, endy + dy,
 				radius
 		);
 	}
@@ -148,11 +148,27 @@ public class CollisionStadium implements CollisionShape
 	{
 		if (!(other instanceof CollisionStadium))
 			throw new IllegalArgumentException();
-		CollisionStadium o = (CollisionStadium) other;
+		CollisionStadium o = (CollisionStadium)other;
 		return new CollisionStadium(
-				(startx+o.startx)/2, (starty+o.starty)/2,
-				(endx+o.endx)/2, (endy+o.endy)/2,
-				(radius+o.radius)/2
+				(startx + o.startx) / 2, (starty + o.starty) / 2,
+				(endx + o.endx) / 2, (endy + o.endy) / 2,
+				(radius + o.radius) / 2
+		);
+	}
+	
+	public CollisionStadium transformBy(double dx, double dy, double rot, double scale, boolean flip)
+	{
+		
+		double sx = startx * (flip ? -scale : scale);
+		double sy = starty * scale;
+		double ex = endx * (flip ? -scale : scale);
+		double ey = endy * scale;
+		double cos = FastMath.cos(FastMath.toRadians(rot));
+		double sin = FastMath.sin(FastMath.toRadians(rot));
+		return new CollisionStadium(
+				sx*cos - sy*sin + dx, sx*sin + sy*cos + dy,
+				ex*cos - ey*sin + dx, ex*sin + ey*cos + dy,
+				FastMath.abs(radius * scale)
 		);
 	}
 }

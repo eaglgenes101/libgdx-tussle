@@ -61,7 +61,7 @@ public class MotionLog
 			base.put(timeTo, interpolate(timeTo));
 		for (Map.Entry<Double, CollisionShape> entry : base.tailMap(timeTo).entrySet())
 		{
-			entry.setValue(entry.getValue().displacement(xDisp, yDisp));
+			entry.setValue(entry.getValue().displacementBy(xDisp, yDisp));
 		}
 	}
 }

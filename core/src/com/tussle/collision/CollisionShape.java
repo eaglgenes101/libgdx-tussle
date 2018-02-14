@@ -34,7 +34,11 @@ public interface CollisionShape
 	
 	void draw(ShapeRenderer drawer);
 	
-	CollisionShape displacement(double dx, double dy);
+	CollisionShape displacementBy(double dx, double dy);
+	
+	CollisionShape transformBy(double dx, double dy, double rot, double scale, boolean flip);
 	
 	CollisionShape interpolate(CollisionShape other);
+	
+	
 }

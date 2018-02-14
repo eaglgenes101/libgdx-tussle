@@ -101,7 +101,7 @@ public class CollisionEdge implements CollisionShape
 			drawer.point((float)startx, (float)starty, 0);
 	}
 	
-	public CollisionEdge displacement(double dx, double dy)
+	public CollisionEdge displacementBy(double dx, double dy)
 	{
 		return new CollisionEdge(startx+dx, starty+dy, endx+dx, endy+dy);
 	}
@@ -114,6 +114,20 @@ public class CollisionEdge implements CollisionShape
 		return new CollisionEdge(
 				(startx+o.startx)/2, (starty+o.starty)/2,
 				(endx+o.endx)/2, (endy+o.endy)/2
+		);
+	}
+	
+	public CollisionEdge transformBy(double dx, double dy, double rot, double scale, boolean flip)
+	{
+		double sx = (flip?endx:startx) * (flip ? -scale : scale);
+		double sy = (flip?endy:starty) * scale;
+		double ex = (flip?startx:endx) * (flip ? -scale : scale);
+		double ey = (flip?starty:endy) * scale;
+		double cos = FastMath.cos(FastMath.toRadians(rot));
+		double sin = FastMath.sin(FastMath.toRadians(rot));
+		return new CollisionEdge(
+				sx*cos - sy*sin + dx, sx*sin + sy*cos + dy,
+				ex*cos - ey*sin + dx, ex*sin + ey*cos + dy
 		);
 	}
 }

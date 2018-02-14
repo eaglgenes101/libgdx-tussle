@@ -19,7 +19,6 @@ package com.tussle.collision;
 
 import com.tussle.motion.PositionComponent;
 import com.tussle.motion.TransformComponent;
-import com.tussle.motion.VelocityComponent;
 
 /**
  * Created by eaglgenes101 on 4/24/17.
@@ -47,16 +46,14 @@ public class StageElement<T extends CollisionShape>
 		return afterShape;
 	}
 	
-	public void step(PositionComponent position, TransformComponent transform,
-	                 VelocityComponent velocity, double dx, double dy)
+	public void step(double dx, double dy, double xpos, double ypos,
+	                 double xvel, double yvel,
+	                 double rot, double scale, boolean flip)
 	{
 		beforeShape = (T) afterShape.displacementBy(dx, dy);
 		afterShape = (T)localShape.transformBy(
-				position.x+dx+(velocity==null?0:velocity.xVel),
-				position.y+dy+(velocity==null?0:velocity.yVel),
-				0,
-				1,
-				false
+				dx+xpos+xvel, dy+ypos+yvel,
+				rot, scale, flip
 		);
 	}
 }

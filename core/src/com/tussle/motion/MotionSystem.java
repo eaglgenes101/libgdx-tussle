@@ -92,7 +92,7 @@ public class MotionSystem extends IteratingSystem
 				//Reflect off of the hit surface
 				if (Components.velocityMapper.has(entity))
 				{
-					CollisionStadium finalStad = hit.getBox().getAfter().displacementBy(
+					CollisionStadium finalStad = (CollisionStadium)hit.getBox().getAfter().displacementBy(
 							hit.getVector().xComp(), hit.getVector().yComp()
 					);
 					ProjectionVector surfNorm = hit.getSurface().getAfter().depth(finalStad);
@@ -156,7 +156,7 @@ public class MotionSystem extends IteratingSystem
 					cl -> {
 						for (StageElement se : cl.getCollisionBoxes())
 						{
-							se.step(dx, dy, xpos+dx+xVel, ypos+dy+yVel, 0, 1, false);
+							se.step(dx, dy, xpos, ypos, xVel, yVel, 0, 1, false);
 						}
 					}
 			);
@@ -174,7 +174,7 @@ public class MotionSystem extends IteratingSystem
 						cl -> {
 							for (StageElement se: cl.getStageElements())
 							{
-								se.step(dx, dy, xpos+dx+xVel, ypos+dy+yVel, 0, 1, false);
+								se.step(dx, dy, xpos, ypos, xVel, yVel, 0, 1, false);
 							}
 						}
 				);
@@ -197,7 +197,7 @@ public class MotionSystem extends IteratingSystem
 						cl -> {
 							for (StageElement se: cl.getStageElements())
 							{
-								se.step(0, 0, xpos+xVel, ypos+yVel, 0, 1, false);
+								se.step(0, 0, xpos, ypos, xVel, yVel, 0, 1, false);
 							}
 						}
 				);

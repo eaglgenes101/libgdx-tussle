@@ -17,12 +17,14 @@
 
 package com.tussle.main;
 
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.utils.JsonValue;
 import com.tussle.collision.CollisionShape;
 import com.tussle.collision.CollisionStadium;
 import com.tussle.collision.ProjectionVector;
+import com.tussle.collision.StageElement;
 import org.apache.commons.math3.util.FastMath;
 
 import java.io.IOException;
@@ -452,6 +454,13 @@ public strictfp class Utility
 	{
 		Preferences top = Gdx.app.getPreferences("config");
 		return Gdx.app.getPreferences(top.getString(name));
+	}
+	
+	public static <T extends CollisionShape> StageElement<T> stageElementFor(T shape,
+	                                                                         Entity e)
+	{
+		return new StageElement<T>(shape, Components.positionMapper.get(e),
+		                           null);
 	}
 }
 

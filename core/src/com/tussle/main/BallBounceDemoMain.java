@@ -60,19 +60,17 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		ball0.getComponent(PositionComponent.class).setPosition(100, 0);
 		ball0.getComponent(VelocityComponent.class).setVelocity(4, -4);
 		ball0.getComponent(ECBComponent.class).put(dummyStatus0,
-		        new StageElement<CollisionStadium>(
-						new CollisionStadium(0, 0, 0, 0, 32),
-						Components.positionMapper.get(ball0),
-						null
+		        Utility.stageElementFor(
+		        		new CollisionStadium(0, 0, 0, 0, 32),
+				        ball0
 		));
 		ball0.getComponent(ElasticityComponent.class).wallElasticity = 1.5;
 		ball0.getComponent(ElasticityComponent.class).groundElasticity = 1.5;
 		ball0.getComponent(SpriteComponent.class).setPath("core/assets/sprites/shield_bubble.png");
 		ball0.getComponent(StageElementComponent.class).put(dummyStatus0,
-		        new StageElement<CollisionCircle>(
-						new CollisionCircle(0, 0, 32),
-						Components.positionMapper.get(ball0),
-						null
+		        Utility.stageElementFor(
+		        		new CollisionCircle(0, 0, 32),
+				        ball0
 		));
 		
 		cage = engine.createEntity();
@@ -85,28 +83,24 @@ public class BallBounceDemoMain extends ApplicationAdapter
 		);
 		cage.getComponent(ScriptContextComponent.class).addStatusEffect(dummyCage);
 		cage.getComponent(StageElementComponent.class).put(dummyCage,
-		        new StageElement<CollisionEdge>(
-		                new CollisionEdge(-320,240, -320, -240),
-		                Components.positionMapper.get(cage),
-		                null
+		        Utility.stageElementFor(
+		        		new CollisionEdge(-320, 240, -320, -240),
+		                cage
 		));
 		cage.getComponent(StageElementComponent.class).put(dummyCage,
-		        new StageElement<CollisionEdge>(
+		        Utility.stageElementFor(
 		                new CollisionEdge(320, -240, 320, 240),
-		                Components.positionMapper.get(cage),
-		                null
+		                cage
 		));
 		cage.getComponent(StageElementComponent.class).put(dummyCage,
-		        new StageElement<CollisionEdge>(
+		        Utility.stageElementFor(
 		                new CollisionEdge(-320, -240, 320, -240),
-		                Components.positionMapper.get(cage),
-		                null
+		                cage
 		));
 		cage.getComponent(StageElementComponent.class).put(dummyCage,
-		        new StageElement<CollisionEdge>(
+		        Utility.stageElementFor(
 		                new CollisionEdge(320, 240, -320, 240),
-		                Components.positionMapper.get(cage),
-		                null
+		                cage
 		));
 
 		engine.addEntity(ball0);

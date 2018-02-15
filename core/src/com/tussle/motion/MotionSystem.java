@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -53,10 +54,10 @@ public class MotionSystem extends IteratingSystem
 		if (Components.ecbMapper.has(entity))
 		{
 			CollisionMap minVectors = new CollisionMap();
-			Map<StageElement<CollisionStadium>, CollisionStadium> beforeStads = new HashMap<>();
-			Map<StageElement<CollisionStadium>, CollisionStadium> afterStads = new HashMap<>();
-			Map<StageElement, CollisionShape> beforeElements = new HashMap<>();
-			Map<StageElement, CollisionShape> afterElements = new HashMap<>();
+			Map<StageElement<CollisionStadium>, CollisionStadium> beforeStads = new LinkedHashMap<>();
+			Map<StageElement<CollisionStadium>, CollisionStadium> afterStads = new LinkedHashMap<>();
+			Map<StageElement, CollisionShape> beforeElements = new LinkedHashMap<>();
+			Map<StageElement, CollisionShape> afterElements = new LinkedHashMap<>();
 			
 			//Move a box copy first
 			for (StageElement<CollisionStadium> box : Components.ecbMapper.get(entity).getCollisionBoxes())
@@ -92,38 +93,35 @@ public class MotionSystem extends IteratingSystem
 				//Reflect off of the hit surface
 				if (Components.velocityMapper.has(entity))
 				{
-					CollisionStadium finalStad = (CollisionStadium)hit.getBox().getAfter().displacementBy(
-							hit.getVector().xComp(), hit.getVector().yComp()
-					);
-					ProjectionVector surfNorm = hit.getSurface().getAfter().depth(finalStad);
-					double[] startStagePoint = hit.getSurface().getBefore().nearestPoint(finalStad);
-					double[] endStagePoint = hit.getSurface().getAfter().nearestPoint(finalStad);
-					double[] stageVelocity = new double[]{endStagePoint[0]-startStagePoint[0],
-					                                 endStagePoint[1]-startStagePoint[1]};
-					double diffX = Components.velocityMapper.get(entity).xVel - stageVelocity[0];
-					double diffY = Components.velocityMapper.get(entity).yVel - stageVelocity[1];
+					//The hit.mostRecent ProjectionVector describes the collision displacement
+					//from the collective of surfaces near the end
+					//Use it for reflection if it runs against our current velocity
+					
+					double[] stageVelocity = new double[]{hit.mostRecent.xNorm(), hit.mostRecent.yNorm()};
+					double diffX = Components.velocityMapper.get(entity).xVel;
+					double diffY = Components.velocityMapper.get(entity).yVel;
 					if (stageVelocity[0]*diffX + stageVelocity[1]*diffY < 0)
 					{
-						dx = hit.getVector().xComp();
-						dy = hit.getVector().yComp();
+						dx = hit.cumulativeX;
+						dy = hit.cumulativeY;
 					}
 					else
 					{
 						dx = 0; dy = 0;
 					}
-					if (diffX * surfNorm.xNorm() + diffY * surfNorm.yNorm() < 0)
+					if (diffX * stageVelocity[0] + diffY * stageVelocity[1] < 0)
 					{
 						final double elasticity;
 						if (Components.elasticityMapper.has(entity))
 						{
-							if (surfNorm.yNorm() > FastMath.abs(surfNorm.xNorm()))
+							if (stageVelocity[1] > FastMath.abs(stageVelocity[0]))
 								elasticity = Components.elasticityMapper.get(entity).getGroundElasticity();
 							else elasticity = Components.elasticityMapper.get(entity).getWallElasticity();
 						}
 						else
 							elasticity = 0;
 						//Get vector projection and rejection
-						final double[] projection = Utility.projection(diffX, diffY, surfNorm.xNorm(), surfNorm.yNorm());
+						final double[] projection = Utility.projection(diffX, diffY, stageVelocity[0], stageVelocity[1]);
 						
 						getEngine().getSystem(PostprocessSystem.class).add(
 								entity,
@@ -137,8 +135,8 @@ public class MotionSystem extends IteratingSystem
 				}
 				else
 				{
-					dx = hit.getVector().xComp();
-					dy = hit.getVector().yComp();
+					dx = hit.cumulativeX;
+					dy = hit.cumulativeY;
 				}
 			}
 			else
@@ -245,24 +243,17 @@ public class MotionSystem extends IteratingSystem
 			Map<StageElement, CollisionShape> postAfterSurfaces;
 			if (latestHit != null)
 			{
-				double xDisp = latestHit.getVector().xComp();
-				double yDisp = latestHit.getVector().yComp();
+				double xDisp = latestHit.cumulativeX;
+				double yDisp = latestHit.cumulativeY;
 				postMiddleBoxes = LazyMap.lazyMap(
 						new HashMap<>(),
-						(StageElement<CollisionStadium> c) -> middleBoxes.get(c).displacementBy(xDisp, yDisp)
-				);
-				postAfterBoxes = LazyMap.lazyMap(
-						new HashMap<>(),
-						(StageElement<CollisionStadium> c) -> afterBoxes.get(c).displacementBy(xDisp, yDisp)
-				);
-				postMiddleSurfaces = LazyMap.lazyMap(
-						new HashMap<>(),
-						(StageElement s) -> middleSurfaces.get(s).displacementBy(xDisp, yDisp)
-				);
-				postAfterSurfaces = LazyMap.lazyMap(
-						new HashMap<>(),
-						(StageElement s) -> afterSurfaces.get(s).displacementBy(xDisp, yDisp)
-				);
+						(StageElement<CollisionStadium> c) -> middleBoxes.get(c).displacementBy(xDisp, yDisp));
+				postAfterBoxes = LazyMap.lazyMap(new HashMap<>(),
+						(StageElement<CollisionStadium> c) -> afterBoxes.get(c).displacementBy(xDisp, yDisp));
+				postMiddleSurfaces = LazyMap.lazyMap(new HashMap<>(),
+						(StageElement s) -> middleSurfaces.get(s).displacementBy(xDisp, yDisp));
+				postAfterSurfaces = LazyMap.lazyMap(new HashMap<>(),
+						(StageElement s) -> afterSurfaces.get(s).displacementBy(xDisp, yDisp));
 			}
 			else
 			{
@@ -283,37 +274,7 @@ public class MotionSystem extends IteratingSystem
 			CollisionTriad secondHalfHit = ecbHit(postMiddleBoxes, postAfterBoxes,
 			                                      postMiddleSurfaces, postAfterSurfaces, mids);
 			if (secondHalfHit != null)
-			{
-				if (latestHit == null)
-				{
-					latestHit = secondHalfHit;
-				}
-				else
-				{
-					double xSum = latestHit.vector.xComp() + secondHalfHit.vector.xComp();
-					double ySum = latestHit.vector.yComp() + secondHalfHit.vector.yComp();
-					latestHit.box = secondHalfHit.getBox();
-					latestHit.surface = secondHalfHit.getSurface();
-					if (xSum == 0 && ySum == 0)
-					{
-						latestHit.vector = new ProjectionVector(
-								secondHalfHit.vector.xNorm(),
-								secondHalfHit.vector.yNorm(),
-								0
-						);
-					}
-					else
-					{
-						double magSum = FastMath.hypot(xSum, ySum);
-						latestHit.vector = new ProjectionVector(
-								xSum/magSum,
-								ySum/magSum,
-								magSum
-						);
-					}
-					
-				}
-			}
+				latestHit = latestHit == null ? secondHalfHit : new CollisionTriad(latestHit, secondHalfHit);
 			return latestHit;
 		}
 		else
@@ -331,28 +292,7 @@ public class MotionSystem extends IteratingSystem
 			ProjectionVector combinedVectors = Utility.combineProjections(
 					Utility.prunedProjections(afts.values())
 			);
-			if (combinedVectors != null)
-			{
-				double dotScore = Double.NEGATIVE_INFINITY;
-				StageElement<CollisionStadium> highScoreBox = null;
-				StageElement highScoreElement = null;
-				for (Map.Entry<Pair<StageElement<CollisionStadium>, StageElement>, ProjectionVector> viewEntry : afts.entrySet())
-				{
-					double candidateDotScore = viewEntry.getValue().xComp() * combinedVectors.xNorm() +
-					                           viewEntry.getValue().yComp() * combinedVectors.yNorm();
-					if (candidateDotScore > dotScore)
-					{
-						dotScore = candidateDotScore;
-						highScoreBox = viewEntry.getKey().getLeft();
-						highScoreElement = viewEntry.getKey().getRight();
-					}
-				}
-				if (dotScore > 0)
-					return new CollisionTriad(highScoreBox, highScoreElement, combinedVectors);
-				else
-					return null;
-			}
-			else return null;
+			return combinedVectors == null ? null : new CollisionTriad(combinedVectors);
 		}
 	}
 }

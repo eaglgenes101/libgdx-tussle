@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eaglgenes101
+ * Copyright (c) 2018 eaglgenes101
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,38 +17,47 @@
 
 package com.tussle.motion;
 
-import com.tussle.collision.CollisionStadium;
 import com.tussle.collision.ProjectionVector;
-import com.tussle.collision.StageElement;
 
-//A tuple of collision box, stage element, and projection vector
-//used for exactly one method in MotionSystem.
-//Kinda heavyweight for a tuple, but it works
 public class CollisionTriad
 {
-	StageElement<CollisionStadium> box;
-	StageElement surface;
-	ProjectionVector vector;
+	double cumulativeX;
+	double cumulativeY;
+	ProjectionVector mostRecent;
 	
-	public CollisionTriad(StageElement<CollisionStadium> b, StageElement s, ProjectionVector v)
+	public CollisionTriad(ProjectionVector start)
 	{
-		box = b;
-		surface = s;
-		vector = v;
+		cumulativeX = start.xComp();
+		cumulativeY = start.yComp();
+		mostRecent = start;
 	}
 	
-	public StageElement<CollisionStadium> getBox()
+	public CollisionTriad(CollisionTriad previous, ProjectionVector newDisp)
 	{
-		return box;
+		cumulativeX = previous.cumulativeX + newDisp.xComp();
+		cumulativeY = previous.cumulativeY + newDisp.yComp();
+		mostRecent = newDisp;
 	}
 	
-	public StageElement getSurface()
+	public CollisionTriad(CollisionTriad previous, CollisionTriad next)
 	{
-		return surface;
+		cumulativeX = previous.cumulativeX + next.cumulativeX;
+		cumulativeY = previous.cumulativeY + next.cumulativeY;
+		mostRecent = next.mostRecent;
 	}
 	
-	public ProjectionVector getVector()
+	public double getCumulativeX()
 	{
-		return vector;
+		return cumulativeX;
+	}
+	
+	public double getCumulativeY()
+	{
+		return cumulativeY;
+	}
+	
+	public ProjectionVector getMostRecent()
+	{
+		return mostRecent;
 	}
 }

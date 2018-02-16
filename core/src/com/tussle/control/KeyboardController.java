@@ -38,7 +38,7 @@ public class KeyboardController implements Controller
 		inputMap = inputDict;
 		releaseMap = releaseDict;
 		maxFrames = len;
-		this.flushInputs();
+		this.clearInputs();
 	}
 
 	public void setInitToken(InputToken token)
@@ -46,7 +46,7 @@ public class KeyboardController implements Controller
 		initials.put(token.state(), token);
 	}
 
-	public void flushInputs()
+	public void clearInputs()
 	{
 		currentFrames = 0;
 		buffer = new java.util.LinkedList<>();

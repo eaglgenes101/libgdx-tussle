@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 public interface Controller extends InputProcessor
 {
-	void flushInputs();
+	void clearInputs();
 	void pumpBuffer();
 	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
 	int getState(InputState state);

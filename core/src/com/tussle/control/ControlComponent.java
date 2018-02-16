@@ -30,4 +30,9 @@ public class ControlComponent implements Component
 	{
 		controller = setController;
 	}
+	
+	public Controller getController()
+	{
+		return controller;
+	}
 }

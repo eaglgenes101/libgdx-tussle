@@ -21,6 +21,7 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.tussle.collision.ECBComponent;
 import com.tussle.collision.ElasticityComponent;
 import com.tussle.collision.StageElementComponent;
+import com.tussle.control.ControlComponent;
 import com.tussle.hitbox.HitboxComponent;
 import com.tussle.hitbox.HitboxLockComponent;
 import com.tussle.hitbox.HurtboxComponent;
@@ -62,4 +63,6 @@ public class Components
 			ComponentMapper.getFor(HitboxLockComponent.class);
 	public static final ComponentMapper<TransformComponent> transformMapper =
 			ComponentMapper.getFor(TransformComponent.class);
+	public static final ComponentMapper<ControlComponent> controlMapper =
+			ComponentMapper.getFor(ControlComponent.class);
 }

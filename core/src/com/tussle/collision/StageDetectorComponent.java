@@ -15,28 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.subaction;
+package com.tussle.collision;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.control.BufferChecker;
-import com.tussle.main.Components;
-import com.tussle.script.StackedBindings;
-
-import javax.script.ScriptContext;
-
-public class TestInputSubaction implements Subaction
+public class StageDetectorComponent
 {
-	BufferChecker[] checkers;
-	Entity owner;
-	
-	public TestInputSubaction(BufferChecker[] bufchecks, Entity e)
-	{
-		checkers = bufchecks;
-		owner = e;
-	}
-	
-	public Object eval(ScriptContext globals, StackedBindings locals) throws RemoteJump
-	{
-		return Components.controlMapper.get(owner).getController().matchInput(checkers);
-	}
 }

@@ -15,28 +15,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.subaction;
+package com.tussle.motion;
 
-import com.badlogic.ashley.core.Entity;
-import com.tussle.control.BufferChecker;
-import com.tussle.main.Components;
-import com.tussle.script.StackedBindings;
+import com.tussle.main.Utility;
 
-import javax.script.ScriptContext;
-
-public class TestInputSubaction implements Subaction
+//Handles gravity falling
+public class GravityComponent
 {
-	BufferChecker[] checkers;
-	Entity owner;
+	double fallSpeed;
+	double fallAcceleration;
+	double fastFallAddition;
 	
-	public TestInputSubaction(BufferChecker[] bufchecks, Entity e)
+	public GravityComponent(double speed, double accel, double plusAccel)
 	{
-		checkers = bufchecks;
-		owner = e;
+		fallSpeed = speed;
+		fallAcceleration = accel;
+		fastFallAddition = plusAccel;
 	}
 	
-	public Object eval(ScriptContext globals, StackedBindings locals) throws RemoteJump
+	public double getAccel(double currentSpeed, boolean isFastFalling)
 	{
-		return Components.controlMapper.get(owner).getController().matchInput(checkers);
+		double provisionalAccel = fallAcceleration+(isFastFalling?fastFallAddition:0);
+		return Utility.addFrom(currentSpeed, -provisionalAccel, -fallSpeed)
+				- currentSpeed;
 	}
 }

@@ -17,18 +17,22 @@
 
 package com.tussle.control;
 
-import com.badlogic.ashley.core.EntitySystem;
-import com.tussle.ownership.Player;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
+import com.tussle.main.Components;
 
-import java.util.HashMap;
-
-public class ControlSystem extends EntitySystem
+//Performs input maitenance tasks, such as pumping buffers
+//Players do their own controller scanning
+public class ControlSystem extends IteratingSystem
 {
-	HashMap<Player, Controller> controlMap;
-	
-	public ControlSystem(Controller[] controllers, int i)
+	public ControlSystem(int i)
 	{
-		super(i);
-		//TODO: Fill in
+		super(Family.all(ControlComponent.class).get(), i);
+	}
+	
+	public void processEntity(Entity entity, float delta)
+	{
+		Components.controlMapper.get(entity).getController().pumpBuffer();
 	}
 }

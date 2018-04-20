@@ -81,23 +81,32 @@ public class EntityActionContext implements ScriptContext
 
 	public Bindings getBindings(int scope)
 	{
-		if (scope == API_SCOPE)
-			return entityImmutables;
-		else if (scope == ENTITY_SCOPE)
-			return entityMutables;
-		else if (scope == ACTION_SCOPE)
-			return actionMutables;
-		else return baseContext.getBindings(scope);
+		switch (scope)
+		{
+			case API_SCOPE:
+				return entityImmutables;
+			case ENTITY_SCOPE:
+				return entityMutables;
+			case ACTION_SCOPE:
+				return actionMutables;
+			default:
+				return baseContext.getBindings(scope);
+		}
 	}
 
 	public void setBindings(Bindings bindings, int scope)
 	{
-		if (scope == ACTION_SCOPE)
-			actionMutables = new SimpleBindings(bindings);
-		else if (scope == ENTITY_SCOPE)
-			entityMutables = new SimpleBindings(bindings);
-		else
-			throw new IllegalArgumentException();
+		switch (scope)
+		{
+			case ACTION_SCOPE:
+				actionMutables = new SimpleBindings(bindings);
+				break;
+			case ENTITY_SCOPE:
+				entityMutables = new SimpleBindings(bindings);
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
 	public Object getAttribute(String name)
@@ -124,22 +133,30 @@ public class EntityActionContext implements ScriptContext
 
 	public void setAttribute(String name, Object value, int scope)
 	{
-		if (scope == ACTION_SCOPE)
-			actionMutables.put(name, value);
-		else if (scope == ENTITY_SCOPE)
-			entityMutables.put(name, value);
-		else
-			throw new IllegalArgumentException();
+		switch (scope)
+		{
+			case ACTION_SCOPE:
+				actionMutables.put(name, value);
+				break;
+			case ENTITY_SCOPE:
+				entityMutables.put(name, value);
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
 	public Object removeAttribute(String name, int scope)
 	{
-		if (scope == ACTION_SCOPE)
-			return actionMutables.remove(name);
-		else if (scope == ENTITY_SCOPE)
-			return entityMutables.remove(name);
-		else
-			throw new IllegalArgumentException();
+		switch (scope)
+		{
+			case ACTION_SCOPE:
+				return actionMutables.remove(name);
+			case ENTITY_SCOPE:
+				return entityMutables.remove(name);
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 
 	public int getAttributesScope(String name)

@@ -66,7 +66,7 @@ public class ECBComponent implements Component
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									ecbs.values(),
-									(LinkedHashSet<StageElement<CollisionStadium>> coll) -> coll.iterator()
+									HashSet::iterator
 							)
 					);
 				}
@@ -74,7 +74,7 @@ public class ECBComponent implements Component
 				public int size()
 				{
 					//WHEE JAVA FUNCTIONAL STREAMS
-					return ecbs.values().stream().mapToInt(coll->coll.size()).sum();
+					return ecbs.values().stream().mapToInt(HashSet::size).sum();
 				}
 			};
 		}

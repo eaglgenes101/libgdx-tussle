@@ -21,6 +21,7 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.SerializationException;
+import com.tussle.main.Components;
 import com.tussle.main.Utility;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 public class JsonDistributingWriter implements JsonSink
 {
-	Map<Entity, Writer> writers;
+	Map<String, Writer> writers;
 	Writer errorWriter;
 
 	public JsonDistributingWriter(Writer err)
@@ -39,18 +40,22 @@ public class JsonDistributingWriter implements JsonSink
 		errorWriter = err;
 	}
 
-	public PipeBufferReader openReaderFor(Entity entity)
+	public PipeBufferReader openReaderFor(Entity ent)
 	{
 		PipeBufferWriter writer = new PipeBufferWriter();
-		writers.put(entity, writer);
+		if (!Components.nameMapper.has(ent))
+			throw new IllegalStateException("Entity has no name component");
+		writers.put(Components.nameMapper.get(ent).getName(), writer);
 		return writer.getNewReader();
 	}
 
-	public void removeEntity(Entity entity)
+	public void removeEntity(Entity ent)
 	{
+		if (!Components.nameMapper.has(ent))
+			throw new IllegalStateException("Entity has no name component");
 		try
 		{
-			writers.get(entity).close();
+			writers.get(Components.nameMapper.get(ent)).close();
 		}
 		catch (IOException ex)
 		{
@@ -58,7 +63,7 @@ public class JsonDistributingWriter implements JsonSink
 		}
 		finally
 		{
-			writers.remove(entity);
+			writers.remove(Components.nameMapper.get(ent));
 		}
 	}
 

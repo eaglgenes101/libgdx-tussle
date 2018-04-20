@@ -63,7 +63,7 @@ public class HitboxComponent implements Component
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									hitboxes.values(),
-									(LinkedHashSet<Hitbox> coll) -> coll.iterator()
+									HashSet::iterator
 							)
 					);
 				}
@@ -71,7 +71,7 @@ public class HitboxComponent implements Component
 				public int size()
 				{
 					//WHEE JAVA FUNCTIONAL STREAMS
-					return hitboxes.values().stream().mapToInt(coll->coll.size()).sum();
+					return hitboxes.values().stream().mapToInt(HashSet::size).sum();
 				}
 			};
 		}

@@ -452,14 +452,14 @@ public strictfp class Utility
 	
 	public static Preferences getPreferencesFor(String name)
 	{
-		Preferences top = Gdx.app.getPreferences("config");
+		Preferences top = Gdx.app.getPreferences("Tussle");
 		return Gdx.app.getPreferences(top.getString(name));
 	}
 	
 	public static <T extends CollisionShape> StageElement<T> stageElementFor(T shape,
 	                                                                         Entity e)
 	{
-		return new StageElement<T>(shape, Components.positionMapper.get(e),
+		return new StageElement(shape, Components.positionMapper.get(e),
 		                           null);
 	}
 }

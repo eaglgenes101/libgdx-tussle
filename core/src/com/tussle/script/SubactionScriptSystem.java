@@ -25,7 +25,10 @@ import com.badlogic.ashley.signals.Signal;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.tussle.main.Components;
 import com.tussle.main.Utility;
-import com.tussle.stream.*;
+import com.tussle.stream.JsonCollectingWriter;
+import com.tussle.stream.JsonDistributingWriter;
+import com.tussle.stream.JsonParsingWriter;
+import com.tussle.stream.PipeBufferWriter;
 import org.apache.commons.collections4.map.LazyMap;
 
 import javax.script.SimpleBindings;
@@ -93,7 +96,6 @@ public class SubactionScriptSystem extends IteratingSystem
 		//Using stdin and stdout for now, will probably change later
 		try
 		{
-			
 			stdinInterpreter.write(Utility.readAll(stdIn));
 			if (stdinInterpreter.ready())
 			{

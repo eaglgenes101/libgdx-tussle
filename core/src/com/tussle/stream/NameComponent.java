@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eaglgenes101
+ * Copyright (c) 2018 eaglgenes101
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,38 +15,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.dependency;
+package com.tussle.stream;
 
 import com.badlogic.ashley.core.Component;
-import com.badlogic.ashley.core.Entity;
 
-import java.util.HashSet;
-import java.util.Set;
-
-/**
- * Created by eaglgenes101 on 4/13/17.
- */
-public class DependencyComponent implements Component
+public class NameComponent implements Component
 {
-	Set<Entity> dependentEntities;
-
-	public DependencyComponent()
+	String name;
+	
+	public NameComponent(String n)
 	{
-		dependentEntities = new HashSet<>();
+		name = n;
 	}
-
-	public Set<Entity> getDependents()
+	
+	public String getName()
 	{
-		return dependentEntities;
-	}
-
-	public void addDependent(Entity entity)
-	{
-		dependentEntities.add(entity);
-	}
-
-	public void removeDependent(Entity entity)
-	{
-		dependentEntities.remove(entity);
+		return name;
 	}
 }

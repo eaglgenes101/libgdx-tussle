@@ -17,22 +17,21 @@
 
 package com.tussle.control;
 
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.function.Function;
 
-public class BufferChecker implements Function<LinkedList<InputToken>, Integer>
+public class SingleTokenScanner implements BufferScanner
 {
 	int bufferLength;
 	InputToken compareToken;
 
-	public BufferChecker(int bufferLen, InputToken matchToken)
+	public SingleTokenScanner(int bufferLen, InputToken matchToken)
 	{
 		bufferLength = bufferLen;
 		compareToken = matchToken;
 	}
 
-	public Integer apply(LinkedList<InputToken> list)
+	public Integer apply(Deque<InputToken> list)
 	{
 		int frameCount = 0;
 		int listPos = list.size();

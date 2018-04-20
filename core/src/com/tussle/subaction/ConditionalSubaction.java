@@ -78,7 +78,7 @@ public class ConditionalSubaction implements Subaction
 		finally
 		{
 			locals.pop();
-			return ret;
 		}
+		return ret;
 	}
 }

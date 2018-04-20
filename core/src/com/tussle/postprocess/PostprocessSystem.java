@@ -42,7 +42,7 @@ public class PostprocessSystem extends EntitySystem
 				() -> LazyMap.lazyMap(
 						new LinkedHashMap<>(),
 						FactoryUtils.constantFactory(
-								(PostprocessStep)((Component c)->{})
+								((Component c)->{})
 						)
 				)
 		);

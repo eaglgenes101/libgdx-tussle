@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eaglgenes101
+ * Copyright (c) 2018 eaglgenes101
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,30 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.tussle.allegiance;
+package com.tussle.control;
 
-import com.badlogic.ashley.core.Component;
+import java.util.Deque;
+import java.util.function.Function;
 
-/**
- * Created by eaglgenes101 on 4/21/17.
- */
-public class AllegianceComponent implements Component
+public interface BufferScanner extends Function<Deque<InputToken>, Integer>
 {
-	private Team team;
-
-	public AllegianceComponent(Team startTeam, boolean isEssential)
-	{
-		team = startTeam;
-		//TODO: Add essential team checking
-	}
-
-	public void changeTeam(Team newTeam)
-	{
-		team = newTeam;
-	}
-
-	public boolean isAllied(Team checkTeam)
-	{
-		return team.equals(checkTeam);
-	}
 }

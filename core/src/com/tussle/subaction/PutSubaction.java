@@ -50,13 +50,9 @@ public class PutSubaction implements Subaction
 		{
 			toPut = source.eval(globals, locals);
 		}
-		catch (Break br)
+		catch (Break | Continue br)
 		{
 			throw new IllegalJumpException(br);
-		}
-		catch (Continue cont)
-		{
-			throw new IllegalJumpException(cont);
 		}
 		if (scope == EntityActionContext.SUBACTION_SCOPE)
 			locals.put(k, toPut);

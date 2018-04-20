@@ -22,7 +22,9 @@ import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.logging.*;
 
 public class LogSystem extends EntitySystem
@@ -44,8 +46,8 @@ public class LogSystem extends EntitySystem
 		Logger.getGlobal().setFilter(new PreferenceLogFilter());
 		if (Gdx.files.isExternalStorageAvailable())
 		{
-			Date date = new Date();
-			date.setTime(System.currentTimeMillis());
+			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+			Date date = calendar.getTime();
 			String dateString = date.toString().replace(" ", "_");
 			try
 			{

@@ -132,7 +132,7 @@ public class ScriptIterator implements Listener<String>
 		}
 		else
 		{
-			logger.warning("Disposal method called on script iterator called more than" +
+			logger.warning("Disposal method called on script iterator called more than " +
 			               "once. Please contact the developer(s) so they can fix this.");
 		}
 	}

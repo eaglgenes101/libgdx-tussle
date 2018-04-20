@@ -53,7 +53,7 @@ public class Hitbox
 		//Squeezing every single field into the constructor would be extremely unweildy,
 		//even if I've managed to reduce it to a bunch of functions
 		//so a blank constructor and numerous set methods are provided for
-		//factory methods to use
+		//loader methods to use
 		owner = e;
 		controller = s;
 	}
@@ -85,16 +85,12 @@ public class Hitbox
 			engine.getSystem(PostprocessSystem.class).add(
 					owner,
 					ScriptContextComponent.class,
-					(comp) -> {
-						comp.addStatusEffect(onOutprioritized.get());
-					}
+					(comp) -> comp.addStatusEffect(onOutprioritized.get())
 			);
 			engine.getSystem(PostprocessSystem.class).add(
 					other.getOwner(),
 					HitboxLockComponent.class,
-					(comp) -> {
-						comp.put(controller, lock);
-					}
+					(comp) -> comp.put(controller, lock)
 			);
 			return true;
 		}
@@ -109,20 +105,16 @@ public class Hitbox
 			engine.getSystem(PostprocessSystem.class).add(
 					owner,
 					ScriptContextComponent.class,
-					(comp) -> {
-						comp.addStatusEffect(onHit.get());
-					}
+					(comp) -> comp.addStatusEffect(onHit.get())
 			);
 			engine.getSystem(PostprocessSystem.class).add(
 					otherOwner,
 					ScriptContextComponent.class,
-					(comp) -> {
-						comp.addStatusEffect(hitInflicts.getEffect(
-								owner, otherOwner,
-								this, other,
-								chargeSupplier
-						));
-					}
+					(comp) -> comp.addStatusEffect(hitInflicts.getEffect(
+							owner, otherOwner,
+							this, other,
+							chargeSupplier
+					))
 			);
 			return true;
 		}

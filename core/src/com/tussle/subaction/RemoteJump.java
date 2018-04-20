@@ -29,7 +29,7 @@ public class RemoteJump extends Throwable
 	
 	public RemoteJump(Subaction source, String header)
 	{
-		super (header + source.toString(), null, true, false);
+		super (header + " " + source.toString(), null, true, false);
 		src = source;
 	}
 	

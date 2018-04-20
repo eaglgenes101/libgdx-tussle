@@ -37,7 +37,7 @@ public class HitboxLockComponent implements Component, Listener<ScriptIterator>
 	
 	public HitboxLockComponent()
 	{
-		//There ought to be a more pleasant factory method to do this
+		//There ought to be a more pleasant loader method to do this
 		lockMap = new AbstractMultiValuedMap<ScriptIterator, HitboxLock>(
 				new ReferenceIdentityMap<>(AbstractReferenceMap.ReferenceStrength.SOFT,
 				                           AbstractReferenceMap.ReferenceStrength.WEAK))

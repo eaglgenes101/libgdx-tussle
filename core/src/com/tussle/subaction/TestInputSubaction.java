@@ -18,7 +18,7 @@
 package com.tussle.subaction;
 
 import com.badlogic.ashley.core.Entity;
-import com.tussle.control.BufferChecker;
+import com.tussle.control.SingleTokenScanner;
 import com.tussle.main.Components;
 import com.tussle.script.StackedBindings;
 
@@ -26,10 +26,10 @@ import javax.script.ScriptContext;
 
 public class TestInputSubaction implements Subaction
 {
-	BufferChecker[] checkers;
+	SingleTokenScanner[] checkers;
 	Entity owner;
 	
-	public TestInputSubaction(BufferChecker[] bufchecks, Entity e)
+	public TestInputSubaction(SingleTokenScanner[] bufchecks, Entity e)
 	{
 		checkers = bufchecks;
 		owner = e;

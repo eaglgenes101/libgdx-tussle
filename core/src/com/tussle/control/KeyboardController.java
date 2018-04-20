@@ -17,6 +17,7 @@
 
 package com.tussle.control;
 
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,7 +26,7 @@ public class KeyboardController implements Controller
 {
 	java.util.Map<Integer, InputToken> inputMap;
 	java.util.Map<Integer, InputToken> releaseMap;
-	java.util.LinkedList<InputToken> buffer;
+	java.util.ArrayDeque<InputToken> buffer;
 	java.util.LinkedHashMap<InputState, InputToken> initials;
 	java.util.HashMap<InputState, Integer> currents;
 	int maxFrames;
@@ -49,7 +50,7 @@ public class KeyboardController implements Controller
 	public void clearInputs()
 	{
 		currentFrames = 0;
-		buffer = new java.util.LinkedList<>();
+		buffer = new java.util.ArrayDeque<>();
 		initials = new java.util.LinkedHashMap<>();
 		currents = new java.util.HashMap<>();
 		setInitToken(new InputToken(0, InputState.HOR_MOVEMENT));
@@ -93,7 +94,7 @@ public class KeyboardController implements Controller
 		return returnList;
 	}
 
-	public int matchInput(Function<LinkedList<InputToken>, Integer>[] candidates)
+	public int matchInput(BufferScanner[] candidates)
 	{
 		int maxPos = 0;
 		int maxMatch = -1;

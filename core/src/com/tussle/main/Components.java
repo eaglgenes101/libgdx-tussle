@@ -32,6 +32,7 @@ import com.tussle.ownership.EntityOwnershipComponent;
 import com.tussle.ownership.PlayerOwnershipComponent;
 import com.tussle.script.ScriptContextComponent;
 import com.tussle.sprite.SpriteComponent;
+import com.tussle.stream.NameComponent;
 
 public class Components
 {
@@ -65,4 +66,6 @@ public class Components
 			ComponentMapper.getFor(TransformComponent.class);
 	public static final ComponentMapper<ControlComponent> controlMapper =
 			ComponentMapper.getFor(ControlComponent.class);
+	public static final ComponentMapper<NameComponent> nameMapper =
+			ComponentMapper.getFor(NameComponent.class);
 }

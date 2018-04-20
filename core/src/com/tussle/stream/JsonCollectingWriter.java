@@ -19,6 +19,7 @@ package com.tussle.stream;
 
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.utils.JsonValue;
+import com.tussle.main.Components;
 import com.tussle.main.Utility;
 
 import java.io.IOException;
@@ -37,11 +38,11 @@ public class JsonCollectingWriter implements JsonSource
 		errorReader = err;
 	}
 
-	public void removeEntity(Entity entity)
+	public void removeEntity(Entity ent)
 	{
 		try
 		{
-			readers.get(entity).close();
+			readers.get(ent).close();
 		}
 		catch (IOException ex)
 		{
@@ -49,14 +50,16 @@ public class JsonCollectingWriter implements JsonSource
 		}
 		finally
 		{
-			readers.remove(entity);
+			readers.remove(ent);
 		}
 	}
 
-	public PipeBufferWriter openWriterFor(Entity entity)
+	public PipeBufferWriter openWriterFor(Entity ent)
 	{
+		if (!Components.nameMapper.has(ent))
+			throw new IllegalStateException("Entity has no name component");
 		PipeBufferWriter writer = new PipeBufferWriter();
-		readers.put(entity, writer.getNewReader());
+		readers.put(ent, writer.getNewReader());
 		return writer;
 	}
 
@@ -81,17 +84,27 @@ public class JsonCollectingWriter implements JsonSource
 		JsonValue toReturn = new JsonValue(JsonValue.ValueType.object);
 		for (Map.Entry<Entity, Reader> entry : readers.entrySet())
 		{
+			NameComponent nameComp = Components.nameMapper.get(entry.getKey());
+			String name;
+			if (nameComp == null)
+			{
+				name = "?"+entry.getKey().hashCode();
+			}
+			else
+			{
+				name = nameComp.getName();
+			}
 			try
 			{
 				if (entry.getValue().ready())
 				{
 					String str = Utility.readAll(entry.getValue());
-					toReturn.addChild(entry.getKey().toString(), new JsonValue(str));
+					toReturn.addChild(name, new JsonValue(str));
 				}
 			}
 			catch (IOException ex)
 			{
-				toReturn.addChild(entry.getKey().toString(), Utility.exceptionToJson(ex));
+				toReturn.addChild(name, Utility.exceptionToJson(ex));
 			}
 		}
 		//Now read the error stream

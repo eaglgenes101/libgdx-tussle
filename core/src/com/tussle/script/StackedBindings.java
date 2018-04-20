@@ -114,7 +114,7 @@ public class StackedBindings implements Bindings
 				{
 					return IteratorUtils.transformedIterator(
 							bindingMap.entrySet().iterator(),
-							entry -> new StackedBindingsEntry(entry)
+							StackedBindingsEntry::new
 					);
 				}
 				
@@ -135,7 +135,7 @@ public class StackedBindings implements Bindings
 				{
 					return IteratorUtils.transformedIterator(
 							bindingMap.entrySet().iterator(),
-							entry -> entry.getKey()
+							Entry::getKey
 					);
 				}
 				
@@ -156,7 +156,7 @@ public class StackedBindings implements Bindings
 				{
 					return IteratorUtils.transformedIterator(
 							bindingMap.values().iterator(),
-							(Deque<Object> stack) -> stack.peek()
+							Deque::peek
 					);
 				}
 				

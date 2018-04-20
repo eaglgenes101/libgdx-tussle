@@ -66,7 +66,7 @@ public class StageElementComponent implements Component
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									surfaces.values(),
-									(LinkedHashSet<StageElement> coll) -> coll.iterator()
+									HashSet::iterator
 							)
 					);
 				}
@@ -74,7 +74,7 @@ public class StageElementComponent implements Component
 				public int size()
 				{
 					//WHEE JAVA FUNCTIONAL STREAMS
-					return surfaces.values().stream().mapToInt(coll->coll.size()).sum();
+					return surfaces.values().stream().mapToInt(HashSet::size).sum();
 				}
 			};
 		}

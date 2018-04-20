@@ -21,7 +21,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.io.Reader;
 
-//Please, use the factory method of PipeBufferWriter to get new PipeBufferReaders
+//Please, use the loader method of PipeBufferWriter to get new PipeBufferReaders
 //This class won't work if instantiated directly
 public class PipeBufferReader extends Reader
 {

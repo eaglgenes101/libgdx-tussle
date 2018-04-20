@@ -126,10 +126,8 @@ public class MotionSystem extends IteratingSystem
 						getEngine().getSystem(PostprocessSystem.class).add(
 								entity,
 								VelocityComponent.class,
-								(comp) -> {
-									comp.accelerate((-1-elasticity)*projection[0],
-									                (-1-elasticity)*projection[1]);
-								}
+								(comp) -> comp.accelerate((-1 - elasticity) * projection[0],
+								                (-1-elasticity)*projection[1])
 						);
 					}
 				}

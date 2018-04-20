@@ -1,4 +1,4 @@
-package com.tussle.main;
+package com.tussle.stream;
 
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.JsonValue.ValueType;
@@ -274,7 +274,7 @@ public class JsonParsingWriter extends Writer implements JsonSource
 	protected int pop()
 	{
 		root = elements.pop();
-		if (current.size() > 0) lastChild.pop();
+		if (current.size > 0) lastChild.pop();
 		current = elements.peek();
 		if (top == 0) return -1;
 		else return stack[top-1];

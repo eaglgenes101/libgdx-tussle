@@ -63,7 +63,7 @@ public class HurtboxComponent implements Component
 					return IteratorUtils.chainedIterator(
 							CollectionUtils.collect(
 									hurtboxes.values(),
-									(LinkedHashSet<Hurtbox> coll) -> coll.iterator()
+									HashSet::iterator
 							)
 					);
 				}
@@ -71,7 +71,7 @@ public class HurtboxComponent implements Component
 				public int size()
 				{
 					//WHEE JAVA FUNCTIONAL STREAMS
-					return hurtboxes.values().stream().mapToInt(coll->coll.size()).sum();
+					return hurtboxes.values().stream().mapToInt(HashSet::size).sum();
 				}
 			};
 		}

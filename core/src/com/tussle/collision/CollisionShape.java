@@ -19,7 +19,7 @@ package com.tussle.collision;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
-//Use StageElement to generate these factory shapes
+//Use StageElement to generate these loader shapes
 public interface CollisionShape
 {
 	ProjectionVector depth(CollisionStadium stad);

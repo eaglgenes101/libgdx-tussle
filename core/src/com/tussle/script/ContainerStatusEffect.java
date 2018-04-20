@@ -29,15 +29,9 @@ public class ContainerStatusEffect extends ScriptIterator
 	{
 		//Contains entries that are then deallocated when this leaves scope
 		super(
-				(globals, locals) -> {
-					return null;
-				},
-				(globals, locals) -> {
-					return null;
-				},
-				(globals, locals) -> {
-					return null;
-				},
+				(globals, locals) -> null,
+				(globals, locals) -> null,
+				(globals, locals) -> null,
 				context,
 				destructSig
 		);

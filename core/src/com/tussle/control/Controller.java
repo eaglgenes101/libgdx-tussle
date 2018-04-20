@@ -19,13 +19,10 @@ package com.tussle.control;
 
 import com.badlogic.gdx.InputProcessor;
 
-import java.util.LinkedList;
-import java.util.function.Function;
-
 public interface Controller extends InputProcessor
 {
 	void clearInputs();
 	void pumpBuffer();
-	int matchInput(Function<LinkedList<InputToken>, Integer>[] funcs);
+	int matchInput(BufferScanner[] funcs);
 	int getState(InputState state);
 }
